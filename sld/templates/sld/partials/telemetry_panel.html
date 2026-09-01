@@ -1,0 +1,54 @@
+<div class="telemetry-panel-root">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-size:12px; font-weight:700; color:var(--text-primary);">실시간 계측 (Telemetry)</span>
+        <span id="telemetry-status-badge" class="telemetry-badge-live">정상 운전</span>
+    </div>
+
+    <!-- Active Power / Reactive Power -->
+    <div class="telemetry-card">
+        <div class="telemetry-metric-title">유효전력 (Active Power)</div>
+        <div class="telemetry-metric-val" id="telemetry-p" style="color:#377DFF;">{{ active_mw|default:"14.8" }} MW</div>
+        <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:11px; color:var(--text-secondary);">
+            <span>무효전력: {{ reactive_mvar|default:"2.3" }} MVAR</span>
+            <span>역률: {{ power_factor|default:"98.8" }}%</span>
+        </div>
+    </div>
+
+    <!-- Voltage Levels -->
+    <div class="telemetry-card">
+        <div class="telemetry-metric-title">계통 전압 (Voltages)</div>
+        <div style="margin-top:4px; display:flex; flex-direction:column; gap:4px; font-size:12px;">
+            <div style="display:flex; justify-content:space-between;">
+                <span style="color:#7A3E9D; font-weight:600;">154kV 수전단:</span>
+                <span style="font-weight:700;">{{ v_154|default:"154.2" }} kV</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span style="color:#9C27B0; font-weight:600;">22.9kV 주 모선:</span>
+                <span style="font-weight:700;">{{ v_229|default:"22.92" }} kV</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span style="color:#2B6CB0; font-weight:600;">0.4kV 배전 모선:</span>
+                <span style="font-weight:700;">{{ v_380|default:"380.4" }} V</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Frequency & Current -->
+    <div class="telemetry-card">
+        <div class="telemetry-metric-title">주파수 및 전류 (Freq & Current)</div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:4px;">
+            <div>
+                <span style="font-size:11px; color:var(--text-secondary);">계통 주파수:</span>
+                <div style="font-size:15px; font-weight:700; color:#2E7D32;">{{ frequency|default:"60.01" }} Hz</div>
+            </div>
+            <div>
+                <span style="font-size:11px; color:var(--text-secondary);">수전 전류:</span>
+                <div style="font-size:15px; font-weight:700; color:#1e293b;" id="telemetry-i">{{ current_a|default:"372.4" }} A</div>
+            </div>
+        </div>
+    </div>
+
+    <div style="font-size:10px; color:var(--text-muted); text-align:right; margin-top:8px;">
+        갱신 시간: {{ timestamp|default:"실시간" }} (HTMX 10s)
+    </div>
+</div>

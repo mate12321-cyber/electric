@@ -1,0 +1,33 @@
+{% load static %}
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>전력 계통도 편집기 - Power System Single-Line Diagram</title>
+
+    <!-- JointJS CSS -->
+    <link rel="stylesheet" href="{% static 'css/joint.min.css' %}" />
+    <!-- SLD Pure CSS Theme -->
+    <link rel="stylesheet" href="{% static 'css/sld_styles.css' %}" />
+  </head>
+  <body>
+    {% csrf_token %} {% block content %}{% endblock %}
+
+    <!-- Vendor Libraries -->
+    <script src="{% static 'js/vendor/jquery.min.js' %}"></script>
+    <script src="{% static 'js/vendor/lodash.min.js' %}"></script>
+    <script src="{% static 'js/vendor/backbone-min.js' %}"></script>
+    <script src="{% static 'js/vendor/joint.min.js' %}"></script>
+    <script src="{% static 'js/vendor/htmx.min.js' %}"></script>
+
+    <!-- SLD Core Modules -->
+    <script src="{% static 'js/equipmentRegistry.js' %}"></script>
+    <script src="{% static 'js/topologyTracker.js' %}"></script>
+    <script src="{% static 'js/sldSymbols.js' %}"></script>
+    <script src="{% static 'js/sldExport.js' %}"></script>
+    <script src="{% static 'js/sldEditor.js' %}"></script>
+
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

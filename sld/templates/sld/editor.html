@@ -1,0 +1,260 @@
+{% extends "sld/base.html" %} {% block content %}
+<div class="sld-app-container">
+  <!-- Top Header -->
+  {% include "sld/partials/header.html" %}
+
+  <!-- Sub Toolbar -->
+  {% include "sld/partials/toolbar.html" %}
+
+  <!-- Main Workspace -->
+  <div class="sld-workspace">
+    <!-- Left Palette -->
+    {% include "sld/partials/palette.html" %}
+
+    <!-- Center Canvas -->
+    {% include "sld/partials/canvas.html" %}
+
+    <!-- Right Properties Panel -->
+    {% include "sld/partials/properties.html" %}
+  </div>
+
+  <!-- Bottom Status Bar -->
+  {% include "sld/partials/status_bar.html" %}
+
+  <!-- Modals -->
+  {% include "sld/partials/modals.html" %}
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // 1. Initialize SLD Editor
+    try {
+      window.sldEditor = new SLDEditor("sld-paper-container", {
+        diagramId: "{{ active_diagram.diagram_id }}",
+        gridSize: 10,
+        snapToGrid: true,
+      });
+    } catch (e) {
+      console.error("SLDEditor initialization error:", e);
+    }
+
+    // 2. Tab switching in Properties Panel
+    const tabBtns = document.querySelectorAll(".prop-tab-btn");
+    const tabPanes = document.querySelectorAll(".tab-pane");
+
+    tabBtns.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        tabBtns.forEach((b) => b.classList.remove("active"));
+        tabPanes.forEach((p) => {
+          p.style.display = "none";
+          p.classList.remove("active");
+        });
+
+        btn.classList.add("active");
+        const targetTab = btn.getAttribute("data-tab");
+        const pane = document.getElementById("tab-" + targetTab);
+        if (pane) {
+          pane.style.display = "block";
+          pane.classList.add("active");
+        }
+      });
+    });
+
+    // 3. Category Collapse/Expand in Left Palette
+    const categoryTitles = document.querySelectorAll(".sld-category-title");
+    categoryTitles.forEach((title) => {
+      title.addEventListener("click", () => {
+        const grid = title.nextElementSibling;
+        const arrow = title.querySelector("span:first-child");
+        if (grid) {
+          if (grid.style.display === "none") {
+            grid.style.display = "grid";
+            if (arrow) arrow.innerText = "▾";
+          } else {
+            grid.style.display = "none";
+            if (arrow) arrow.innerText = "▸";
+          }
+        }
+      });
+    });
+
+    // 4. Search filtering in Symbol Palette
+    const searchInput = document.getElementById("symbol-search-input");
+    if (searchInput) {
+      searchInput.addEventListener("input", (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        const items = document.querySelectorAll(".palette-item");
+        items.forEach((item) => {
+          const text = item.innerText.toLowerCase();
+          const type = (
+            item.getAttribute("data-symbol-type") || ""
+          ).toLowerCase();
+          if (!query || text.includes(query) || type.includes(query)) {
+            item.style.display = "flex";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      });
+    }
+
+    // 5. Export Menu Dropdown & Actions
+    const exportBtn = document.getElementById("btn-export-dropdown");
+    const exportMenu = document.getElementById("export-menu");
+    if (exportBtn && exportMenu) {
+      exportBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        exportMenu.style.display =
+          exportMenu.style.display === "block" ? "none" : "block";
+      });
+      document.addEventListener("click", () => {
+        exportMenu.style.display = "none";
+      });
+    }
+
+    const btnExportPng = document.getElementById("btn-export-png");
+    const btnExportSvg = document.getElementById("btn-export-svg");
+    const btnExportJson = document.getElementById("btn-export-json");
+
+    if (btnExportPng) {
+      btnExportPng.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (window.sldEditor && window.sldEditor.paper) {
+          SLDExport.toPNG(
+            window.sldEditor.paper,
+            "{{ active_diagram.title }}.png",
+          );
+        }
+      });
+    }
+
+    if (btnExportSvg) {
+      btnExportSvg.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (window.sldEditor && window.sldEditor.paper) {
+          SLDExport.toSVG(
+            window.sldEditor.paper,
+            "{{ active_diagram.title }}.svg",
+          );
+        }
+      });
+    }
+
+    if (btnExportJson) {
+      btnExportJson.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (window.sldEditor && window.sldEditor.graph) {
+          SLDExport.toJSON(window.sldEditor.graph, {
+            id: "{{ active_diagram.diagram_id }}",
+            title: "{{ active_diagram.title }}",
+          });
+        }
+      });
+    }
+
+    // 6. Help Modal Toggle
+    const helpBtn = document.getElementById("btn-help-modal");
+    const helpModal = document.getElementById("modal-help");
+    const closeHelpBtn = document.getElementById("btn-close-help-modal");
+    const confirmHelpBtn = document.getElementById("btn-confirm-help");
+
+    if (helpBtn && helpModal) {
+      helpBtn.addEventListener("click", () =>
+        helpModal.classList.add("active"),
+      );
+      if (closeHelpBtn)
+        closeHelpBtn.addEventListener("click", () =>
+          helpModal.classList.remove("active"),
+        );
+      if (confirmHelpBtn)
+        confirmHelpBtn.addEventListener("click", () =>
+          helpModal.classList.remove("active"),
+        );
+    }
+
+    // 7. Project Modal Toggle & Creation
+    const projBtn = document.getElementById("project-dropdown-btn");
+    const projModal = document.getElementById("modal-projects");
+    const closeProjBtn = document.getElementById("btn-close-project-modal");
+    const createProjForm = document.getElementById("create-project-form");
+
+    if (projBtn && projModal) {
+      projBtn.addEventListener("click", () =>
+        projModal.classList.add("active"),
+      );
+      if (closeProjBtn)
+        closeProjBtn.addEventListener("click", () =>
+          projModal.classList.remove("active"),
+        );
+    }
+
+    if (createProjForm) {
+      createProjForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const title = document.getElementById("new-project-title").value;
+        const formData = new FormData();
+        formData.append("title", title);
+
+        fetch("/api/projects/create/", {
+          method: "POST",
+          body: formData,
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.redirect_url) {
+              window.location.href = data.redirect_url;
+            }
+          });
+      });
+    }
+
+    // 8. Share Button
+    const shareBtn = document.getElementById("btn-share-modal");
+    if (shareBtn) {
+      shareBtn.addEventListener("click", () => {
+        navigator.clipboard
+          .writeText(window.location.href)
+          .then(() => {
+            alert("📋 현재 프로젝트 링크가 클립보드에 복사되었습니다.");
+          })
+          .catch(() => {
+            prompt("프로젝트 URL:", window.location.href);
+          });
+      });
+    }
+
+    // 9. Save Button
+    const saveBtn = document.getElementById("btn-save-project");
+    if (saveBtn) {
+      saveBtn.addEventListener("click", () => {
+        if (window.sldEditor) {
+          window.sldEditor.saveDiagram();
+        }
+      });
+    }
+
+    // 10. Toolbar Color Dots
+    const toolbarColorDots = document.querySelectorAll(
+      ".sld-toolbar .palette-color-dot",
+    );
+    toolbarColorDots.forEach((dot) => {
+      dot.addEventListener("click", () => {
+        const color =
+          dot.getAttribute("data-color") || dot.style.backgroundColor;
+        if (window.sldEditor && window.sldEditor.selectedCell) {
+          const sldData = window.sldEditor.selectedCell.get("sldData") || {};
+          sldData.color = color;
+          window.sldEditor.selectedCell.set(
+            "sldData",
+            Object.assign({}, sldData),
+          );
+          const colorInput = document.getElementById("prop-symbol-color");
+          if (colorInput) colorInput.value = color;
+          window.sldEditor.topologyTracker.applyStyles(window.sldEditor.paper);
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

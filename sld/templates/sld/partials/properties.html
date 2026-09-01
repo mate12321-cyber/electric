@@ -1,0 +1,123 @@
+<aside class="sld-sidebar-right">
+    <div class="sld-prop-tabs">
+        <button class="prop-tab-btn active" data-tab="general">일반</button>
+        <button class="prop-tab-btn" data-tab="style">스타일</button>
+        <button class="prop-tab-btn" data-tab="data">데이터</button>
+    </div>
+
+    <div class="sld-prop-content">
+        <!-- Tab 1: 일반 속성 -->
+        <div class="tab-pane active" id="tab-general">
+            <div class="sld-form-group">
+                <label class="sld-form-label">이름</label>
+                <input type="text" class="sld-input" id="prop-name" placeholder="설비명 입력 (예: ACB)">
+            </div>
+
+            <div class="sld-form-group">
+                <label class="sld-form-label">설명</label>
+                <input type="text" class="sld-input" id="prop-desc" placeholder="설비 설명 (예: 주 배전 차단기)">
+            </div>
+
+            <div class="sld-form-group">
+                <label class="sld-form-label">정격 전압</label>
+                <div class="sld-input-row">
+                    <input type="number" step="any" class="sld-input" id="prop-voltage" placeholder="0.4">
+                    <select class="sld-select" style="width: 70px;">
+                        <option>kV</option>
+                        <option>V</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="sld-form-group">
+                <label class="sld-form-label">정격 전류</label>
+                <div class="sld-input-row">
+                    <input type="number" step="any" class="sld-input" id="prop-current" placeholder="3200">
+                    <select class="sld-select" style="width: 70px;">
+                        <option>A</option>
+                        <option>kA</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="sld-form-group">
+                <label class="sld-form-label">극수</label>
+                <select class="sld-select" id="prop-poles" style="width: 100%;">
+                    <option value="1P">1P</option>
+                    <option value="2P">2P</option>
+                    <option value="3P" selected>3P</option>
+                    <option value="4P">4P</option>
+                </select>
+            </div>
+
+            <div class="sld-form-group">
+                <label class="sld-form-label">설치 위치</label>
+                <select class="sld-select" id="prop-location" style="width: 100%;">
+                    <option value="154kV 수전단">154kV 수전단</option>
+                    <option value="22.9kV 모선">22.9kV 모선</option>
+                    <option value="0.4kV 모선 (A)" selected>0.4kV 모선 (A)</option>
+                    <option value="0.4kV 모선 (B)">0.4kV 모선 (B)</option>
+                    <option value="0.4kV 모선 (C)">0.4kV 모선 (C)</option>
+                    <option value="UPS 배전반">UPS 배전반</option>
+                </select>
+            </div>
+
+            <div class="sld-form-group">
+                <label class="sld-form-label">메모</label>
+                <textarea class="sld-textarea" id="prop-memo" placeholder="특이사항 및 메모 입력"></textarea>
+            </div>
+
+            <div style="margin-top: 24px;">
+                <button type="button" class="sld-btn-danger" id="btn-delete-element">
+                    <span>🗑️</span>
+                    <span>삭제</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab 2: 스타일 속성 -->
+        <div class="tab-pane" id="tab-style" style="display:none;">
+            <div class="sld-form-group">
+                <label class="sld-form-label">심볼 색상</label>
+                <div class="sld-input-row" style="align-items:center;">
+                    <input type="color" id="prop-symbol-color" value="#377DFF" style="width:40px; height:32px; padding:0; border:none; cursor:pointer;">
+                    <div style="display:flex; gap:6px;">
+                        <div class="palette-color-dot prop-color-picker" data-color="#7A3E9D" style="background:#7A3E9D;"></div>
+                        <div class="palette-color-dot prop-color-picker" data-color="#9C27B0" style="background:#9C27B0;"></div>
+                        <div class="palette-color-dot prop-color-picker" data-color="#2B6CB0" style="background:#2B6CB0;"></div>
+                        <div class="palette-color-dot prop-color-picker" data-color="#2E7D32" style="background:#2E7D32;"></div>
+                        <div class="palette-color-dot prop-color-picker" data-color="#E65100" style="background:#E65100;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sld-form-group">
+                <label class="sld-form-label">선 색상</label>
+                <input type="color" id="prop-line-color" value="#377DFF" style="width:40px; height:32px; padding:0; border:none; cursor:pointer;">
+            </div>
+
+            <div class="sld-form-group">
+                <label class="sld-form-label">선 두께 (px)</label>
+                <input type="number" class="sld-input" id="prop-line-width" value="2" min="1" max="10">
+            </div>
+
+            <div class="sld-form-group">
+                <label class="sld-form-label">라벨 표시</label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;">
+                    <input type="checkbox" id="prop-show-label" checked>
+                    <span>캔버스에 명칭 표시</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Tab 3: 데이터 & HTMX 텔레메트리 -->
+        <div class="tab-pane" id="tab-data" style="display:none;">
+            <div id="telemetry-container"
+                 hx-get="/api/sld/{{ active_diagram.diagram_id }}/telemetry/"
+                 hx-trigger="load, every 10s"
+                 hx-swap="innerHTML">
+                {% include "sld/partials/telemetry_panel.html" %}
+            </div>
+        </div>
+    </div>
+</aside>
