@@ -638,11 +638,44 @@ g[data-type*="Link"].link-dead path {
   background: #16a34a;
 }
 
-/* Selection Highlight */
-.sld-selected rect,
-.sld-selected circle,
-.sld-selected path {
-  filter: drop-shadow(0 0 3px rgba(55, 125, 255, 0.6));
+/* Selection Box Overlay & Handles */
+.sld-selection-overlay {
+  pointer-events: none;
+}
+
+.sld-selection-box {
+  fill: rgba(37, 99, 235, 0.08);
+  stroke: #2563eb;
+  stroke-width: 1.5px;
+  stroke-dasharray: 4, 3;
+  animation: sld-selection-dash 20s linear infinite;
+}
+
+@keyframes sld-selection-dash {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+.sld-selection-handle {
+  fill: #ffffff;
+  stroke: #2563eb;
+  stroke-width: 1.5px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* Link Selection Highlight */
+.sld-selected.joint-link path.connection {
+  stroke: #2563eb !important;
+  stroke-width: 3.5px !important;
+  stroke-dasharray: 6, 4 !important;
+  filter: drop-shadow(0 0 4px rgba(37, 99, 235, 0.8)) !important;
+  animation: sld-selection-dash 20s linear infinite;
+}
+
+/* Element Selection Subtle Glow */
+.sld-selected {
+  filter: drop-shadow(0 0 4px rgba(37, 99, 235, 0.65));
 }
 
 /* Telemetry Badge Styles */

@@ -347,17 +347,110 @@ class SLDEditor {
       view.el.classList.add("sld-selected");
     }
 
+    if (cell.isElement && cell.isElement()) {
+      cell.on(
+        "change:position change:size",
+        this._onSelectedCellTransform,
+        this,
+      );
+    }
+    this.updateSelectionOverlay();
+
     this.populateProperties(cell);
+  }
+
+  _onSelectedCellTransform() {
+    this.updateSelectionOverlay();
+  }
+
+  updateSelectionOverlay() {
+    this.removeSelectionOverlay();
+    if (!this.selectedCell || !this.paper) return;
+
+    if (this.selectedCell.isElement && this.selectedCell.isElement()) {
+      const bbox = this.selectedCell.getBBox();
+      if (!bbox) return;
+
+      const pad = 5;
+      const boxX = bbox.x - pad;
+      const boxY = bbox.y - pad;
+      const boxW = bbox.width + pad * 2;
+      const boxH = bbox.height + pad * 2;
+
+      const handleSize = 6;
+      const handleOffset = handleSize / 2;
+
+      const svgNS = "http://www.w3.org/2000/svg";
+      const overlay = document.createElementNS(svgNS, "g");
+      overlay.setAttribute("id", "sld-selection-overlay");
+      overlay.setAttribute("class", "sld-selection-overlay");
+
+      // Bounding box rect
+      const rect = document.createElementNS(svgNS, "rect");
+      rect.setAttribute("class", "sld-selection-box");
+      rect.setAttribute("x", boxX);
+      rect.setAttribute("y", boxY);
+      rect.setAttribute("width", boxW);
+      rect.setAttribute("height", boxH);
+      rect.setAttribute("rx", "4");
+      overlay.appendChild(rect);
+
+      // Corner handle positions
+      const corners = [
+        { x: boxX - handleOffset, y: boxY - handleOffset }, // Top-Left
+        { x: boxX + boxW - handleOffset, y: boxY - handleOffset }, // Top-Right
+        { x: boxX - handleOffset, y: boxY + boxH - handleOffset }, // Bottom-Left
+        { x: boxX + boxW - handleOffset, y: boxY + boxH - handleOffset }, // Bottom-Right
+      ];
+
+      corners.forEach((c) => {
+        const handle = document.createElementNS(svgNS, "rect");
+        handle.setAttribute("class", "sld-selection-handle");
+        handle.setAttribute("x", c.x);
+        handle.setAttribute("y", c.y);
+        handle.setAttribute("width", handleSize);
+        handle.setAttribute("height", handleSize);
+        handle.setAttribute("rx", "1.5");
+        overlay.appendChild(handle);
+      });
+
+      const viewport =
+        this.paper.viewport ||
+        (this.paper.svg
+          ? this.paper.svg.querySelector(".joint-viewport") ||
+            this.paper.svg.querySelector("g") ||
+            this.paper.svg
+          : null);
+      if (viewport) {
+        viewport.appendChild(overlay);
+      }
+    }
+  }
+
+  removeSelectionOverlay() {
+    const existing = document.getElementById("sld-selection-overlay");
+    if (existing && existing.parentNode) {
+      existing.parentNode.removeChild(existing);
+    }
   }
 
   deselectAll() {
     if (this.selectedCell) {
+      if (this.selectedCell.isElement && this.selectedCell.isElement()) {
+        this.selectedCell.off(
+          "change:position change:size",
+          this._onSelectedCellTransform,
+          this,
+        );
+      }
       const view = this.paper.findViewByModel(this.selectedCell);
       if (view && view.el) {
         view.el.classList.remove("sld-selected");
       }
       this.selectedCell = null;
     }
+
+    this.removeSelectionOverlay();
 
     // Clean up any stray selection classes
     const selectedDoms = document.querySelectorAll(".sld-selected");
@@ -370,11 +463,19 @@ class SLDEditor {
     if (!this.selectedCell) return;
 
     const targetCell = this.selectedCell;
+    if (targetCell.isElement && targetCell.isElement()) {
+      targetCell.off(
+        "change:position change:size",
+        this._onSelectedCellTransform,
+        this,
+      );
+    }
     const view = this.paper.findViewByModel(targetCell);
     if (view && view.el) {
       view.el.classList.remove("sld-selected");
     }
 
+    this.removeSelectionOverlay();
     this.selectedCell = null;
     targetCell.remove();
     this.clearProperties();
