@@ -789,3 +789,40 @@ g[data-type*="Link"].link-dead path {
   justify-content: flex-end;
   gap: 8px;
 }
+
+/* Port Hover & Disconnect UX */
+.joint-port {
+  cursor: pointer;
+}
+
+.joint-port:hover circle {
+  stroke-width: 2.5px !important;
+}
+
+/* SLD Toast Notification */
+.sld-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 9px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  z-index: 99999;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sld-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+

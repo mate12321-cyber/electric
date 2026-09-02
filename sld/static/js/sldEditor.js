@@ -414,6 +414,81 @@ class SLDEditor {
       this.selectCell(linkView.model);
     });
 
+    // Right-Click on Element Port Node (Port Disconnect)
+    this.paper.on("element:contextmenu", (elementView, evt, x, y) => {
+      evt.preventDefault();
+      evt.stopPropagation();
+
+      const el = elementView.model;
+      const target = evt.target;
+
+      let portEl =
+        target.closest("[port]") ||
+        target.closest("[data-port]") ||
+        target.closest(".joint-port");
+
+      let portId = null;
+      if (portEl) {
+        portId =
+          portEl.getAttribute("port") ||
+          portEl.getAttribute("data-port") ||
+          portEl.getAttribute("joint-port");
+      }
+
+      // Check proximity to any port if not found directly
+      if (!portId && el.getPorts) {
+        const ports = el.getPorts() || [];
+        const elPos = el.position();
+        for (const p of ports) {
+          const pArgs = p.args || {};
+          const pAbsX = elPos.x + (pArgs.x || 0);
+          const pAbsY = elPos.y + (pArgs.y || 0);
+          const dist = Math.hypot(x - pAbsX, y - pAbsY);
+          if (dist <= 18) {
+            portId = p.id;
+            break;
+          }
+        }
+      }
+
+      if (portId) {
+        const connectedLinks = this.graph
+          .getConnectedLinks(el)
+          .filter((link) => {
+            const s = link.get("source");
+            const t = link.get("target");
+            return (
+              (s && s.id === el.id && s.port === portId) ||
+              (t && t.id === el.id && t.port === portId)
+            );
+          });
+
+        if (connectedLinks.length > 0) {
+          connectedLinks.forEach((link) => link.remove());
+          this.cleanupUnusedBusbarPorts();
+          this.topologyTracker.applyStyles(this.paper);
+          this.updateMinimap();
+          this.pushHistory();
+          this.scheduleAutoSave();
+          this.showToast("연결선이 해제되었습니다.");
+        }
+      }
+    });
+
+    // Right-Click on Link directly (Link Delete)
+    this.paper.on("link:contextmenu", (linkView, evt) => {
+      evt.preventDefault();
+      evt.stopPropagation();
+      const link = linkView.model;
+      link.remove();
+      this.cleanupUnusedBusbarPorts();
+      this.topologyTracker.applyStyles(this.paper);
+      this.updateMinimap();
+      this.pushHistory();
+      this.scheduleAutoSave();
+      this.showToast("연결선이 삭제되었습니다.");
+    });
+
     // Dynamic Busbar Port Auto-Generation & Auto-Deletion
     this.paper.on("link:connect", (linkView) => {
       const link = linkView.model;
@@ -448,6 +523,22 @@ class SLDEditor {
         this.syncConnectedBusbarPorts(element);
       }
     });
+  }
+
+  showToast(message) {
+    let toast = document.getElementById("sld-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "sld-toast";
+      toast.className = "sld-toast";
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.classList.add("show");
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 1800);
   }
 
   autoCreateBusbarPort(link) {
