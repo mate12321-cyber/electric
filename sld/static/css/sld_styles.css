@@ -601,6 +601,56 @@ g[data-type*="Link"].link-dead path.connection {
   opacity: 0.7 !important;
 }
 
+/* Voltage Conflict / Mismatch Warning */
+@keyframes hazardPulse {
+  0% {
+    stroke: #ef4444 !important;
+    stroke-width: 3.5px !important;
+  }
+  50% {
+    stroke: #f59e0b !important;
+    stroke-width: 4.5px !important;
+  }
+  100% {
+    stroke: #ef4444 !important;
+    stroke-width: 3.5px !important;
+  }
+}
+
+.link-voltage-conflict path.connection,
+g[data-type*="Link"].link-voltage-conflict path.connection {
+  stroke-dasharray: 8, 4 !important;
+  animation: hazardPulse 1.2s infinite ease-in-out !important;
+  stroke: #ef4444 !important;
+  cursor: pointer;
+}
+
+.sld-conflict-alert-banner {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(220, 38, 38, 0.94);
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
+  z-index: 1000;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  animation: slideDownFade 0.25s ease-out;
+  pointer-events: auto;
+}
+
+.sld-conflict-alert-banner .badge-icon {
+  font-size: 15px;
+}
+
 /* State Segmented Toggle (활선, 사선, 접지) */
 .sld-state-toggle-group {
   display: flex;

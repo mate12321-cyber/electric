@@ -201,6 +201,9 @@ class PowerSystemTopologyTracker {
     const liveNodes = new Set();
     const liveLinks = new Set();
     const nodeVoltages = new Map();
+    const conflicts = [];
+    const conflictLinks = new Set();
+    const conflictNodes = new Set();
 
     elements.forEach((el) => {
       // If already grounded, it cannot be safely energized live
@@ -303,12 +306,13 @@ class PowerSystemTopologyTracker {
         let nextVoltage = currentVoltage;
         let nextColor = currentColor;
 
-        if (
+        const isTransformer =
           neighborSldData.type === "TR_2W" ||
           neighborSldData.type === "TR_3W" ||
           neighborEl.get("type") === "sld.Transformer2W" ||
-          neighborEl.get("type") === "sld.Transformer3W"
-        ) {
+          neighborEl.get("type") === "sld.Transformer3W";
+
+        if (isTransformer) {
           // Transformer step down/up
           if (edge.portTo === "sec") {
             nextVoltage =
@@ -349,10 +353,32 @@ class PowerSystemTopologyTracker {
           nextColor = currentColor;
         }
 
+        // Check for Voltage Mismatch / Conflict if node was already reached with different voltage
+        if (liveNodes.has(edge.neighborId) && !isTransformer) {
+          const existingVInfo = nodeVoltages.get(edge.neighborId);
+          if (
+            existingVInfo &&
+            Math.abs(existingVInfo.voltage - nextVoltage) > 0.05
+          ) {
+            conflicts.push({
+              type: "VOLTAGE_MISMATCH",
+              linkId: edge.link.id,
+              nodeId: edge.neighborId,
+              voltage1: existingVInfo.voltage,
+              voltage2: nextVoltage,
+              elementName: neighborSldData.name || neighborEl.id,
+              message: `${existingVInfo.voltage}kV 계통과 ${nextVoltage}kV 계통이 변압기 없이 직접 연결되어 전압 불일치(혼촉) 상태입니다.`,
+            });
+            conflictLinks.add(edge.link.id);
+            conflictNodes.add(edge.neighborId);
+          }
+        }
+
         liveLinks.add(edge.link.id);
         linkStatus.set(edge.link.id, {
           state: "LIVE",
           voltageColor: nextColor,
+          isConflict: conflictLinks.has(edge.link.id),
         });
 
         if (!liveNodes.has(edge.neighborId)) {
@@ -369,6 +395,45 @@ class PowerSystemTopologyTracker {
         }
       }
     }
+
+    // Direct links between live elements of different voltages check
+    links.forEach((link) => {
+      const src = link.get("source");
+      const tgt = link.get("target");
+      if (src && src.id && tgt && tgt.id) {
+        const srcEl = this.graph.getCell(src.id);
+        const tgtEl = this.graph.getCell(tgt.id);
+        if (srcEl && tgtEl) {
+          const srcSld = srcEl.get("sldData") || {};
+          const tgtSld = tgtEl.get("sldData") || {};
+          const isSrcTR = srcSld.type === "TR_2W" || srcSld.type === "TR_3W";
+          const isTgtTR = tgtSld.type === "TR_2W" || tgtSld.type === "TR_3W";
+
+          if (!isSrcTR && !isTgtTR) {
+            const srcV = nodeVoltages.get(srcEl.id);
+            const tgtV = nodeVoltages.get(tgtEl.id);
+            if (
+              srcV &&
+              tgtV &&
+              liveNodes.has(srcEl.id) &&
+              liveNodes.has(tgtEl.id) &&
+              Math.abs(srcV.voltage - tgtV.voltage) > 0.05
+            ) {
+              conflictLinks.add(link.id);
+              if (!conflicts.some((c) => c.linkId === link.id)) {
+                conflicts.push({
+                  type: "VOLTAGE_MISMATCH",
+                  linkId: link.id,
+                  voltage1: srcV.voltage,
+                  voltage2: tgtV.voltage,
+                  message: `${srcV.voltage}kV 계통과 ${tgtV.voltage}kV 계통이 변압기 없이 직접 연결되어 전압 불일치(혼촉) 상태입니다.`,
+                });
+              }
+            }
+          }
+        }
+      }
+    });
 
     // --- Priority 3: Assemble Status for all Elements & Links ---
     elements.forEach((el) => {
@@ -387,7 +452,12 @@ class PowerSystemTopologyTracker {
         voltage = vInfo ? vInfo.voltage : sldData.voltage;
       }
 
-      nodeStatus.set(el.id, { state, voltage, voltageColor: color });
+      nodeStatus.set(el.id, {
+        state,
+        voltage,
+        voltageColor: color,
+        isConflict: conflictNodes.has(el.id),
+      });
     });
 
     links.forEach((link) => {
@@ -395,26 +465,34 @@ class PowerSystemTopologyTracker {
         linkStatus.set(link.id, {
           state: "GROUNDED",
           voltageColor: "#84CC16",
+          isConflict: false,
         });
       } else if (liveLinks.has(link.id)) {
         const info = linkStatus.get(link.id) || {
           state: "LIVE",
           voltageColor: "#377DFF",
         };
-        linkStatus.set(link.id, info);
+        linkStatus.set(
+          link.id,
+          Object.assign({}, info, { isConflict: conflictLinks.has(link.id) }),
+        );
       } else {
-        linkStatus.set(link.id, { state: "DEAD", voltageColor: "#595959" });
+        linkStatus.set(link.id, {
+          state: "DEAD",
+          voltageColor: "#595959",
+          isConflict: false,
+        });
       }
     });
 
-    return { nodeStatus, linkStatus };
+    return { nodeStatus, linkStatus, conflicts };
   }
 
   /**
    * Apply the evaluated styles and classes directly to JointJS views
    */
   applyStyles(paper) {
-    const { nodeStatus, linkStatus } = this.evaluate();
+    const { nodeStatus, linkStatus, conflicts } = this.evaluate();
 
     // Update Links
     linkStatus.forEach((status, linkId) => {
@@ -424,29 +502,35 @@ class PowerSystemTopologyTracker {
       const view = paper.findViewByModel(link);
       const isLive = status.state === "LIVE";
       const isGrounded = status.state === "GROUNDED";
-      const strokeColor = isLive
-        ? status.voltageColor || "#377DFF"
-        : isGrounded
-          ? "#84CC16"
-          : "#595959";
+      const isConflict = status.isConflict;
+      const strokeColor = isConflict
+        ? "#EF4444"
+        : isLive
+          ? status.voltageColor || "#377DFF"
+          : isGrounded
+            ? "#84CC16"
+            : "#595959";
 
       link.attr({
         line: {
           stroke: strokeColor,
-          strokeWidth: 2.5,
-          strokeDasharray: "none",
-          class: isLive
-            ? "link-live"
-            : isGrounded
-              ? "link-grounded"
-              : "link-dead",
+          strokeWidth: isConflict ? 3.5 : 2.5,
+          strokeDasharray: isConflict ? "8, 4" : "none",
+          class: isConflict
+            ? "link-voltage-conflict"
+            : isLive
+              ? "link-live"
+              : isGrounded
+                ? "link-grounded"
+                : "link-dead",
           targetMarker: { type: "none" },
           sourceMarker: { type: "none" },
         },
       });
 
       if (view && view.el) {
-        view.el.classList.toggle("link-live", isLive);
+        view.el.classList.toggle("link-voltage-conflict", isConflict);
+        view.el.classList.toggle("link-live", isLive && !isConflict);
         view.el.classList.toggle("link-grounded", isGrounded);
         view.el.classList.toggle("link-dead", !isLive && !isGrounded);
 
@@ -502,8 +586,9 @@ class PowerSystemTopologyTracker {
       }
       // If it is a junction node, update visual based on topological state
       if (sldData.type === "JUNCTION" || el.get("type") === "sld.Junction") {
-        const fillColor =
-          status.state === "LIVE"
+        const fillColor = status.isConflict
+          ? "#EF4444"
+          : status.state === "LIVE"
             ? status.voltageColor || "#377DFF"
             : status.state === "GROUNDED"
               ? "#84CC16"
@@ -515,7 +600,30 @@ class PowerSystemTopologyTracker {
       }
     });
 
-    return { nodeStatus, linkStatus };
+    // Update Canvas Alert Banner for Voltage Conflicts
+    if (paper && paper.el) {
+      const container =
+        paper.el.closest(".sld-canvas-wrapper") ||
+        paper.el.closest("#sld-editor-container") ||
+        paper.el.parentElement;
+      if (container) {
+        let banner = container.querySelector(".sld-conflict-alert-banner");
+        if (conflicts && conflicts.length > 0) {
+          if (!banner) {
+            banner = document.createElement("div");
+            banner.className = "sld-conflict-alert-banner";
+            container.appendChild(banner);
+          }
+          const c0 = conflicts[0];
+          banner.innerHTML = `<span class="badge-icon">⚠️</span><span>[계통 경고] 전압 불일치 혼촉 감지: ${c0.voltage1}kV ↔ ${c0.voltage2}kV (변압기 연결 필요)</span>`;
+          banner.style.display = "flex";
+        } else if (banner) {
+          banner.style.display = "none";
+        }
+      }
+    }
+
+    return { nodeStatus, linkStatus, conflicts };
   }
 }
 

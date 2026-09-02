@@ -602,7 +602,8 @@ class SLDEditor {
           }
 
           const srcCell = this.graph.getCell(this._wireSource.id);
-          const wireColor = this.topologyTracker.getElementVoltageColor(srcCell);
+          const wireColor =
+            this.topologyTracker.getElementVoltageColor(srcCell);
 
           const link = new joint.shapes.standard.Link({
             source: { id: this._wireSource.id, port: this._wireSource.port },
