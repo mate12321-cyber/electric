@@ -251,32 +251,33 @@ class SLDEditor {
   }
 
   setupCellInteractions() {
-    // Element Pointer Down (Select or Breaker Toggle)
+    // Element Pointer Down (Select and optionally toggle Breaker)
     this.paper.on("element:pointerdown", (elementView, evt) => {
       const el = elementView.model;
       const sldData = el.get("sldData") || {};
       const catalog = window.EQUIPMENT_CATALOG[sldData.type] || {};
 
-      // If clicked on contact blade or breaker box, toggle OPEN/CLOSED state
-      const targetTag = evt.target.tagName
-        ? evt.target.tagName.toLowerCase()
-        : "";
+      // ALWAYS select the cell first
+      this.selectCell(el);
+
+      // If clicked on contact blade or with shiftKey on a switch/breaker, toggle OPEN/CLOSED state
       const isBreakerOrSwitch =
         catalog.subCategory === "SWITCH" || sldData.type === "GROUND_SWITCH";
 
-      if (
-        isBreakerOrSwitch &&
-        (evt.target.getAttribute("cursor") === "pointer" || evt.shiftKey)
-      ) {
+      const targetSel = evt.target ? evt.target.getAttribute("data-selector") : "";
+      const isClickOnBlade =
+        targetSel === "blade" ||
+        targetSel === "contactPath" ||
+        targetSel === "stateBadge" ||
+        evt.shiftKey;
+
+      if (isBreakerOrSwitch && isClickOnBlade) {
         const currentState = sldData.state || "CLOSED";
         const newState = currentState === "CLOSED" ? "OPEN" : "CLOSED";
         el.set("sldData", Object.assign({}, sldData, { state: newState }));
         this.topologyTracker.applyStyles(this.paper);
         this.populateProperties(el);
-        return;
       }
-
-      this.selectCell(el);
     });
 
     this.paper.on("link:pointerdown", (linkView) => {
@@ -285,6 +286,7 @@ class SLDEditor {
   }
 
   selectCell(cell) {
+    if (!cell) return;
     this.deselectAll();
     this.selectedCell = cell;
 
@@ -304,15 +306,30 @@ class SLDEditor {
       }
       this.selectedCell = null;
     }
+
+    // Clean up any stray selection classes
+    const selectedDoms = document.querySelectorAll(".sld-selected");
+    selectedDoms.forEach((d) => d.classList.remove("sld-selected"));
+
     this.clearProperties();
   }
 
   deleteSelected() {
-    if (this.selectedCell) {
-      this.selectedCell.remove();
-      this.deselectAll();
-      this.topologyTracker.applyStyles(this.paper);
+    if (!this.selectedCell) return;
+
+    const targetCell = this.selectedCell;
+    const view = this.paper.findViewByModel(targetCell);
+    if (view && view.el) {
+      view.el.classList.remove("sld-selected");
     }
+
+    this.selectedCell = null;
+    targetCell.remove();
+    this.clearProperties();
+    this.topologyTracker.applyStyles(this.paper);
+    this.updateMinimap();
+    this.pushHistory();
+    this.scheduleAutoSave();
   }
 
   getPaperPoint(clientX, clientY) {
@@ -681,6 +698,12 @@ class SLDEditor {
       });
     });
 
+    // Toolbar Delete button
+    const btnDeleteToolbar = document.getElementById("btn-delete-toolbar");
+    if (btnDeleteToolbar) {
+      btnDeleteToolbar.addEventListener("click", () => this.deleteSelected());
+    }
+
     // Save & Export buttons
     const btnSave = document.getElementById("btn-save-project");
     if (btnSave) btnSave.addEventListener("click", () => this.saveDiagram());
@@ -774,7 +797,9 @@ class SLDEditor {
         }
       })
       .catch(() => {
-        console.info("Static mode or offline: loading from LocalStorage or default schema");
+        console.info(
+          "Static mode or offline: loading from LocalStorage or default schema",
+        );
         const cached = localStorage.getItem("sld_diagram_" + diagramId);
         if (cached) {
           try {
@@ -830,7 +855,10 @@ class SLDEditor {
         const sldData = this.selectedCell.get("sldData") || {};
         if (vEl) vEl.innerText = (sldData.voltage || 22.9) + " kV";
         if (iEl) iEl.innerText = (sldData.current || curr) + " A";
-        if (pEl) pEl.innerText = (sldData.voltage ? Math.round(sldData.voltage * 0.8) : 18.5) + " MW";
+        if (pEl)
+          pEl.innerText =
+            (sldData.voltage ? Math.round(sldData.voltage * 0.8) : 18.5) +
+            " MW";
       }
     };
     updateValues();
@@ -844,7 +872,10 @@ class SLDEditor {
     };
 
     try {
-      localStorage.setItem("sld_diagram_" + this.options.diagramId, JSON.stringify(schemaData));
+      localStorage.setItem(
+        "sld_diagram_" + this.options.diagramId,
+        JSON.stringify(schemaData),
+      );
     } catch (e) {}
 
     const csrfToken =
@@ -868,7 +899,9 @@ class SLDEditor {
           const now = new Date();
           const timeStr = now.toTimeString().split(" ")[0];
           autoSaveBadge.innerHTML =
-            "☁️ 서버 저장 완료 " + timeStr + ' <span style="color:#52c41a">✓</span>';
+            "☁️ 서버 저장 완료 " +
+            timeStr +
+            ' <span style="color:#52c41a">✓</span>';
         }
       })
       .catch(() => {
@@ -877,7 +910,9 @@ class SLDEditor {
           const now = new Date();
           const timeStr = now.toTimeString().split(" ")[0];
           autoSaveBadge.innerHTML =
-            "💾 로컬 저장 완료 " + timeStr + ' <span style="color:#52c41a">✓</span>';
+            "💾 로컬 저장 완료 " +
+            timeStr +
+            ' <span style="color:#52c41a">✓</span>';
         }
       });
   }
