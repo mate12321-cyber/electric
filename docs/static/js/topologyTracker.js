@@ -271,11 +271,18 @@ class PowerSystemTopologyTracker {
             strokeWidth: 2.5,
             strokeDasharray: "none",
             class: "link-live",
+            targetMarker: { type: "none" },
+            sourceMarker: { type: "none" },
           },
         });
         if (view.el) {
           view.el.classList.add("link-live");
           view.el.classList.remove("link-dead", "link-grounded");
+          const paths = view.el.querySelectorAll("path");
+          paths.forEach((p) => {
+            p.removeAttribute("marker-end");
+            p.removeAttribute("marker-start");
+          });
         }
       } else if (status.state === "GROUNDED") {
         link.attr({
@@ -284,11 +291,18 @@ class PowerSystemTopologyTracker {
             strokeWidth: 2.5,
             strokeDasharray: "none",
             class: "link-grounded",
+            targetMarker: { type: "none" },
+            sourceMarker: { type: "none" },
           },
         });
         if (view.el) {
           view.el.classList.add("link-grounded");
           view.el.classList.remove("link-live", "link-dead");
+          const paths = view.el.querySelectorAll("path");
+          paths.forEach((p) => {
+            p.removeAttribute("marker-end");
+            p.removeAttribute("marker-start");
+          });
         }
       } else {
         link.attr({
@@ -297,16 +311,23 @@ class PowerSystemTopologyTracker {
             strokeWidth: 2.5,
             strokeDasharray: "none",
             class: "link-dead",
+            targetMarker: { type: "none" },
+            sourceMarker: { type: "none" },
           },
         });
         if (view.el) {
           view.el.classList.add("link-dead");
           view.el.classList.remove("link-live", "link-grounded");
+          const paths = view.el.querySelectorAll("path");
+          paths.forEach((p) => {
+            p.removeAttribute("marker-end");
+            p.removeAttribute("marker-start");
+          });
         }
       }
     });
 
-    // Update Elements (Status styling & Open/Close contact arm update)
+    // Update Elements (Status styling & Open/Close contact arm update & Transformer visual)
     nodeStatus.forEach((status, elId) => {
       const el = this.graph.getCell(elId);
       if (!el || !el.isElement()) return;
@@ -321,6 +342,16 @@ class PowerSystemTopologyTracker {
       // If it is a switch/breaker, update visual contact state
       if (typeof el.updateContactVisual === "function") {
         el.updateContactVisual(sldData.state, status.state);
+      }
+      // If it is a transformer, update visual based on topological state
+      if (
+        typeof el.updateVisual === "function" &&
+        (sldData.type === "TR_2W" ||
+          sldData.type === "TR_3W" ||
+          el.get("type") === "sld.Transformer2W" ||
+          el.get("type") === "sld.Transformer3W")
+      ) {
+        el.updateVisual(status.state);
       }
     });
 

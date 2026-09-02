@@ -1021,7 +1021,7 @@
         this.on("change:sldData", this.updateVisual, this);
         this.on("change:size", this.updateVisual, this);
       },
-      updateVisual: function () {
+      updateVisual: function (effectiveState) {
         const data = this.get("sldData") || {};
         const vUnit = data.voltageUnit || "kV";
         const getVColor =
@@ -1029,7 +1029,8 @@
             ? window.getVoltageColor
             : (v) => data.color || "#2E7D32";
 
-        const state = (data.state || "LIVE").toUpperCase();
+        const baseState = (data.state || "LIVE").toUpperCase();
+        const state = (effectiveState || baseState).toUpperCase();
         const isDead = state === "DEAD" || state === "OPEN";
         const isGrounded =
           state === "GROUNDED" || state === "GROUND" || state === "EARTH";
@@ -1052,10 +1053,10 @@
           priColor = "#94a3b8";
           secColor = "#94a3b8";
           tertColor = "#94a3b8";
-          priFill = "#cbd5e1";
-          secFill = "#cbd5e1";
-          tertFill = "#cbd5e1";
-          labelFill = "#334155";
+          priFill = "#94a3b8";
+          secFill = "#94a3b8";
+          tertFill = "#94a3b8";
+          labelFill = "#ffffff";
         } else if (isGrounded) {
           // 접지 상태 (녹색 계열)
           priColor = "#16a34a";

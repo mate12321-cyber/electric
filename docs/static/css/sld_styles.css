@@ -535,10 +535,31 @@ html {
 }
 
 /* Link State Solid Styles (점선 및 애니메이션, 화살표 비활성화 & 동일 굵기 유지) */
-marker,
+svg marker,
+svg marker *,
+svg marker path,
+svg marker polygon,
 .joint-link marker,
 .joint-link defs marker {
   display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  fill: transparent !important;
+  stroke: transparent !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+svg [marker-end],
+svg [marker-start],
+svg [marker-mid],
+.joint-link path,
+.joint-paper path,
+g[data-type*="Link"] path {
+  marker-start: none !important;
+  marker-end: none !important;
+  marker-mid: none !important;
+  marker: none !important;
 }
 
 .joint-link path.wrapper,
