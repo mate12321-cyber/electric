@@ -289,11 +289,11 @@ const EQUIPMENT_CATALOG = {
   // 2. 보호 / 차단 설비 (Protection / Circuit Breaker)
   CB_ACB: {
     type: "CB_ACB",
-    jointType: "sld.Breaker",
+    jointType: "sld.ACB",
     category: "PROTECTION",
     subCategory: "SWITCH",
     nameKo: "기중차단기 (ACB)",
-    descKo: "저압 주 배전용 기중차단기",
+    descKo: "저압 주 배전용 기중차단기 (인출형)",
     defaultProps: {
       name: "ACB",
       state: "CLOSED",
@@ -302,11 +302,11 @@ const EQUIPMENT_CATALOG = {
       poles: "3P",
       location: "0.4kV 모선 (A)",
       color: "#377DFF",
-      memo: "주 배전 차단용 ACB",
+      memo: "주 배전 차단용 인출형 ACB",
     },
     ports: ["in", "out"],
     iconSvg:
-      '<rect x="5" y="4" width="14" height="16" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="12" y="14" text-anchor="middle" font-size="7" font-weight="bold" fill="currentColor">ACB</text>',
+      '<path d="M12 2v2M8 4h8l-4 3M12 20v2M8 20h8l-4-3" stroke="currentColor" stroke-width="1.2" fill="currentColor"/><rect x="5" y="7" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>',
   },
   CB_VCB: {
     type: "CB_VCB",

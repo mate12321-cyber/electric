@@ -98,7 +98,7 @@
     },
   );
 
-  // 2. Circuit Breaker (차단기류 - ACB, VCB, MCCB, GCB: 내부 텍스트 제거, 활선/사선/접지 내부 색상 지원)
+  // 2-1. Circuit Breaker (일반 차단기류 - VCB, MCCB, GCB: 내부 텍스트 제거, 활선/사선/접지 내부 색상 지원)
   joint.shapes.sld.Breaker = joint.dia.Element.define(
     "sld.Breaker",
     {
@@ -209,6 +209,152 @@
           },
           groundSymbol: { display: showGround, fill: "#ffffff" },
           nameLabel: { text: data.name || "CB" },
+          specLabel: { text: data.current ? data.current + "A" : "" },
+        });
+      },
+    },
+  );
+
+  // 2-2. Air Circuit Breaker (ACB - 인출형 기중차단기)
+  joint.shapes.sld.ACB = joint.dia.Element.define(
+    "sld.ACB",
+    {
+      size: { width: 32, height: 48 },
+      markup: [
+        { tagName: "path", selector: "topLead" },
+        { tagName: "path", selector: "botLead" },
+        { tagName: "polygon", selector: "topArrow" },
+        { tagName: "polygon", selector: "botArrow" },
+        { tagName: "rect", selector: "box" },
+        { tagName: "text", selector: "groundSymbol" },
+        { tagName: "text", selector: "nameLabel" },
+        { tagName: "text", selector: "specLabel" },
+      ],
+      attrs: {
+        topLead: {
+          d: "M 16 0 L 16 4",
+          stroke: "#377DFF",
+          strokeWidth: 2,
+        },
+        botLead: {
+          d: "M 16 44 L 16 48",
+          stroke: "#377DFF",
+          strokeWidth: 2,
+        },
+        topArrow: {
+          points: "10,4 22,4 16,8",
+          fill: "#377DFF",
+          stroke: "#377DFF",
+          strokeWidth: 1,
+        },
+        botArrow: {
+          points: "10,44 22,44 16,40",
+          fill: "#377DFF",
+          stroke: "#377DFF",
+          strokeWidth: 1,
+        },
+        box: {
+          x: 2,
+          y: 8,
+          width: 28,
+          height: 32,
+          rx: 3,
+          ry: 3,
+          fill: "#000000",
+          stroke: "#377DFF",
+          strokeWidth: 2,
+        },
+        groundSymbol: {
+          text: "⏚",
+          x: 16,
+          y: 24,
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          fontSize: 14,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          display: "none",
+          pointerEvents: "none",
+        },
+        nameLabel: {
+          text: "ACB",
+          refX: 36,
+          refY: "25%",
+          textAnchor: "start",
+          fontSize: 9.5,
+          fontWeight: "600",
+          fill: "#1e293b",
+        },
+        specLabel: {
+          text: "3200A",
+          refX: 36,
+          refY: "65%",
+          textAnchor: "start",
+          fontSize: 8.5,
+          fill: "#64748b",
+        },
+      },
+      ports: {
+        groups: {
+          ports: {
+            position: { name: "absolute" },
+            attrs: {
+              circle: {
+                r: 3.5,
+                magnet: true,
+                fill: "#fff",
+                stroke: "#377DFF",
+                strokeWidth: 1.5,
+              },
+            },
+          },
+        },
+        items: [
+          { id: "in", group: "ports", args: { x: 16, y: 0 } },
+          { id: "out", group: "ports", args: { x: 16, y: 48 } },
+        ],
+      },
+    },
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateContactVisual();
+        this.on("change:sldData", this.updateContactVisual, this);
+        this.on("change:size", this.updateContactVisual, this);
+      },
+      updateContactVisual: function () {
+        const data = this.get("sldData") || {};
+        const state = (data.state || "LIVE").toUpperCase();
+        const color = data.color || "#377DFF";
+
+        const isLive = state === "LIVE" || state === "CLOSED";
+        const isGrounded = state === "GROUNDED" || state === "EARTH";
+
+        let boxFill = "#000000"; // 활선: 검정색 (Live Black)
+        let strokeColor = color;
+        let showGround = "none";
+
+        if (isGrounded) {
+          boxFill = "#16a34a"; // 접지: 초록색 (Ground Green)
+          strokeColor = "#16a34a";
+          showGround = "block";
+        } else if (!isLive) {
+          // DEAD (사선)
+          boxFill = "#94a3b8"; // 사선: 회색 (Dead Gray)
+          strokeColor = "#94a3b8";
+        }
+
+        this.attr({
+          topLead: { stroke: strokeColor },
+          botLead: { stroke: strokeColor },
+          topArrow: { fill: strokeColor, stroke: strokeColor },
+          botArrow: { fill: strokeColor, stroke: strokeColor },
+          box: {
+            fill: boxFill,
+            stroke: strokeColor,
+          },
+          groundSymbol: { display: showGround, fill: "#ffffff" },
+          nameLabel: { text: data.name || "ACB" },
           specLabel: { text: data.current ? data.current + "A" : "" },
         });
       },

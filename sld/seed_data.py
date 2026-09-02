@@ -116,7 +116,7 @@ def get_default_sld_schema():
     cells.append(make_link('link-tr2-bus04a', 'tr-2', 'sec', 'bus-04-a', 'p_tr', '#16A34A'))
 
     # Sub-loads on 0.4kV Bus A (Columns: 216, 278, 340)
-    cells.append(make_cell('acb-a1', 'sld.Breaker', 202, 615, 28, 40, {'type': 'CB_ACB', 'name': 'ACB', 'state': 'LIVE', 'voltage': 0.4, 'current': 1600, 'color': '#16A34A', 'location': '0.4kV 모선 (A)'}))
+    cells.append(make_cell('acb-a1', 'sld.ACB', 200, 611, 32, 48, {'type': 'CB_ACB', 'name': 'ACB', 'state': 'LIVE', 'voltage': 0.4, 'current': 1600, 'color': '#16A34A', 'location': '0.4kV 모선 (A)'}))
     cells.append(make_cell('load-a1', 'sld.Load', 199, 680, 34, 36, {'type': 'LOAD', 'name': '부하', 'color': '#16A34A'}))
     cells.append(make_link('link-busa-acba1', 'bus-04-a', 'p1', 'acb-a1', 'in', '#16A34A'))
     cells.append(make_link('link-acba1-loada1', 'acb-a1', 'out', 'load-a1', 'in', '#16A34A'))
@@ -227,7 +227,7 @@ def get_default_sld_schema():
         {'type': 'GENERATOR', 'name': '비상 발전기', 'capacity': '500kVA', 'voltage': 22.9, 'color': '#E65100'}
     ))
     cells.append(make_cell(
-        'acb-gen', 'sld.Breaker', 814, 430, 28, 40,
+        'acb-gen', 'sld.ACB', 812, 426, 32, 48,
         {'type': 'CB_ACB', 'name': 'ACB', 'state': 'LIVE', 'voltage': 22.9, 'current': 800, 'color': '#9C27B0'}
     ))
     cells.append(make_link('link-gen-acb', 'gen-1', 'out', 'acb-gen', 'out', '#E65100'))
@@ -245,7 +245,7 @@ def get_default_sld_schema():
         {'type': 'TEXT_LABEL', 'text': '상용 전원 AC 3Φ 380V', 'color': '#16A34A'}
     ))
     cells.append(make_cell(
-        'acb-ups-in', 'sld.Breaker', 220, 810, 28, 40,
+        'acb-ups-in', 'sld.ACB', 218, 806, 32, 48,
         {'type': 'CB_ACB', 'name': 'ACB', 'state': 'LIVE', 'voltage': 0.38, 'color': '#16A34A'}
     ))
     cells.append(make_cell(

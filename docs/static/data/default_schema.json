@@ -488,15 +488,15 @@
       }
     },
     {
-      "type": "sld.Breaker",
+      "type": "sld.ACB",
       "id": "acb-a1",
       "position": {
-        "x": 202,
-        "y": 615
+        "x": 200,
+        "y": 611
       },
       "size": {
-        "width": 28,
-        "height": 40
+        "width": 32,
+        "height": 48
       },
       "sldData": {
         "type": "CB_ACB",
@@ -1780,15 +1780,15 @@
       "attrs": {}
     },
     {
-      "type": "sld.Breaker",
+      "type": "sld.ACB",
       "id": "acb-gen",
       "position": {
-        "x": 814,
-        "y": 430
+        "x": 812,
+        "y": 426
       },
       "size": {
-        "width": 28,
-        "height": 40
+        "width": 32,
+        "height": 48
       },
       "sldData": {
         "type": "CB_ACB",
@@ -1894,15 +1894,15 @@
       "attrs": {}
     },
     {
-      "type": "sld.Breaker",
+      "type": "sld.ACB",
       "id": "acb-ups-in",
       "position": {
-        "x": 220,
-        "y": 810
+        "x": 218,
+        "y": 806
       },
       "size": {
-        "width": 28,
-        "height": 40
+        "width": 32,
+        "height": 48
       },
       "sldData": {
         "type": "CB_ACB",
