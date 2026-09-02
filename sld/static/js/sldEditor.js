@@ -446,7 +446,8 @@ class SLDEditor {
       if (e.dataTransfer) {
         type =
           e.dataTransfer.getData("text/plain") ||
-          e.dataTransfer.getData("text");
+          e.dataTransfer.getData("text") ||
+          e.dataTransfer.getData("text/sld-type");
       }
       if (!type) {
         type = window.__draggedSymbolType;
@@ -457,6 +458,23 @@ class SLDEditor {
       this.createElement(type, p.x - 20, p.y - 20);
       window.__draggedSymbolType = null;
     });
+
+    // Palette Search Filter
+    const searchInput = document.getElementById("symbol-search");
+    if (searchInput) {
+      searchInput.addEventListener("input", (e) => {
+        const q = e.target.value.toLowerCase().trim();
+        items.forEach((item) => {
+          const text = item.innerText.toLowerCase();
+          const type = (item.getAttribute("data-type") || "").toLowerCase();
+          if (!q || text.includes(q) || type.includes(q)) {
+            item.style.display = "flex";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      });
+    }
   }
 
   createElement(type, x, y) {
@@ -499,8 +517,8 @@ class SLDEditor {
         height = 64;
         break;
       case "TR_3W":
-        width = 56;
-        height = 60;
+        width = 60;
+        height = 64;
         break;
       case "CB_ACB":
       case "CB_VCB":
@@ -589,19 +607,24 @@ class SLDEditor {
       default:
         width = 40;
         height = 40;
-        break;
     }
 
-    const element = new shapeClass({
-      position: { x: Math.round(x / 10) * 10, y: Math.round(y / 10) * 10 },
+    // Snap to grid (10px)
+    const gridX = Math.round(x / 10) * 10;
+    const gridY = Math.round(y / 10) * 10;
+
+    const cell = new shapeClass({
+      position: { x: gridX, y: gridY },
       size: { width: width, height: height },
       sldData: defaultProps,
     });
 
-    this.graph.addCell(element);
-    this.selectCell(element);
+    this.graph.addCell(cell);
+    this.selectCell(cell);
     this.topologyTracker.applyStyles(this.paper);
-    return element;
+    this.updateMinimap();
+    this.scheduleAutoSave();
+    return cell;
   }
 
   setupPropertiesPanel() {
@@ -638,6 +661,7 @@ class SLDEditor {
 
     bindInput("prop-name", "name");
     bindInput("prop-desc", "desc");
+    bindInput("prop-state", "state");
     bindInput("prop-voltage", "voltage", true);
     bindInput("prop-connection", "connection");
     bindInput("prop-capacity", "capacity");
@@ -647,6 +671,34 @@ class SLDEditor {
     bindInput("prop-memo", "memo");
     bindInput("prop-symbol-color", "color");
     bindInput("prop-line-color", "lineColor");
+
+    const stateBtns = document.querySelectorAll(".state-toggle-btn");
+    stateBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (!this.selectedCell) return;
+        const targetState = btn.getAttribute("data-state");
+        const sldData = this.selectedCell.get("sldData") || {};
+        sldData.state = targetState;
+        this.selectedCell.set("sldData", Object.assign({}, sldData));
+
+        stateBtns.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const stateSelect = document.getElementById("prop-state");
+        if (stateSelect) stateSelect.value = targetState;
+
+        if (typeof this.selectedCell.updateContactVisual === "function") {
+          this.selectedCell.updateContactVisual();
+        }
+        if (typeof this.selectedCell.updateVisual === "function") {
+          this.selectedCell.updateVisual();
+        }
+        this.topologyTracker.applyStyles(this.paper);
+        this.populateProperties(this.selectedCell);
+        this.updateMinimap();
+        this.scheduleAutoSave();
+      });
+    });
 
     const delBtn = document.getElementById("btn-delete-element");
     if (delBtn) {
@@ -691,8 +743,19 @@ class SLDEditor {
     else if (sldData.priVoltage === 154 || sldData.voltage === 154)
       defConn = "Y-Δ";
 
+    const curState = (sldData.state || "LIVE").toUpperCase();
+    const mappedState =
+      curState === "CLOSED" ? "LIVE" : curState === "OPEN" ? "DEAD" : curState;
+
+    const stateBtns = document.querySelectorAll(".state-toggle-btn");
+    stateBtns.forEach((b) => {
+      const bState = b.getAttribute("data-state");
+      b.classList.toggle("active", bState === mappedState);
+    });
+
     setValue("prop-name", sldData.name || catalog.nameKo || "설비");
     setValue("prop-desc", sldData.desc || catalog.descKo || "");
+    setValue("prop-state", mappedState);
     setValue("prop-voltage", sldData.voltage || sldData.priVoltage || "");
     setValue("prop-connection", sldData.connection || defConn);
     setValue("prop-capacity", sldData.capacity || "");
@@ -712,21 +775,30 @@ class SLDEditor {
     const pEl = document.getElementById("telemetry-p");
     const statusBadge = document.getElementById("telemetry-status-badge");
 
-    const isLive = sldData.state !== "OPEN";
-    if (vEl) vEl.innerText = (sldData.voltage || 22.9) + " kV";
-    if (iEl) iEl.innerText = (sldData.current || 240) + " A";
+    const isLive = mappedState === "LIVE";
+    const isGrounded = mappedState === "GROUNDED";
+    if (vEl) vEl.innerText = (isLive ? sldData.voltage || 22.9 : 0) + " kV";
+    if (iEl) iEl.innerText = (isLive ? sldData.current || 240 : 0) + " A";
     if (pEl)
-      pEl.innerText =
-        Math.round(
-          ((sldData.voltage || 22.9) * (sldData.current || 240) * 1.732) / 100,
-        ) /
-          10 +
-        " MW";
+      pEl.innerText = isLive
+        ? Math.round(
+            ((sldData.voltage || 22.9) * (sldData.current || 240) * 1.732) /
+              100,
+          ) /
+            10 +
+          " MW"
+        : "0.0 MW";
     if (statusBadge) {
-      statusBadge.innerText = isLive ? "정상 통전 (LIVE)" : "차단 (OPEN)";
-      statusBadge.className = isLive
-        ? "telemetry-badge-live"
-        : "telemetry-badge-open";
+      if (isLive) {
+        statusBadge.innerText = "⚡ 활선 (LIVE)";
+        statusBadge.className = "telemetry-badge-live";
+      } else if (isGrounded) {
+        statusBadge.innerText = "⏚ 접지 (GROUNDED)";
+        statusBadge.className = "telemetry-badge-grounded";
+      } else {
+        statusBadge.innerText = "⚪ 사선 (DEAD)";
+        statusBadge.className = "telemetry-badge-dead";
+      }
     }
   }
 

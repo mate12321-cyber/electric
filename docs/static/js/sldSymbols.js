@@ -98,7 +98,7 @@
     },
   );
 
-  // 2. Breaker (VCB, ACB, MCCB, GCB)
+  // 2. Circuit Breaker (차단기류 - ACB, VCB, MCCB, GCB: 활선/사선/접지 내부 색상 지원)
   joint.shapes.sld.Breaker = joint.dia.Element.define(
     "sld.Breaker",
     {
@@ -106,30 +106,42 @@
       markup: [
         { tagName: "rect", selector: "box" },
         { tagName: "path", selector: "contactPath" },
+        { tagName: "text", selector: "groundSymbol" },
         { tagName: "text", selector: "typeLabel" },
+        { tagName: "circle", selector: "stateBadge" },
         { tagName: "text", selector: "nameLabel" },
         { tagName: "text", selector: "specLabel" },
-        { tagName: "rect", selector: "stateBadge" },
       ],
       attrs: {
         box: {
-          refWidth: "100%",
-          refHeight: "100%",
+          width: 28,
+          height: 40,
           rx: 3,
           ry: 3,
-          fill: "#ffffff",
+          fill: "#fee2e2",
           stroke: "#377DFF",
           strokeWidth: 2,
-          cursor: "pointer",
         },
         contactPath: {
           d: "M 14 5 L 14 35",
           stroke: "#377DFF",
-          strokeWidth: 2.2,
+          strokeWidth: 2,
           strokeLinecap: "round",
         },
+        groundSymbol: {
+          text: "⏚",
+          x: 14,
+          y: 20,
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          fontSize: 13,
+          fontWeight: "bold",
+          fill: "#16a34a",
+          display: "none",
+          pointerEvents: "none",
+        },
         typeLabel: {
-          text: "ACB",
+          text: "CB",
           refX: "50%",
           refY: "50%",
           textAnchor: "middle",
@@ -140,7 +152,7 @@
           pointerEvents: "none",
         },
         nameLabel: {
-          text: "ACB",
+          text: "CB",
           refX: 34,
           refY: "25%",
           textAnchor: "start",
@@ -157,15 +169,12 @@
           fill: "#64748b",
         },
         stateBadge: {
-          refX: -5,
-          refY: -5,
-          width: 12,
-          height: 12,
-          rx: 6,
-          ry: 6,
-          fill: "#52c41a",
+          cx: 4,
+          cy: 4,
+          r: 3.5,
+          fill: "#ef4444",
           stroke: "#ffffff",
-          strokeWidth: 1.5,
+          strokeWidth: 1.2,
         },
       },
       ports: {
@@ -198,51 +207,97 @@
       },
       updateContactVisual: function () {
         const data = this.get("sldData") || {};
-        const state = data.state || "CLOSED";
+        const state = (data.state || "LIVE").toUpperCase();
         const color = data.color || "#377DFF";
-        const isClosed = state === "CLOSED";
         const sz = this.get("size") || { width: 28, height: 40 };
         const cx = Math.round(sz.width / 2);
         const topY = 5;
         const botY = sz.height - 5;
 
+        const isLive = state === "LIVE" || state === "CLOSED";
+        const isGrounded = state === "GROUNDED" || state === "EARTH";
+
+        let boxFill = "#fee2e2"; // Live Red Tint
+        let boxStroke = color;
+        let badgeColor = "#ef4444";
+        let labelColor = color;
+        let pathStroke = color;
+        let pathDash = "none";
+        let showGround = "none";
+        let showType = "block";
+
+        if (isGrounded) {
+          boxFill = "#dcfce7"; // Ground Green Tint
+          boxStroke = "#16a34a";
+          badgeColor = "#16a34a";
+          labelColor = "#15803d";
+          pathStroke = "#16a34a";
+          showGround = "block";
+          showType = "none";
+        } else if (!isLive) {
+          // DEAD (사선)
+          boxFill = "#ffffff"; // Dead White
+          boxStroke = "#94a3b8";
+          badgeColor = "#94a3b8";
+          labelColor = "#64748b";
+          pathStroke = "#cbd5e1";
+          pathDash = "3,2";
+        }
+
         this.attr({
-          box: { stroke: color },
+          box: {
+            fill: boxFill,
+            stroke: boxStroke,
+            width: sz.width,
+            height: sz.height,
+          },
           typeLabel: {
             text:
               data.name || (data.type ? data.type.replace("CB_", "") : "CB"),
-            fill: color,
+            fill: labelColor,
+            display: showType,
           },
+          groundSymbol: { display: showGround },
           nameLabel: { text: data.name || "CB" },
           specLabel: { text: data.current ? data.current + "A" : "" },
           contactPath: {
-            d: isClosed
-              ? `M ${cx} ${topY} L ${cx} ${botY}`
-              : `M ${cx} ${topY} L ${cx + 8} ${botY - 4}`,
-            stroke: isClosed ? color : "#ff4d4f",
+            d: `M ${cx} ${topY} L ${cx} ${botY}`,
+            stroke: pathStroke,
+            strokeDasharray: pathDash,
+            strokeWidth: 2,
           },
-          stateBadge: {
-            fill: isClosed ? "#52c41a" : "#ff4d4f",
-          },
+          stateBadge: { fill: badgeColor },
         });
       },
     },
   );
 
-  // 3. Disconnector (DS - 단로기)
+  // 3. Disconnector (DS - 단로기: 활선/사선/접지 내부 색상 지원)
   joint.shapes.sld.Disconnector = joint.dia.Element.define(
     "sld.Disconnector",
     {
       size: { width: 30, height: 40 },
       markup: [
+        { tagName: "rect", selector: "bgBox" },
         { tagName: "path", selector: "inLine" },
         { tagName: "path", selector: "outLine" },
         { tagName: "circle", selector: "topNode" },
         { tagName: "circle", selector: "botNode" },
         { tagName: "path", selector: "blade" },
+        { tagName: "text", selector: "groundSymbol" },
+        { tagName: "circle", selector: "stateBadge" },
         { tagName: "text", selector: "nameLabel" },
       ],
       attrs: {
+        bgBox: {
+          width: 30,
+          height: 40,
+          rx: 3,
+          ry: 3,
+          fill: "#fee2e2",
+          stroke: "#7A3E9D",
+          strokeWidth: 1.5,
+        },
         inLine: { d: "M 15 0 L 15 12", stroke: "#7A3E9D", strokeWidth: 2 },
         outLine: { d: "M 15 28 L 15 40", stroke: "#7A3E9D", strokeWidth: 2 },
         topNode: { cx: 15, cy: 12, r: 2.5, fill: "#7A3E9D" },
@@ -253,6 +308,24 @@
           strokeWidth: 2.5,
           strokeLinecap: "round",
           cursor: "pointer",
+        },
+        groundSymbol: {
+          text: "⏚",
+          x: 23,
+          y: 20,
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          fontSize: 10,
+          fill: "#16a34a",
+          display: "none",
+        },
+        stateBadge: {
+          cx: 4,
+          cy: 4,
+          r: 3.5,
+          fill: "#ef4444",
+          stroke: "#ffffff",
+          strokeWidth: 1.2,
         },
         nameLabel: {
           text: "154kV DS",
@@ -294,19 +367,45 @@
       },
       updateContactVisual: function () {
         const data = this.get("sldData") || {};
-        const state = data.state || "CLOSED";
+        const state = (data.state || "LIVE").toUpperCase();
         const color = data.color || "#7A3E9D";
-        const isClosed = state === "CLOSED";
+
+        const isLive = state === "LIVE" || state === "CLOSED";
+        const isGrounded = state === "GROUNDED" || state === "EARTH";
+
+        let boxFill = "#fee2e2";
+        let boxStroke = color;
+        let nodeColor = color;
+        let bladeColor = color;
+        let badgeColor = "#ef4444";
+        let showGround = "none";
+        let bladeD = "M 15 12 L 15 28";
+
+        if (isGrounded) {
+          boxFill = "#dcfce7";
+          boxStroke = "#16a34a";
+          nodeColor = "#16a34a";
+          bladeColor = "#16a34a";
+          badgeColor = "#16a34a";
+          showGround = "block";
+        } else if (!isLive) {
+          boxFill = "#ffffff";
+          boxStroke = "#94a3b8";
+          nodeColor = "#94a3b8";
+          bladeColor = "#94a3b8";
+          badgeColor = "#94a3b8";
+          bladeD = "M 15 12 L 23 24";
+        }
 
         this.attr({
-          inLine: { stroke: color },
-          outLine: { stroke: color },
-          topNode: { fill: color },
-          botNode: { fill: color },
-          blade: {
-            d: isClosed ? "M 15 12 L 15 28" : "M 15 12 L 26 24",
-            stroke: isClosed ? color : "#ff4d4f",
-          },
+          bgBox: { fill: boxFill, stroke: boxStroke },
+          inLine: { stroke: nodeColor },
+          outLine: { stroke: nodeColor },
+          topNode: { fill: nodeColor },
+          botNode: { fill: nodeColor },
+          blade: { d: bladeD, stroke: bladeColor },
+          groundSymbol: { display: showGround },
+          stateBadge: { fill: badgeColor },
           nameLabel: { text: data.name || "DS" },
         });
       },

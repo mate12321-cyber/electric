@@ -44,9 +44,11 @@ class PowerSystemTopologyTracker {
             const sldData = el.get('sldData') || {};
             const catalog = window.EQUIPMENT_CATALOG[sldData.type] || {};
 
-            // If it is a switch/breaker/fuse, check open/close state
+            const st = (sldData.state || 'LIVE').toUpperCase();
+            if (st === 'DEAD' || st === 'OPEN') return false;
+            if (st === 'GROUNDED' || st === 'EARTH') return true;
             if (catalog.subCategory === 'SWITCH') {
-                return sldData.state !== 'OPEN';
+                return st === 'LIVE' || st === 'CLOSED';
             }
             return true;
         };
@@ -59,12 +61,13 @@ class PowerSystemTopologyTracker {
         elements.forEach(el => {
             const sldData = el.get('sldData') || {};
             const catalog = window.EQUIPMENT_CATALOG[sldData.type] || {};
+            const st = (sldData.state || '').toUpperCase();
             
-            // Ground source (Direct Ground or Closed Ground Switch)
-            if (catalog.isGroundSource || sldData.type === 'GROUND') {
+            // Ground source (Direct Ground or Ground Switch or element set to GROUNDED)
+            if (catalog.isGroundSource || sldData.type === 'GROUND' || st === 'GROUNDED' || st === 'EARTH') {
                 groundQueue.push(el.id);
                 groundedNodes.add(el.id);
-            } else if (sldData.type === 'GROUND_SWITCH' && sldData.state === 'CLOSED') {
+            } else if (sldData.type === 'GROUND_SWITCH' && (st === 'CLOSED' || st === 'LIVE')) {
                 groundQueue.push(el.id);
                 groundedNodes.add(el.id);
             }
@@ -100,8 +103,9 @@ class PowerSystemTopologyTracker {
 
             const sldData = el.get('sldData') || {};
             const catalog = window.EQUIPMENT_CATALOG[sldData.type] || {};
+            const st = (sldData.state || 'LIVE').toUpperCase();
 
-            if (catalog.isEnergizedSource) {
+            if (catalog.isEnergizedSource && st !== 'DEAD' && st !== 'OPEN') {
                 // If it is generator/UPS, check if switched on (default on)
                 const isOnline = sldData.isOnline !== false;
                 if (isOnline) {

@@ -568,6 +568,76 @@ g[data-type*="Link"].link-dead path {
   opacity: 0.5 !important;
 }
 
+/* State Segmented Toggle (활선, 사선, 접지) */
+.sld-state-toggle-group {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 6px;
+  padding: 3px;
+  gap: 3px;
+  border: 1px solid var(--border-color);
+  margin-top: 4px;
+}
+
+.state-toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.state-toggle-btn:hover {
+  color: #1e293b;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.state-toggle-btn.active.btn-state-live {
+  background: #fee2e2;
+  color: #b91c1c;
+  box-shadow: 0 1px 3px rgba(239, 68, 68, 0.2);
+}
+
+.state-toggle-btn.active.btn-state-dead {
+  background: #ffffff;
+  color: #475569;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.state-toggle-btn.active.btn-state-grounded {
+  background: #dcfce7;
+  color: #15803d;
+  box-shadow: 0 1px 3px rgba(34, 197, 94, 0.2);
+}
+
+.state-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-live {
+  background: #ef4444;
+}
+
+.dot-dead {
+  background: #94a3b8;
+}
+
+.dot-grounded {
+  background: #16a34a;
+}
+
 /* Selection Highlight */
 .sld-selected rect,
 .sld-selected circle,
@@ -577,6 +647,26 @@ g[data-type*="Link"].link-dead path {
 
 /* Telemetry Badge Styles */
 .telemetry-badge-live {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.telemetry-badge-dead {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.telemetry-badge-grounded {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 12px;
@@ -590,8 +680,8 @@ g[data-type*="Link"].link-dead path {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 12px;
-  background: #fee2e2;
-  color: #b91c1c;
+  background: #f1f5f9;
+  color: #475569;
   font-size: 11px;
   font-weight: 600;
 }

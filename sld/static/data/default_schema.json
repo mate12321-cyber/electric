@@ -34,7 +34,7 @@
       "sldData": {
         "type": "CB_GCB",
         "name": "154kV CB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 154,
         "current": 2000,
         "poles": "3P",
@@ -57,7 +57,7 @@
       "sldData": {
         "type": "DS",
         "name": "154kV DS",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 154,
         "current": 2000,
         "color": "#7A3E9D",
@@ -298,7 +298,7 @@
       "sldData": {
         "type": "CB_VCB",
         "name": "VCB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 22.9,
         "current": 630,
         "color": "#9C27B0",
@@ -501,7 +501,7 @@
       "sldData": {
         "type": "CB_ACB",
         "name": "ACB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 0.4,
         "current": 1600,
         "color": "#377DFF",
@@ -598,7 +598,7 @@
       "sldData": {
         "type": "CB_MCCB",
         "name": "MCCB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 0.4,
         "current": 225,
         "color": "#377DFF"
@@ -694,7 +694,7 @@
       "sldData": {
         "type": "CB_MCCB",
         "name": "MCCB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 0.4,
         "current": 225,
         "color": "#377DFF"
@@ -790,7 +790,7 @@
       "sldData": {
         "type": "CB_VCB",
         "name": "VCB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 22.9,
         "current": 630,
         "color": "#9C27B0"
@@ -992,7 +992,7 @@
       "sldData": {
         "type": "CB_MCCB",
         "name": "MCCB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 0.4,
         "color": "#2B6CB0"
       },
@@ -1087,7 +1087,7 @@
       "sldData": {
         "type": "CB_MCCB",
         "name": "MCCB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 0.4,
         "color": "#2B6CB0"
       },
@@ -1182,7 +1182,7 @@
       "sldData": {
         "type": "CB_MCCB",
         "name": "MCCB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 0.4,
         "color": "#2B6CB0"
       },
@@ -1277,7 +1277,7 @@
       "sldData": {
         "type": "CB_VCB",
         "name": "VCB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 22.9,
         "current": 630,
         "color": "#9C27B0"
@@ -1479,7 +1479,7 @@
       "sldData": {
         "type": "CB_MCCB",
         "name": "MCCB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 0.4,
         "color": "#E65100"
       },
@@ -1574,7 +1574,7 @@
       "sldData": {
         "type": "CB_MCCB",
         "name": "MCCB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 0.4,
         "color": "#E65100"
       },
@@ -1669,7 +1669,7 @@
       "sldData": {
         "type": "CB_MCCB",
         "name": "MCCB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 0.4,
         "color": "#E65100"
       },
@@ -1784,7 +1784,7 @@
       "sldData": {
         "type": "CB_ACB",
         "name": "ACB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 22.9,
         "current": 800,
         "color": "#9C27B0"
@@ -1898,7 +1898,7 @@
       "sldData": {
         "type": "CB_ACB",
         "name": "ACB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 0.38,
         "color": "#377DFF"
       },
@@ -2039,7 +2039,7 @@
       "sldData": {
         "type": "CB_MCCB",
         "name": "MCCB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 0.38,
         "color": "#377DFF"
       },
@@ -2076,7 +2076,7 @@
       "sldData": {
         "type": "CB_MCCB",
         "name": "MCCB",
-        "state": "CLOSED",
+        "state": "LIVE",
         "voltage": 0.38,
         "color": "#377DFF"
       },

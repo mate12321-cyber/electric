@@ -28,6 +28,41 @@
         />
       </div>
 
+      <div class="sld-form-group" id="group-prop-state">
+        <label class="sld-form-label">설비 상태 (Equipment State)</label>
+        <div class="sld-state-toggle-group">
+          <button
+            type="button"
+            class="state-toggle-btn btn-state-live"
+            data-state="LIVE"
+          >
+            <span class="state-dot dot-live"></span>
+            <span>활선 (Live)</span>
+          </button>
+          <button
+            type="button"
+            class="state-toggle-btn btn-state-dead"
+            data-state="DEAD"
+          >
+            <span class="state-dot dot-dead"></span>
+            <span>사선 (Dead)</span>
+          </button>
+          <button
+            type="button"
+            class="state-toggle-btn btn-state-grounded"
+            data-state="GROUNDED"
+          >
+            <span class="state-dot dot-grounded"></span>
+            <span>접지 (Ground)</span>
+          </button>
+        </div>
+        <select class="sld-select" id="prop-state" style="display: none">
+          <option value="LIVE">활선 (Live)</option>
+          <option value="DEAD">사선 (Dead)</option>
+          <option value="GROUNDED">접지 (Grounded)</option>
+        </select>
+      </div>
+
       <div class="sld-form-group">
         <label class="sld-form-label">정격 전압</label>
         <div class="sld-input-row">

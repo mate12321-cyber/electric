@@ -45,12 +45,12 @@ def get_default_sld_schema():
 
     cells.append(make_cell(
         'cb-154', 'sld.Breaker', 504, 130, 28, 40,
-        {'type': 'CB_GCB', 'name': '154kV CB', 'state': 'CLOSED', 'voltage': 154, 'current': 2000, 'poles': '3P', 'color': '#7A3E9D', 'memo': '154kV 수전 주 차단기'}
+        {'type': 'CB_GCB', 'name': '154kV CB', 'state': 'LIVE', 'voltage': 154, 'current': 2000, 'poles': '3P', 'color': '#7A3E9D', 'memo': '154kV 수전 주 차단기'}
     ))
 
     cells.append(make_cell(
         'ds-154', 'sld.Disconnector', 503, 205, 30, 40,
-        {'type': 'DS', 'name': '154kV DS', 'state': 'CLOSED', 'voltage': 154, 'current': 2000, 'color': '#7A3E9D', 'memo': '154kV 수전 단로기'}
+        {'type': 'DS', 'name': '154kV DS', 'state': 'LIVE', 'voltage': 154, 'current': 2000, 'color': '#7A3E9D', 'memo': '154kV 수전 단로기'}
     ))
 
     cells.append(make_cell(
@@ -91,7 +91,7 @@ def get_default_sld_schema():
     # 3. Feeder A (Column X = 278: 22.9/0.4kV TR#2 & 0.4kV Bus A)
     cells.append(make_cell(
         'vcb-a', 'sld.Breaker', 264, 410, 28, 40,
-        {'type': 'CB_VCB', 'name': 'VCB', 'state': 'CLOSED', 'voltage': 22.9, 'current': 630, 'color': '#9C27B0', 'location': '22.9kV 모선'}
+        {'type': 'CB_VCB', 'name': 'VCB', 'state': 'LIVE', 'voltage': 22.9, 'current': 630, 'color': '#9C27B0', 'location': '22.9kV 모선'}
     ))
     cells.append(make_cell(
         'tr-2', 'sld.Transformer2W', 256, 480, 44, 64,
@@ -118,17 +118,17 @@ def get_default_sld_schema():
     cells.append(make_link('link-tr2-bus04a', 'tr-2', 'sec', 'bus-04-a', 'p_tr', '#2E7D32'))
 
     # Sub-loads on 0.4kV Bus A (Columns: 216, 278, 340)
-    cells.append(make_cell('acb-a1', 'sld.Breaker', 202, 615, 28, 40, {'type': 'CB_ACB', 'name': 'ACB', 'state': 'CLOSED', 'voltage': 0.4, 'current': 1600, 'color': '#377DFF', 'location': '0.4kV 모선 (A)'}))
+    cells.append(make_cell('acb-a1', 'sld.Breaker', 202, 615, 28, 40, {'type': 'CB_ACB', 'name': 'ACB', 'state': 'LIVE', 'voltage': 0.4, 'current': 1600, 'color': '#377DFF', 'location': '0.4kV 모선 (A)'}))
     cells.append(make_cell('load-a1', 'sld.Load', 199, 680, 34, 36, {'type': 'LOAD', 'name': '부하'}))
     cells.append(make_link('link-busa-acba1', 'bus-04-a', 'p1', 'acb-a1', 'in', '#2E7D32'))
     cells.append(make_link('link-acba1-loada1', 'acb-a1', 'out', 'load-a1', 'in', '#377DFF'))
 
-    cells.append(make_cell('mccb-a2', 'sld.Breaker', 264, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'CLOSED', 'voltage': 0.4, 'current': 225, 'color': '#377DFF'}))
+    cells.append(make_cell('mccb-a2', 'sld.Breaker', 264, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'current': 225, 'color': '#377DFF'}))
     cells.append(make_cell('load-a2', 'sld.Load', 261, 680, 34, 36, {'type': 'LOAD', 'name': '부하'}))
     cells.append(make_link('link-busa-mccba2', 'bus-04-a', 'p2', 'mccb-a2', 'in', '#2E7D32'))
     cells.append(make_link('link-mccba2-loada2', 'mccb-a2', 'out', 'load-a2', 'in', '#377DFF'))
 
-    cells.append(make_cell('mccb-a3', 'sld.Breaker', 326, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'CLOSED', 'voltage': 0.4, 'current': 225, 'color': '#377DFF'}))
+    cells.append(make_cell('mccb-a3', 'sld.Breaker', 326, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'current': 225, 'color': '#377DFF'}))
     cells.append(make_cell('load-a3', 'sld.Load', 323, 680, 34, 36, {'type': 'LOAD', 'name': '부하'}))
     cells.append(make_link('link-busa-mccba3', 'bus-04-a', 'p3', 'mccb-a3', 'in', '#2E7D32'))
     cells.append(make_link('link-mccba3-loada3', 'mccb-a3', 'out', 'load-a3', 'in', '#377DFF'))
@@ -136,7 +136,7 @@ def get_default_sld_schema():
     # 4. Feeder B (Column X = 488: 22.9/0.4kV TR#3 & 0.4kV Bus B)
     cells.append(make_cell(
         'vcb-b', 'sld.Breaker', 474, 410, 28, 40,
-        {'type': 'CB_VCB', 'name': 'VCB', 'state': 'CLOSED', 'voltage': 22.9, 'current': 630, 'color': '#9C27B0'}
+        {'type': 'CB_VCB', 'name': 'VCB', 'state': 'LIVE', 'voltage': 22.9, 'current': 630, 'color': '#9C27B0'}
     ))
     cells.append(make_cell(
         'tr-3', 'sld.Transformer2W', 466, 480, 44, 64,
@@ -163,17 +163,17 @@ def get_default_sld_schema():
     cells.append(make_link('link-tr3-bus04b', 'tr-3', 'sec', 'bus-04-b', 'p_tr', '#2B6CB0'))
 
     # Sub-loads on Bus B (Columns: 426, 488, 550)
-    cells.append(make_cell('mccb-b1', 'sld.Breaker', 412, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'CLOSED', 'voltage': 0.4, 'color': '#2B6CB0'}))
+    cells.append(make_cell('mccb-b1', 'sld.Breaker', 412, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'color': '#2B6CB0'}))
     cells.append(make_cell('load-b1', 'sld.Load', 409, 680, 34, 36, {'type': 'LOAD', 'name': '부하'}))
     cells.append(make_link('link-busb-mccbb1', 'bus-04-b', 'p1', 'mccb-b1', 'in', '#2B6CB0'))
     cells.append(make_link('link-mccbb1-loadb1', 'mccb-b1', 'out', 'load-b1', 'in', '#2B6CB0'))
 
-    cells.append(make_cell('mccb-b2', 'sld.Breaker', 474, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'CLOSED', 'voltage': 0.4, 'color': '#2B6CB0'}))
+    cells.append(make_cell('mccb-b2', 'sld.Breaker', 474, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'color': '#2B6CB0'}))
     cells.append(make_cell('load-b2', 'sld.Load', 471, 680, 34, 36, {'type': 'LOAD', 'name': '부하'}))
     cells.append(make_link('link-busb-mccbb2', 'bus-04-b', 'p2', 'mccb-b2', 'in', '#2B6CB0'))
     cells.append(make_link('link-mccbb2-loadb2', 'mccb-b2', 'out', 'load-b2', 'in', '#2B6CB0'))
 
-    cells.append(make_cell('mccb-b3', 'sld.Breaker', 536, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'CLOSED', 'voltage': 0.4, 'color': '#2B6CB0'}))
+    cells.append(make_cell('mccb-b3', 'sld.Breaker', 536, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'color': '#2B6CB0'}))
     cells.append(make_cell('load-b3', 'sld.Load', 533, 680, 34, 36, {'type': 'LOAD', 'name': '부하'}))
     cells.append(make_link('link-busb-mccbb3', 'bus-04-b', 'p3', 'mccb-b3', 'in', '#2B6CB0'))
     cells.append(make_link('link-mccbb3-loadb3', 'mccb-b3', 'out', 'load-b3', 'in', '#2B6CB0'))
@@ -181,7 +181,7 @@ def get_default_sld_schema():
     # 5. Feeder C (Column X = 698: 22.9/0.4kV TR#4 & 0.4kV Bus C)
     cells.append(make_cell(
         'vcb-c', 'sld.Breaker', 684, 410, 28, 40,
-        {'type': 'CB_VCB', 'name': 'VCB', 'state': 'CLOSED', 'voltage': 22.9, 'current': 630, 'color': '#9C27B0'}
+        {'type': 'CB_VCB', 'name': 'VCB', 'state': 'LIVE', 'voltage': 22.9, 'current': 630, 'color': '#9C27B0'}
     ))
     cells.append(make_cell(
         'tr-4', 'sld.Transformer2W', 676, 480, 44, 64,
@@ -208,17 +208,17 @@ def get_default_sld_schema():
     cells.append(make_link('link-tr4-bus04c', 'tr-4', 'sec', 'bus-04-c', 'p_tr', '#E65100'))
 
     # Sub-loads on Bus C (Columns: 636, 698, 760)
-    cells.append(make_cell('mccb-c1', 'sld.Breaker', 622, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'CLOSED', 'voltage': 0.4, 'color': '#E65100'}))
+    cells.append(make_cell('mccb-c1', 'sld.Breaker', 622, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'color': '#E65100'}))
     cells.append(make_cell('load-c1', 'sld.Load', 619, 680, 34, 36, {'type': 'LOAD', 'name': '부하'}))
     cells.append(make_link('link-busc-mccbc1', 'bus-04-c', 'p1', 'mccb-c1', 'in', '#E65100'))
     cells.append(make_link('link-mccbc1-loadc1', 'mccb-c1', 'out', 'load-c1', 'in', '#E65100'))
 
-    cells.append(make_cell('mccb-c2', 'sld.Breaker', 684, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'CLOSED', 'voltage': 0.4, 'color': '#E65100'}))
+    cells.append(make_cell('mccb-c2', 'sld.Breaker', 684, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'color': '#E65100'}))
     cells.append(make_cell('load-c2', 'sld.Load', 681, 680, 34, 36, {'type': 'LOAD', 'name': '부하'}))
     cells.append(make_link('link-busc-mccbc2', 'bus-04-c', 'p2', 'mccb-c2', 'in', '#E65100'))
     cells.append(make_link('link-mccbc2-loadc2', 'mccb-c2', 'out', 'load-c2', 'in', '#E65100'))
 
-    cells.append(make_cell('mccb-c3', 'sld.Breaker', 746, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'CLOSED', 'voltage': 0.4, 'color': '#E65100'}))
+    cells.append(make_cell('mccb-c3', 'sld.Breaker', 746, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'color': '#E65100'}))
     cells.append(make_cell('load-c3', 'sld.Load', 743, 680, 34, 36, {'type': 'LOAD', 'name': '부하'}))
     cells.append(make_link('link-busc-mccbc3', 'bus-04-c', 'p3', 'mccb-c3', 'in', '#E65100'))
     cells.append(make_link('link-mccbc3-loadc3', 'mccb-c3', 'out', 'load-c3', 'in', '#E65100'))
@@ -230,7 +230,7 @@ def get_default_sld_schema():
     ))
     cells.append(make_cell(
         'acb-gen', 'sld.Breaker', 814, 430, 28, 40,
-        {'type': 'CB_ACB', 'name': 'ACB', 'state': 'CLOSED', 'voltage': 22.9, 'current': 800, 'color': '#9C27B0'}
+        {'type': 'CB_ACB', 'name': 'ACB', 'state': 'LIVE', 'voltage': 22.9, 'current': 800, 'color': '#9C27B0'}
     ))
     cells.append(make_link('link-gen-acb', 'gen-1', 'out', 'acb-gen', 'out', '#E65100'))
     cells.append(make_link('link-acbgen-bus22', 'acb-gen', 'in', 'bus-22-9', 'p_gen', '#9C27B0'))
@@ -248,7 +248,7 @@ def get_default_sld_schema():
     ))
     cells.append(make_cell(
         'acb-ups-in', 'sld.Breaker', 220, 810, 28, 40,
-        {'type': 'CB_ACB', 'name': 'ACB', 'state': 'CLOSED', 'voltage': 0.38, 'color': '#377DFF'}
+        {'type': 'CB_ACB', 'name': 'ACB', 'state': 'LIVE', 'voltage': 0.38, 'color': '#377DFF'}
     ))
     cells.append(make_cell(
         'ups-1', 'sld.UPS', 310, 808, 56, 48,
@@ -279,9 +279,9 @@ def get_default_sld_schema():
     ))
 
     # UPS Sub-loads (Columns: 568, 648)
-    cells.append(make_cell('mccb-ups1', 'sld.Breaker', 554, 860, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'CLOSED', 'voltage': 0.38, 'color': '#377DFF'}))
+    cells.append(make_cell('mccb-ups1', 'sld.Breaker', 554, 860, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.38, 'color': '#377DFF'}))
     cells.append(make_cell('load-ups1', 'sld.Load', 551, 925, 34, 36, {'type': 'LOAD', 'name': '중요 부하 1'}))
-    cells.append(make_cell('mccb-ups2', 'sld.Breaker', 634, 860, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'CLOSED', 'voltage': 0.38, 'color': '#377DFF'}))
+    cells.append(make_cell('mccb-ups2', 'sld.Breaker', 634, 860, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.38, 'color': '#377DFF'}))
     cells.append(make_cell('load-ups2', 'sld.Load', 631, 925, 34, 36, {'type': 'LOAD', 'name': '중요 부하 2'}))
 
     # UPS Links (All straight lines)
