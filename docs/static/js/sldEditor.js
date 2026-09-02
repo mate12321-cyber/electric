@@ -396,11 +396,12 @@ class SLDEditor {
       }
     });
 
-    // Snap to port grid on drag release
+    // Snap to port grid on drag release & sync busbar ports
     this.paper.on("element:pointerup", (elementView) => {
       const el = elementView.model;
       if (el && el.isElement && el.isElement()) {
         this.snapElementToPortGrid(el);
+        this.syncConnectedBusbarPorts(el);
         this.topologyTracker.applyStyles(this.paper);
         this.updateSelectionOverlay();
         this.updateMinimap();
@@ -411,6 +412,247 @@ class SLDEditor {
 
     this.paper.on("link:pointerdown", (linkView) => {
       this.selectCell(linkView.model);
+    });
+
+    // Dynamic Busbar Port Auto-Generation & Auto-Deletion
+    this.paper.on("link:connect", (linkView) => {
+      const link = linkView.model;
+      this.autoCreateBusbarPort(link);
+      this.cleanupUnusedBusbarPorts();
+      this.topologyTracker.applyStyles(this.paper);
+      this.updateMinimap();
+      this.scheduleAutoSave();
+    });
+
+    this.graph.on("add", (cell) => {
+      if (cell.isLink && cell.isLink()) {
+        this.autoCreateBusbarPort(cell);
+      }
+    });
+
+    this.graph.on("remove", (cell) => {
+      if (cell.isLink && cell.isLink()) {
+        this.cleanupUnusedBusbarPorts();
+      }
+    });
+
+    this.graph.on("change:source change:target", (link) => {
+      if (link.isLink && link.isLink()) {
+        this.autoCreateBusbarPort(link);
+        this.cleanupUnusedBusbarPorts();
+      }
+    });
+
+    this.graph.on("change:position", (element) => {
+      if (element.isElement && element.isElement()) {
+        this.syncConnectedBusbarPorts(element);
+      }
+    });
+  }
+
+  autoCreateBusbarPort(link) {
+    if (!link || !link.isLink || !link.isLink()) return;
+
+    const source = link.get("source");
+    const target = link.get("target");
+
+    if (!source || !target || !source.id || !target.id) return;
+
+    const sourceCell = this.graph.getCell(source.id);
+    const targetCell = this.graph.getCell(target.id);
+
+    if (!sourceCell || !targetCell) return;
+
+    const gridSize = this.options.gridSize || 10;
+
+    // Case 1: Target is Busbar
+    if (
+      targetCell.get("type") === "sld.Busbar" ||
+      targetCell.get("sldData")?.type === "BUSBAR"
+    ) {
+      const busbar = targetCell;
+      const busPos = busbar.position();
+      const busSize = busbar.size();
+
+      if (!target.port || !busbar.getPort(target.port)) {
+        const sourceSize = sourceCell.size();
+        const sourceData = sourceCell.get("sldData") || {};
+        const sourceOffset = this.getPrimaryPortOffset(
+          sourceData.type,
+          sourceSize.width,
+          sourceSize.height,
+          sourceCell,
+        );
+        const sourcePortAbsX = sourceCell.position().x + sourceOffset.x;
+
+        const rawLocalX = sourcePortAbsX - busPos.x;
+        let portX = Math.max(10, Math.min(busSize.width - 10, rawLocalX));
+        portX = Math.round(portX / gridSize) * gridSize;
+
+        const portId = "bus_p_" + Math.random().toString(36).substr(2, 9);
+        const busColor = busbar.get("sldData")?.color || "#9C27B0";
+
+        busbar.addPort({
+          id: portId,
+          group: "bus-ports",
+          args: { x: portX, y: busSize.height / 2 },
+          attrs: {
+            circle: {
+              r: 3.5,
+              magnet: true,
+              fill: "#ffffff",
+              stroke: busColor,
+              strokeWidth: 1.5,
+            },
+          },
+        });
+
+        link.prop("target", { id: busbar.id, port: portId });
+      }
+    }
+
+    // Case 2: Source is Busbar
+    if (
+      sourceCell.get("type") === "sld.Busbar" ||
+      sourceCell.get("sldData")?.type === "BUSBAR"
+    ) {
+      const busbar = sourceCell;
+      const busPos = busbar.position();
+      const busSize = busbar.size();
+
+      if (!source.port || !busbar.getPort(source.port)) {
+        const targetSize = targetCell.size();
+        const targetData = targetCell.get("sldData") || {};
+        const targetOffset = this.getPrimaryPortOffset(
+          targetData.type,
+          targetSize.width,
+          targetSize.height,
+          targetCell,
+        );
+        const targetPortAbsX = targetCell.position().x + targetOffset.x;
+
+        const rawLocalX = targetPortAbsX - busPos.x;
+        let portX = Math.max(10, Math.min(busSize.width - 10, rawLocalX));
+        portX = Math.round(portX / gridSize) * gridSize;
+
+        const portId = "bus_p_" + Math.random().toString(36).substr(2, 9);
+        const busColor = busbar.get("sldData")?.color || "#9C27B0";
+
+        busbar.addPort({
+          id: portId,
+          group: "bus-ports",
+          args: { x: portX, y: busSize.height / 2 },
+          attrs: {
+            circle: {
+              r: 3.5,
+              magnet: true,
+              fill: "#ffffff",
+              stroke: busColor,
+              strokeWidth: 1.5,
+            },
+          },
+        });
+
+        link.prop("source", { id: busbar.id, port: portId });
+      }
+    }
+  }
+
+  cleanupUnusedBusbarPorts() {
+    if (!this.graph) return;
+    const busbars = this.graph
+      .getElements()
+      .filter(
+        (el) =>
+          el.get("type") === "sld.Busbar" ||
+          el.get("sldData")?.type === "BUSBAR",
+      );
+
+    const allLinks = this.graph.getLinks();
+
+    busbars.forEach((busbar) => {
+      const usedPorts = new Set();
+      allLinks.forEach((link) => {
+        const s = link.get("source");
+        const t = link.get("target");
+        if (s && s.id === busbar.id && s.port) usedPorts.add(s.port);
+        if (t && t.id === busbar.id && t.port) usedPorts.add(t.port);
+      });
+
+      const existingPorts = busbar.getPorts() || [];
+      existingPorts.forEach((port) => {
+        if (!usedPorts.has(port.id)) {
+          busbar.removePort(port.id);
+        }
+      });
+    });
+  }
+
+  syncConnectedBusbarPorts(element) {
+    if (!element || !element.isElement || !element.isElement()) return;
+    if (
+      element.get("type") === "sld.Busbar" ||
+      element.get("sldData")?.type === "BUSBAR"
+    )
+      return;
+
+    const connectedLinks = this.graph.getConnectedLinks(element);
+    const elemPos = element.position();
+    const elemSize = element.size();
+    const elemData = element.get("sldData") || {};
+    const elemOffset = this.getPrimaryPortOffset(
+      elemData.type,
+      elemSize.width,
+      elemSize.height,
+      element,
+    );
+    const elemPortAbsX = elemPos.x + elemOffset.x;
+
+    connectedLinks.forEach((link) => {
+      const s = link.get("source");
+      const t = link.get("target");
+
+      if (s && s.id !== element.id) {
+        const other = this.graph.getCell(s.id);
+        if (
+          other &&
+          (other.get("type") === "sld.Busbar" ||
+            other.get("sldData")?.type === "BUSBAR")
+        ) {
+          const busPos = other.position();
+          const busSize = other.size();
+          const localX = Math.max(
+            10,
+            Math.min(busSize.width - 10, elemPortAbsX - busPos.x),
+          );
+          const gridSize = this.options.gridSize || 10;
+          const snappedX = Math.round(localX / gridSize) * gridSize;
+          if (s.port && other.getPort(s.port)) {
+            other.portProp(s.port, "args/x", snappedX);
+          }
+        }
+      }
+
+      if (t && t.id !== element.id) {
+        const other = this.graph.getCell(t.id);
+        if (
+          other &&
+          (other.get("type") === "sld.Busbar" ||
+            other.get("sldData")?.type === "BUSBAR")
+        ) {
+          const busPos = other.position();
+          const busSize = other.size();
+          const localX = Math.max(
+            10,
+            Math.min(busSize.width - 10, elemPortAbsX - busPos.x),
+          );
+          const gridSize = this.options.gridSize || 10;
+          const snappedX = Math.round(localX / gridSize) * gridSize;
+          if (t.port && other.getPort(t.port)) {
+            other.portProp(t.port, "args/x", snappedX);
+          }
+        }
+      }
     });
   }
 

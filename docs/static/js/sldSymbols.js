@@ -29,6 +29,7 @@
           stroke: "#7A1C8E",
           strokeWidth: 1.5,
           cursor: "move",
+          magnet: "passive",
         },
         label: {
           text: "22.9kV 모선",
@@ -62,29 +63,8 @@
     {
       initialize: function () {
         joint.dia.Element.prototype.initialize.apply(this, arguments);
-        this.distributePorts();
-        this.on("change:size", this.distributePorts, this);
         this.on("change:sldData", this.updateFromSldData, this);
         this.updateFromSldData();
-      },
-      distributePorts: function () {
-        const existing = this.prop("ports/items");
-        if (existing && existing.length > 0) {
-          return;
-        }
-        const width = this.get("size").width || 500;
-        const height = this.get("size").height || 12;
-        const count = 10;
-        const items = [];
-        for (let i = 1; i <= count; i++) {
-          const x = (width / (count + 1)) * i;
-          items.push({
-            id: "p" + i,
-            group: "bus-ports",
-            args: { x: Math.round(x), y: height / 2 },
-          });
-        }
-        this.prop("ports/items", items);
       },
       updateFromSldData: function () {
         const data = this.get("sldData") || {};
@@ -93,6 +73,12 @@
         this.attr({
           body: { fill: color, stroke: color },
           label: { text: name, fill: color },
+        });
+
+        // Update stroke of all existing ports to match busbar color
+        const ports = this.getPorts() || [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", color);
         });
       },
     },
