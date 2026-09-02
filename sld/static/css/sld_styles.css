@@ -713,6 +713,15 @@ g[data-type*="Link"].link-dead path.connection {
   stroke: #ffffff;
 }
 
+/* Rubberband / Area Selection Box */
+.sld-rubberband-box {
+  fill: rgba(37, 99, 235, 0.12) !important;
+  stroke: #2563eb !important;
+  stroke-width: 1.5px !important;
+  stroke-dasharray: 4, 3 !important;
+  pointer-events: none !important;
+}
+
 /* Link Selection Highlight */
 .sld-selected.joint-link path.connection {
   stroke: #2563eb !important;

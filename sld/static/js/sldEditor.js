@@ -86,7 +86,10 @@ class SLDEditor {
     this.panStart = { x: 0, y: 0 };
     this.isSpacePressed = false;
     this.activeTool = "select"; // 'select' | 'lasso' | 'wire' | 'busbar' | 'pen' | 'text' | 'group'
+    this.selectedCells = [];
     this.selectedCell = null;
+    this.isAreaSelecting = false;
+    this.areaSelectStart = { x: 0, y: 0 };
     this.history = [];
     this.historyIndex = -1;
     this.isHistoryTracking = true;
@@ -172,7 +175,7 @@ class SLDEditor {
         e.target.tagName !== "INPUT" &&
         e.target.tagName !== "TEXTAREA"
       ) {
-        if (!this.selectedCell) {
+        if (!this.selectedCells || this.selectedCells.length === 0) {
           this.isSpacePressed = true;
           paperEl.style.cursor = "grab";
         }
@@ -188,9 +191,8 @@ class SLDEditor {
       }
     });
 
-    // Mouse Move -> Update Status Bar Coordinates
+    // Mouse Move -> Status Coordinates & Pan Drag & Area Selection Drag
     paperEl.addEventListener("mousemove", (e) => {
-      const rect = paperEl.getBoundingClientRect();
       const p = this.paper.clientToLocalPoint({ x: e.clientX, y: e.clientY });
 
       const coordEl = document.getElementById("status-coord");
@@ -207,28 +209,54 @@ class SLDEditor {
         this.panStart = { x: e.clientX, y: e.clientY };
         this.paper.setOrigin(this.origin.x, this.origin.y);
         this.updateMinimap();
+      } else if (this.isAreaSelecting) {
+        this.updateAreaSelection(e.clientX, e.clientY);
       }
     });
 
-    // Pan Start (Right Click, Middle Click, Space+Click, or Pan Tool)
+    // Mousedown -> Pan Start or Area Selection Start
     paperEl.addEventListener("mousedown", (e) => {
-      if (
+      const isPanTrigger =
         e.button === 2 ||
         e.button === 1 ||
         this.isSpacePressed ||
-        this.activeTool === "pan" ||
-        (e.target.tagName === "svg" && e.button === 0 && !this.selectedCell)
-      ) {
+        this.activeTool === "pan";
+
+      if (isPanTrigger) {
         this.isPanning = true;
         this.panStart = { x: e.clientX, y: e.clientY };
         paperEl.style.cursor = "grabbing";
+        return;
+      }
+
+      // Area Selection on left-click drag on canvas background
+      if (
+        e.button === 0 &&
+        (this.activeTool === "select" || this.activeTool === "lasso")
+      ) {
+        const isSvgTarget =
+          e.target.tagName === "svg" ||
+          e.target.classList.contains("joint-paper") ||
+          e.target.classList.contains("joint-paper-background") ||
+          e.target.classList.contains("joint-paper-grid") ||
+          e.target.tagName === "DIV";
+
+        if (isSvgTarget) {
+          if (!e.shiftKey) {
+            this.deselectAll();
+          }
+          this.startAreaSelection(e.clientX, e.clientY);
+        }
       }
     });
 
-    window.addEventListener("mouseup", () => {
+    window.addEventListener("mouseup", (e) => {
       if (this.isPanning) {
         this.isPanning = false;
         paperEl.style.cursor = this.isSpacePressed ? "grab" : "default";
+      }
+      if (this.isAreaSelecting) {
+        this.finishAreaSelection(e.clientX, e.clientY, e.shiftKey);
       }
     });
 
@@ -245,11 +273,6 @@ class SLDEditor {
       { passive: false },
     );
 
-    // Blank Click -> Deselect
-    this.paper.on("blank:pointerdown", () => {
-      this.deselectAll();
-    });
-
     // Graph Change -> Run Topology Tracker & History Push
     this.graph.on(
       "change:position change:size add remove change:sldData",
@@ -260,6 +283,110 @@ class SLDEditor {
         this.scheduleAutoSave();
       },
     );
+  }
+
+  startAreaSelection(clientX, clientY) {
+    this.isAreaSelecting = true;
+    this.areaSelectStart = this.paper.clientToLocalPoint({
+      x: clientX,
+      y: clientY,
+    });
+
+    const svgNS = "http://www.w3.org/2000/svg";
+    let box = document.getElementById("sld-rubberband-box");
+    if (!box) {
+      box = document.createElementNS(svgNS, "rect");
+      box.setAttribute("id", "sld-rubberband-box");
+      box.setAttribute("class", "sld-rubberband-box");
+      const viewport =
+        this.paper.viewport ||
+        (this.paper.svg
+          ? this.paper.svg.querySelector(".joint-viewport") || this.paper.svg
+          : null);
+      if (viewport) viewport.appendChild(box);
+    }
+    box.setAttribute("x", this.areaSelectStart.x);
+    box.setAttribute("y", this.areaSelectStart.y);
+    box.setAttribute("width", 0);
+    box.setAttribute("height", 0);
+  }
+
+  updateAreaSelection(clientX, clientY) {
+    if (!this.isAreaSelecting) return;
+    const p = this.paper.clientToLocalPoint({ x: clientX, y: clientY });
+    const rx = Math.min(this.areaSelectStart.x, p.x);
+    const ry = Math.min(this.areaSelectStart.y, p.y);
+    const rw = Math.abs(p.x - this.areaSelectStart.x);
+    const rh = Math.abs(p.y - this.areaSelectStart.y);
+
+    const box = document.getElementById("sld-rubberband-box");
+    if (box) {
+      box.setAttribute("x", rx);
+      box.setAttribute("y", ry);
+      box.setAttribute("width", rw);
+      box.setAttribute("height", rh);
+    }
+
+    // Real-time highlight preview of intersecting elements
+    const elements = this.graph.getElements();
+    const selRect = { x: rx, y: ry, width: rw, height: rh };
+
+    elements.forEach((el) => {
+      const bbox = el.getBBox();
+      const intersects =
+        bbox.x < selRect.x + selRect.width &&
+        bbox.x + bbox.width > selRect.x &&
+        bbox.y < selRect.y + selRect.height &&
+        bbox.y + bbox.height > selRect.y;
+
+      const view = this.paper.findViewByModel(el);
+      if (view && view.el) {
+        if (intersects && (rw > 5 || rh > 5)) {
+          view.el.classList.add("sld-selected");
+        } else if (!this.selectedCells.includes(el)) {
+          view.el.classList.remove("sld-selected");
+        }
+      }
+    });
+  }
+
+  finishAreaSelection(clientX, clientY, shiftKey) {
+    if (!this.isAreaSelecting) return;
+    this.isAreaSelecting = false;
+
+    const p = this.paper.clientToLocalPoint({ x: clientX, y: clientY });
+    const rx = Math.min(this.areaSelectStart.x, p.x);
+    const ry = Math.min(this.areaSelectStart.y, p.y);
+    const rw = Math.abs(p.x - this.areaSelectStart.x);
+    const rh = Math.abs(p.y - this.areaSelectStart.y);
+
+    const box = document.getElementById("sld-rubberband-box");
+    if (box && box.parentNode) box.parentNode.removeChild(box);
+
+    if (rw > 5 || rh > 5) {
+      const selRect = { x: rx, y: ry, width: rw, height: rh };
+      const elements = this.graph.getElements();
+      const matched = elements.filter((el) => {
+        const bbox = el.getBBox();
+        return (
+          bbox.x < selRect.x + selRect.width &&
+          bbox.x + bbox.width > selRect.x &&
+          bbox.y < selRect.y + selRect.height &&
+          bbox.y + bbox.height > selRect.y
+        );
+      });
+
+      if (matched.length > 0) {
+        this.selectCells(matched, shiftKey);
+        if (matched.length > 1) {
+          this.showToast(`${matched.length}개 설비가 선택되었습니다.`);
+        }
+      } else if (!shiftKey) {
+        this.deselectAll();
+      }
+    } else if (!shiftKey) {
+      this.deselectAll();
+    }
   }
 
   zoom(delta, clientPoint) {
@@ -368,14 +495,60 @@ class SLDEditor {
   }
 
   setupCellInteractions() {
-    // Element Pointer Down (Select and optionally toggle Breaker)
+    // Element Pointer Down (Select, Shift Multi-Select, Multi-Drag)
     this.paper.on("element:pointerdown", (elementView, evt) => {
       const el = elementView.model;
       const sldData = el.get("sldData") || {};
       const catalog = window.EQUIPMENT_CATALOG[sldData.type] || {};
 
-      // ALWAYS select the cell first
-      this.selectCell(el);
+      if (evt.shiftKey) {
+        // Shift+Click toggle in/out of selection
+        if (this.selectedCells.includes(el)) {
+          const remaining = this.selectedCells.filter((c) => c !== el);
+          if (remaining.length > 0) {
+            this.selectCells(remaining);
+          } else {
+            this.deselectAll();
+          }
+        } else {
+          this.selectCells([el], true);
+        }
+        return;
+      }
+
+      // If clicked element is not part of current multi-selection, select it singly
+      if (!this.selectedCells.includes(el)) {
+        this.selectCell(el);
+      }
+
+      // Record starting positions for multi-drag
+      if (this.selectedCells.length > 1) {
+        this._multiDragStarts = this.selectedCells.map((c) => ({
+          cell: c,
+          pos: Object.assign({}, c.position()),
+        }));
+        this._multiDragPivotStart = Object.assign({}, el.position());
+        this._isMultiDragging = true;
+
+        const onPivotChange = () => {
+          if (!this._isMultiDragging) return;
+          const curPos = el.position();
+          const dx = curPos.x - this._multiDragPivotStart.x;
+          const dy = curPos.y - this._multiDragPivotStart.y;
+
+          this._multiDragStarts.forEach((item) => {
+            if (item.cell.id !== el.id) {
+              item.cell.position(item.pos.x + dx, item.pos.y + dy);
+            }
+          });
+        };
+
+        el.on("change:position", onPivotChange);
+        this._cleanupPivotDrag = () => {
+          el.off("change:position", onPivotChange);
+          this._isMultiDragging = false;
+        };
+      }
 
       // If clicked on contact blade or with shiftKey on a switch/breaker, toggle OPEN/CLOSED state
       const isBreakerOrSwitch =
@@ -394,10 +567,13 @@ class SLDEditor {
         targetSel === "contactPath" ||
         targetSel === "stateBadge" ||
         targetSel === "crescent" ||
-        targetSel === "box" ||
-        evt.shiftKey;
+        targetSel === "box";
 
-      if (isBreakerOrSwitch && isClickOnBlade) {
+      if (
+        isBreakerOrSwitch &&
+        isClickOnBlade &&
+        this.selectedCells.length <= 1
+      ) {
         const currentState = sldData.state || "CLOSED";
         const newState = currentState === "CLOSED" ? "OPEN" : "CLOSED";
         el.set("sldData", Object.assign({}, sldData, { state: newState }));
@@ -408,16 +584,31 @@ class SLDEditor {
 
     // Snap to port grid on drag release & sync busbar ports
     this.paper.on("element:pointerup", (elementView) => {
-      const el = elementView.model;
-      if (el && el.isElement && el.isElement()) {
-        this.snapElementToPortGrid(el);
-        this.syncConnectedBusbarPorts(el);
-        this.topologyTracker.applyStyles(this.paper);
-        this.updateSelectionOverlay();
-        this.updateMinimap();
-        this.pushHistory();
-        this.scheduleAutoSave();
+      if (this._cleanupPivotDrag) {
+        this._cleanupPivotDrag();
+        this._cleanupPivotDrag = null;
       }
+
+      if (this.selectedCells.length > 1) {
+        this.selectedCells.forEach((c) => {
+          if (c.isElement && c.isElement()) {
+            this.snapElementToPortGrid(c);
+            this.syncConnectedBusbarPorts(c);
+          }
+        });
+      } else {
+        const el = elementView.model;
+        if (el && el.isElement && el.isElement()) {
+          this.snapElementToPortGrid(el);
+          this.syncConnectedBusbarPorts(el);
+        }
+      }
+
+      this.topologyTracker.applyStyles(this.paper);
+      this.updateSelectionOverlay();
+      this.updateMinimap();
+      this.pushHistory();
+      this.scheduleAutoSave();
     });
 
     this.paper.on("link:pointerdown", (linkView) => {
@@ -789,26 +980,50 @@ class SLDEditor {
     });
   }
 
-  selectCell(cell) {
-    if (!cell) return;
-    this.deselectAll();
-    this.selectedCell = cell;
-
-    const view = this.paper.findViewByModel(cell);
-    if (view && view.el) {
-      view.el.classList.add("sld-selected");
+  selectCells(cells, append = false) {
+    const validCells = (cells || []).filter((c) => c && typeof c === "object");
+    if (validCells.length === 0) {
+      if (!append) this.deselectAll();
+      return;
     }
 
-    if (cell.isElement && cell.isElement()) {
-      cell.on(
-        "change:position change:size",
-        this._onSelectedCellTransform,
-        this,
-      );
+    if (!append) {
+      this.deselectAll();
+      this.selectedCells = [...validCells];
+    } else {
+      const set = new Set([...this.selectedCells, ...validCells]);
+      this.selectedCells = Array.from(set);
     }
+
+    this.selectedCell = this.selectedCells[0] || null;
+
+    this.selectedCells.forEach((cell) => {
+      if (!cell) return;
+      const view = this.paper.findViewByModel(cell);
+      if (view && view.el) {
+        view.el.classList.add("sld-selected");
+      }
+      if (cell.isElement && cell.isElement()) {
+        cell.off(
+          "change:position change:size",
+          this._onSelectedCellTransform,
+          this,
+        );
+        cell.on(
+          "change:position change:size",
+          this._onSelectedCellTransform,
+          this,
+        );
+      }
+    });
+
     this.updateSelectionOverlay();
+    this.populateProperties();
+  }
 
-    this.populateProperties(cell);
+  selectCell(cell, append = false) {
+    if (!cell) return;
+    this.selectCells([cell], append);
   }
 
   _onSelectedCellTransform() {
@@ -817,25 +1032,27 @@ class SLDEditor {
 
   updateSelectionOverlay() {
     this.removeSelectionOverlay();
-    if (!this.selectedCell || !this.paper) return;
+    if (!this.selectedCells || this.selectedCells.length === 0 || !this.paper)
+      return;
 
-    if (this.selectedCell.isElement && this.selectedCell.isElement()) {
-      const bbox = this.selectedCell.getBBox();
+    const svgNS = "http://www.w3.org/2000/svg";
+    const overlay = document.createElementNS(svgNS, "g");
+    overlay.setAttribute("id", "sld-selection-overlay");
+    overlay.setAttribute("class", "sld-selection-overlay");
+
+    const pad = 5;
+    const handleSize = 6;
+    const handleOffset = handleSize / 2;
+
+    this.selectedCells.forEach((cell) => {
+      if (!cell.isElement || !cell.isElement()) return;
+      const bbox = cell.getBBox();
       if (!bbox) return;
 
-      const pad = 5;
       const boxX = bbox.x - pad;
       const boxY = bbox.y - pad;
       const boxW = bbox.width + pad * 2;
       const boxH = bbox.height + pad * 2;
-
-      const handleSize = 6;
-      const handleOffset = handleSize / 2;
-
-      const svgNS = "http://www.w3.org/2000/svg";
-      const overlay = document.createElementNS(svgNS, "g");
-      overlay.setAttribute("id", "sld-selection-overlay");
-      overlay.setAttribute("class", "sld-selection-overlay");
 
       // Bounding box rect
       const rect = document.createElementNS(svgNS, "rect");
@@ -847,13 +1064,12 @@ class SLDEditor {
       rect.setAttribute("rx", "4");
       overlay.appendChild(rect);
 
-      const sldData = this.selectedCell.get("sldData") || {};
+      const sldData = cell.get("sldData") || {};
       const isBusbar =
-        sldData.type === "BUSBAR" ||
-        this.selectedCell.get("type") === "sld.Busbar";
+        sldData.type === "BUSBAR" || cell.get("type") === "sld.Busbar";
 
-      if (isBusbar) {
-        // Special West / East interactive drag handles for Busbars
+      if (isBusbar && this.selectedCells.length === 1) {
+        // Special West / East interactive drag handles for single Busbar
         const handleW = document.createElementNS(svgNS, "rect");
         handleW.setAttribute(
           "class",
@@ -886,20 +1102,21 @@ class SLDEditor {
             e.stopPropagation();
             e.preventDefault();
 
-            const startPos = this.selectedCell.position();
-            const startSize = this.selectedCell.size();
+            const startPos = cell.position();
+            const startSize = cell.size();
             const rightEdge = startPos.x + startSize.width;
             const gridSize = this.options.gridSize || 10;
             const busLengthInput = document.getElementById("prop-bus-length");
 
             // Gather all existing ports and their starting local coordinates
-            const ports = this.selectedCell.getPorts() || [];
+            const ports = cell.getPorts() || [];
             const initialPortOffsets = {};
             let minPortLocalX = Infinity;
             let maxPortLocalX = -Infinity;
 
             ports.forEach((p) => {
-              const currentX = p.args && p.args.x !== undefined ? p.args.x : 0;
+              const currentX =
+                p.args && p.args.x !== undefined ? p.args.x : 0;
               initialPortOffsets[p.id] = currentX;
               if (currentX < minPortLocalX) minPortLocalX = currentX;
               if (currentX > maxPortLocalX) maxPortLocalX = currentX;
@@ -923,14 +1140,17 @@ class SLDEditor {
                 let newW =
                   Math.round((paperPt.x - startPos.x) / gridSize) * gridSize;
                 newW = Math.max(minAllowedW, Math.min(3000, newW));
-                this.selectedCell.resize(newW, startSize.height);
+                cell.resize(newW, startSize.height);
                 this.updateSelectionOverlay();
                 if (busLengthInput) busLengthInput.value = newW;
               } else if (direction === "w") {
                 // Left Handle: Anchor all ports to world coordinates and guard left edge before ports
                 const maxAllowedX =
                   minPortLocalX !== Infinity
-                    ? Math.min(rightEdge - 40, startPos.x + minPortLocalX - pad)
+                    ? Math.min(
+                        rightEdge - 40,
+                        startPos.x + minPortLocalX - pad,
+                      )
                     : rightEdge - 40;
 
                 let newX = Math.round(paperPt.x / gridSize) * gridSize;
@@ -939,14 +1159,14 @@ class SLDEditor {
                 const dx = newX - startPos.x;
 
                 // 1. Move and resize busbar
-                this.selectedCell.position(newX, startPos.y);
-                this.selectedCell.resize(newW, startSize.height);
+                cell.position(newX, startPos.y);
+                cell.resize(newW, startSize.height);
 
                 // 2. Adjust all port local coordinates so world position stays 100% stationary
                 ports.forEach((p) => {
                   const origLocalX = initialPortOffsets[p.id];
                   const newLocalX = origLocalX - dx;
-                  this.selectedCell.portProp(p.id, "args/x", newLocalX);
+                  cell.portProp(p.id, "args/x", newLocalX);
                 });
 
                 this.updateSelectionOverlay();
@@ -968,8 +1188,8 @@ class SLDEditor {
 
         setupBusbarResizeHandle(handleW, "w");
         setupBusbarResizeHandle(handleE, "e");
-      } else {
-        // Corner handle positions
+      } else if (this.selectedCells.length === 1) {
+        // Corner handle positions for single element selection
         const corners = [
           { x: boxX - handleOffset, y: boxY - handleOffset }, // Top-Left
           { x: boxX + boxW - handleOffset, y: boxY - handleOffset }, // Top-Right
@@ -988,17 +1208,17 @@ class SLDEditor {
           overlay.appendChild(handle);
         });
       }
+    });
 
-      const viewport =
-        this.paper.viewport ||
-        (this.paper.svg
-          ? this.paper.svg.querySelector(".joint-viewport") ||
-            this.paper.svg.querySelector("g") ||
-            this.paper.svg
-          : null);
-      if (viewport) {
-        viewport.appendChild(overlay);
-      }
+    const viewport =
+      this.paper.viewport ||
+      (this.paper.svg
+        ? this.paper.svg.querySelector(".joint-viewport") ||
+          this.paper.svg.querySelector("g") ||
+          this.paper.svg
+        : null);
+    if (viewport) {
+      viewport.appendChild(overlay);
     }
   }
 
@@ -1010,20 +1230,23 @@ class SLDEditor {
   }
 
   deselectAll() {
-    if (this.selectedCell) {
-      if (this.selectedCell.isElement && this.selectedCell.isElement()) {
-        this.selectedCell.off(
-          "change:position change:size",
-          this._onSelectedCellTransform,
-          this,
-        );
-      }
-      const view = this.paper.findViewByModel(this.selectedCell);
-      if (view && view.el) {
-        view.el.classList.remove("sld-selected");
-      }
-      this.selectedCell = null;
+    if (this.selectedCells && this.selectedCells.length > 0) {
+      this.selectedCells.forEach((cell) => {
+        if (cell.isElement && cell.isElement()) {
+          cell.off(
+            "change:position change:size",
+            this._onSelectedCellTransform,
+            this,
+          );
+        }
+        const view = this.paper.findViewByModel(cell);
+        if (view && view.el) {
+          view.el.classList.remove("sld-selected");
+        }
+      });
     }
+    this.selectedCells = [];
+    this.selectedCell = null;
 
     this.removeSelectionOverlay();
 
@@ -1035,29 +1258,42 @@ class SLDEditor {
   }
 
   deleteSelected() {
-    if (!this.selectedCell) return;
-
-    const targetCell = this.selectedCell;
-    if (targetCell.isElement && targetCell.isElement()) {
-      targetCell.off(
-        "change:position change:size",
-        this._onSelectedCellTransform,
-        this,
-      );
-    }
-    const view = this.paper.findViewByModel(targetCell);
-    if (view && view.el) {
-      view.el.classList.remove("sld-selected");
+    if (!this.selectedCells || this.selectedCells.length === 0) {
+      if (this.selectedCell) {
+        this.selectedCells = [this.selectedCell];
+      } else {
+        return;
+      }
     }
 
+    const targets = [...this.selectedCells];
+    const count = targets.length;
+
+    targets.forEach((cell) => {
+      if (cell.isElement && cell.isElement()) {
+        cell.off(
+          "change:position change:size",
+          this._onSelectedCellTransform,
+          this,
+        );
+      }
+      const view = this.paper.findViewByModel(cell);
+      if (view && view.el) {
+        view.el.classList.remove("sld-selected");
+      }
+      cell.remove();
+    });
+
+    this.cleanupUnusedBusbarPorts();
     this.removeSelectionOverlay();
+    this.selectedCells = [];
     this.selectedCell = null;
-    targetCell.remove();
     this.clearProperties();
     this.topologyTracker.applyStyles(this.paper);
     this.updateMinimap();
     this.pushHistory();
     this.scheduleAutoSave();
+    this.showToast(`${count}개 항목이 삭제되었습니다.`);
   }
 
   getPaperPoint(clientX, clientY) {
@@ -1612,28 +1848,8 @@ class SLDEditor {
     const stateBtns = document.querySelectorAll(".state-toggle-btn");
     stateBtns.forEach((btn) => {
       btn.addEventListener("click", () => {
-        if (!this.selectedCell) return;
         const targetState = btn.getAttribute("data-state");
-        const sldData = this.selectedCell.get("sldData") || {};
-        sldData.state = targetState;
-        this.selectedCell.set("sldData", Object.assign({}, sldData));
-
-        stateBtns.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        const stateSelect = document.getElementById("prop-state");
-        if (stateSelect) stateSelect.value = targetState;
-
-        if (typeof this.selectedCell.updateContactVisual === "function") {
-          this.selectedCell.updateContactVisual();
-        }
-        if (typeof this.selectedCell.updateVisual === "function") {
-          this.selectedCell.updateVisual();
-        }
-        this.topologyTracker.applyStyles(this.paper);
-        this.populateProperties(this.selectedCell);
-        this.updateMinimap();
-        this.scheduleAutoSave();
+        this.toggleSelectedEquipmentState(targetState);
       });
     });
 
@@ -1647,20 +1863,31 @@ class SLDEditor {
     paletteColors.forEach((cp) => {
       cp.addEventListener("click", () => {
         const color = cp.getAttribute("data-color");
-        if (this.selectedCell) {
-          const sldData = this.selectedCell.get("sldData") || {};
-          sldData.color = color;
-          this.selectedCell.set("sldData", Object.assign({}, sldData));
+        if (this.selectedCells && this.selectedCells.length > 0) {
+          this.selectedCells.forEach((cell) => {
+            const sldData = cell.get("sldData") || {};
+            sldData.color = color;
+            cell.set("sldData", Object.assign({}, sldData));
+          });
           const colorInput = document.getElementById("prop-symbol-color");
           if (colorInput) colorInput.value = color;
           this.topologyTracker.applyStyles(this.paper);
+          this.scheduleAutoSave();
         }
       });
     });
   }
 
   populateProperties(cell) {
-    if (!cell) return;
+    if (!cell) {
+      if (this.selectedCells && this.selectedCells.length > 0) {
+        cell = this.selectedCells[0];
+      } else {
+        this.clearProperties();
+        return;
+      }
+    }
+
     const sldData = cell.get("sldData") || {};
     const catalog = window.EQUIPMENT_CATALOG[sldData.type] || {};
 
@@ -1669,15 +1896,33 @@ class SLDEditor {
       if (el) el.value = val !== undefined && val !== null ? val : "";
     };
 
+    const isMulti = this.selectedCells && this.selectedCells.length > 1;
+    const multiBanner = document.getElementById("group-prop-multi-selection");
+    const countTitle = document.getElementById("prop-multi-count-title");
+    const groupName = document.getElementById("group-prop-name");
+    const groupDesc = document.getElementById("group-prop-desc");
+
+    if (multiBanner) {
+      multiBanner.style.display = isMulti ? "block" : "none";
+      if (isMulti && countTitle) {
+        countTitle.innerText = `다중 설비 선택됨 (${this.selectedCells.length}개)`;
+      }
+    }
+
+    if (groupName) groupName.style.display = isMulti ? "none" : "block";
+    if (groupDesc) groupDesc.style.display = isMulti ? "none" : "block";
+
     const isBusbar =
-      sldData.type === "BUSBAR" || cell.get("type") === "sld.Busbar";
+      !isMulti &&
+      (sldData.type === "BUSBAR" || cell.get("type") === "sld.Busbar");
     const groupBusLen = document.getElementById("group-prop-bus-length");
     if (groupBusLen) groupBusLen.style.display = isBusbar ? "block" : "none";
     if (isBusbar) {
       setValue("prop-bus-length", Math.round(cell.size().width));
     }
 
-    const isTransformer = sldData.type === "TR_2W" || sldData.type === "TR_3W";
+    const isTransformer =
+      !isMulti && (sldData.type === "TR_2W" || sldData.type === "TR_3W");
     const groupConn = document.getElementById("group-prop-connection");
     const groupCap = document.getElementById("group-prop-capacity");
     const groupVolt = document.getElementById("group-prop-voltage");
@@ -1686,7 +1931,8 @@ class SLDEditor {
 
     if (groupConn) groupConn.style.display = isTransformer ? "block" : "none";
     if (groupCap) groupCap.style.display = isTransformer ? "block" : "none";
-    if (groupVolt) groupVolt.style.display = isTransformer ? "none" : "block";
+    if (groupVolt)
+      groupVolt.style.display = isTransformer || isMulti ? "none" : "block";
     if (groupTrVolt)
       groupTrVolt.style.display = isTransformer ? "block" : "none";
     if (groupTertVolt) {
@@ -1958,8 +2204,18 @@ class SLDEditor {
       if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
         return;
 
+      if ((e.ctrlKey || e.metaKey) && (e.key === "a" || e.key === "A")) {
+        e.preventDefault();
+        const allElements = this.graph.getElements();
+        if (allElements.length > 0) {
+          this.selectCells(allElements);
+          this.showToast(`전체 ${allElements.length}개 설비가 선택되었습니다.`);
+        }
+        return;
+      }
+
       if (e.code === "Space") {
-        if (this.selectedCell) {
+        if (this.selectedCells && this.selectedCells.length > 0) {
           e.preventDefault();
           e.stopPropagation();
           this.toggleSelectedEquipmentState();
@@ -1985,38 +2241,55 @@ class SLDEditor {
     });
   }
 
-  toggleSelectedEquipmentState() {
-    if (!this.selectedCell) return;
-    const cell = this.selectedCell;
-    const sldData = cell.get("sldData") || {};
+  toggleSelectedEquipmentState(forcedState) {
+    if (!this.selectedCells || this.selectedCells.length === 0) {
+      if (this.selectedCell) {
+        this.selectedCells = [this.selectedCell];
+      } else {
+        return;
+      }
+    }
 
-    const curState = (sldData.state || "LIVE").toUpperCase();
-    const normState =
-      curState === "CLOSED"
-        ? "LIVE"
-        : curState === "OPEN"
+    const targets = this.selectedCells.filter(
+      (c) => c.isElement && c.isElement(),
+    );
+    if (targets.length === 0) return;
+
+    let nextState = forcedState;
+    if (!nextState) {
+      const primaryCell = targets[0];
+      const sldData = primaryCell.get("sldData") || {};
+      const curState = (sldData.state || "LIVE").toUpperCase();
+      const normState =
+        curState === "CLOSED"
+          ? "LIVE"
+          : curState === "OPEN"
+            ? "DEAD"
+            : curState === "GROUND" || curState === "EARTH"
+              ? "GROUNDED"
+              : curState;
+
+      // Cycle: LIVE (활선) -> DEAD (사선) -> GROUNDED (접지) -> LIVE (활선)
+      nextState =
+        normState === "LIVE"
           ? "DEAD"
-          : curState === "GROUND" || curState === "EARTH"
+          : normState === "DEAD"
             ? "GROUNDED"
-            : curState;
-
-    // Cycle: LIVE (활선) -> DEAD (사선) -> GROUNDED (접지) -> LIVE (활선)
-    const nextState =
-      normState === "LIVE"
-        ? "DEAD"
-        : normState === "DEAD"
-          ? "GROUNDED"
-          : "LIVE";
-
-    sldData.state = nextState;
-    cell.set("sldData", Object.assign({}, sldData));
-
-    if (typeof cell.updateContactVisual === "function") {
-      cell.updateContactVisual();
+            : "LIVE";
     }
-    if (typeof cell.updateVisual === "function") {
-      cell.updateVisual();
-    }
+
+    targets.forEach((cell) => {
+      const sldData = cell.get("sldData") || {};
+      sldData.state = nextState;
+      cell.set("sldData", Object.assign({}, sldData));
+
+      if (typeof cell.updateContactVisual === "function") {
+        cell.updateContactVisual();
+      }
+      if (typeof cell.updateVisual === "function") {
+        cell.updateVisual();
+      }
+    });
 
     const stateBtns = document.querySelectorAll(".state-toggle-btn");
     stateBtns.forEach((b) => {
@@ -2028,7 +2301,7 @@ class SLDEditor {
     if (stateSelect) stateSelect.value = nextState;
 
     this.topologyTracker.applyStyles(this.paper);
-    this.populateProperties(cell);
+    this.populateProperties();
     this.updateMinimap();
     this.pushHistory();
     this.scheduleAutoSave();
@@ -2039,7 +2312,13 @@ class SLDEditor {
       GROUNDED: "🟢 접지 (Ground)",
       GROUND: "🟢 접지 (Ground)",
     };
-    this.showToast(`설비 상태: ${stateNames[nextState] || nextState}`);
+    if (targets.length > 1) {
+      this.showToast(
+        `선택된 ${targets.length}개 설비가 ${stateNames[nextState] || nextState} 상태로 변경되었습니다.`,
+      );
+    } else {
+      this.showToast(`설비 상태: ${stateNames[nextState] || nextState}`);
+    }
   }
 
   pushHistory() {
