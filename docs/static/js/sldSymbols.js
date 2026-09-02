@@ -98,14 +98,13 @@
     },
   );
 
-  // 2. Circuit Breaker (차단기류 - ACB, VCB, MCCB, GCB: 활선/사선/접지 내부 색상 지원)
+  // 2. Circuit Breaker (차단기류 - ACB, VCB, MCCB, GCB: 활선/사선/접지 내부 색상 지원, 내부 선 제거)
   joint.shapes.sld.Breaker = joint.dia.Element.define(
     "sld.Breaker",
     {
       size: { width: 28, height: 40 },
       markup: [
         { tagName: "rect", selector: "box" },
-        { tagName: "path", selector: "contactPath" },
         { tagName: "text", selector: "groundSymbol" },
         { tagName: "text", selector: "typeLabel" },
         { tagName: "circle", selector: "stateBadge" },
@@ -122,19 +121,13 @@
           stroke: "#377DFF",
           strokeWidth: 2,
         },
-        contactPath: {
-          d: "M 14 5 L 14 35",
-          stroke: "#377DFF",
-          strokeWidth: 2,
-          strokeLinecap: "round",
-        },
         groundSymbol: {
           text: "⏚",
           x: 14,
           y: 20,
           textAnchor: "middle",
           textVerticalAnchor: "middle",
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: "bold",
           fill: "#16a34a",
           display: "none",
@@ -146,7 +139,7 @@
           refY: "50%",
           textAnchor: "middle",
           textVerticalAnchor: "middle",
-          fontSize: 8,
+          fontSize: 8.5,
           fontWeight: "bold",
           fill: "#377DFF",
           pointerEvents: "none",
@@ -210,9 +203,6 @@
         const state = (data.state || "LIVE").toUpperCase();
         const color = data.color || "#377DFF";
         const sz = this.get("size") || { width: 28, height: 40 };
-        const cx = Math.round(sz.width / 2);
-        const topY = 5;
-        const botY = sz.height - 5;
 
         const isLive = state === "LIVE" || state === "CLOSED";
         const isGrounded = state === "GROUNDED" || state === "EARTH";
@@ -221,8 +211,6 @@
         let boxStroke = color;
         let badgeColor = "#ef4444";
         let labelColor = color;
-        let pathStroke = color;
-        let pathDash = "none";
         let showGround = "none";
         let showType = "block";
 
@@ -231,7 +219,6 @@
           boxStroke = "#16a34a";
           badgeColor = "#16a34a";
           labelColor = "#15803d";
-          pathStroke = "#16a34a";
           showGround = "block";
           showType = "none";
         } else if (!isLive) {
@@ -240,8 +227,6 @@
           boxStroke = "#94a3b8";
           badgeColor = "#94a3b8";
           labelColor = "#64748b";
-          pathStroke = "#cbd5e1";
-          pathDash = "3,2";
         }
 
         this.attr({
@@ -260,12 +245,6 @@
           groundSymbol: { display: showGround },
           nameLabel: { text: data.name || "CB" },
           specLabel: { text: data.current ? data.current + "A" : "" },
-          contactPath: {
-            d: `M ${cx} ${topY} L ${cx} ${botY}`,
-            stroke: pathStroke,
-            strokeDasharray: pathDash,
-            strokeWidth: 2,
-          },
           stateBadge: { fill: badgeColor },
         });
       },
