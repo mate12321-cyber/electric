@@ -480,63 +480,35 @@
     },
   );
 
-  // 2-4. High Voltage Bus Tie Breaker (고압 TIE 차단기: 가로형 VCB 스타일)
+  // 2-4. High Voltage Bus Tie Breaker (고압 TIE 차단기: VCB와 동일한 사각박스 가로형 40x28)
   joint.shapes.sld.TieBreakerHV = joint.dia.Element.define(
     "sld.TieBreakerHV",
     {
       size: { width: 40, height: 28 },
       markup: [
-        { tagName: "path", selector: "inLine" },
-        { tagName: "path", selector: "outLine" },
         { tagName: "rect", selector: "box" },
-        { tagName: "text", selector: "tieLabel" },
         { tagName: "text", selector: "groundSymbol" },
         { tagName: "text", selector: "nameLabel" },
         { tagName: "text", selector: "specLabel" },
       ],
       attrs: {
-        inLine: {
-          d: "M 0 14 L 8 14",
-          stroke: "#9C27B0",
-          strokeWidth: 2,
-          strokeLinecap: "round",
-        },
-        outLine: {
-          d: "M 32 14 L 40 14",
-          stroke: "#9C27B0",
-          strokeWidth: 2,
-          strokeLinecap: "round",
-        },
         box: {
-          x: 8,
-          y: 4,
-          width: 24,
-          height: 20,
-          rx: 2,
-          ry: 2,
+          width: 40,
+          height: 28,
+          rx: 3,
+          ry: 3,
           fill: "#000000",
           stroke: "#9C27B0",
           strokeWidth: 2,
           cursor: "pointer",
         },
-        tieLabel: {
-          text: "TIE",
-          x: 20,
-          y: 15,
-          textAnchor: "middle",
-          textVerticalAnchor: "middle",
-          fontSize: 8.5,
-          fontWeight: "bold",
-          fill: "#ffffff",
-          pointerEvents: "none",
-        },
         groundSymbol: {
           text: "⏚",
           x: 20,
-          y: 15,
+          y: 14,
           textAnchor: "middle",
           textVerticalAnchor: "middle",
-          fontSize: 12,
+          fontSize: 14,
           fontWeight: "bold",
           fill: "#ffffff",
           display: "none",
@@ -564,25 +536,13 @@
       },
       ports: {
         groups: {
-          "port-left": {
-            position: { name: "left" },
+          ports: {
+            position: { name: "absolute" },
             attrs: {
               circle: {
                 r: 3.5,
                 magnet: true,
-                fill: "#ffffff",
-                stroke: "#9C27B0",
-                strokeWidth: 1.5,
-              },
-            },
-          },
-          "port-right": {
-            position: { name: "right" },
-            attrs: {
-              circle: {
-                r: 3.5,
-                magnet: true,
-                fill: "#ffffff",
+                fill: "#fff",
                 stroke: "#9C27B0",
                 strokeWidth: 1.5,
               },
@@ -590,21 +550,23 @@
           },
         },
         items: [
-          { id: "in", group: "port-left" },
-          { id: "out", group: "port-right" },
+          { id: "in", group: "ports", args: { x: 0, y: 14 } },
+          { id: "out", group: "ports", args: { x: 40, y: 14 } },
         ],
       },
     },
     {
       initialize: function () {
         joint.dia.Element.prototype.initialize.apply(this, arguments);
-        this.on("change:sldData", this.updateContactVisual, this);
         this.updateContactVisual();
+        this.on("change:sldData", this.updateContactVisual, this);
+        this.on("change:size", this.updateContactVisual, this);
       },
       updateContactVisual: function () {
         const data = this.get("sldData") || {};
         const state = (data.state || "OPEN").toUpperCase();
         const color = data.color || "#9C27B0";
+        const sz = this.get("size") || { width: 40, height: 28 };
 
         const isLive = state === "LIVE" || state === "CLOSED";
         const isGrounded =
@@ -613,28 +575,24 @@
         let boxFill = "#000000";
         let boxStroke = color;
         let showGround = "none";
-        let showTie = "block";
 
         if (isGrounded) {
           boxFill = "#16a34a";
           boxStroke = "#16a34a";
           showGround = "block";
-          showTie = "none";
         } else if (!isLive) {
           boxFill = "#94a3b8";
           boxStroke = "#94a3b8";
         }
 
         this.attr({
-          inLine: {
-            stroke: isGrounded ? "#16a34a" : isLive ? color : "#94a3b8",
+          box: {
+            fill: boxFill,
+            stroke: boxStroke,
+            width: sz.width,
+            height: sz.height,
           },
-          outLine: {
-            stroke: isGrounded ? "#16a34a" : isLive ? color : "#94a3b8",
-          },
-          box: { fill: boxFill, stroke: boxStroke },
-          tieLabel: { display: showTie },
-          groundSymbol: { display: showGround },
+          groundSymbol: { display: showGround, fill: "#ffffff" },
           nameLabel: { text: data.name || "TIE VCB" },
           specLabel: { text: data.current ? data.current + "A" : "" },
         });
@@ -642,64 +600,51 @@
     },
   );
 
-  // 2-5. Low Voltage Bus Tie Breaker (저압 TIE 차단기: 가로형 ACB 스타일)
+  // 2-5. Low Voltage Bus Tie Breaker (저압 TIE 차단기: ACB와 동일한 원형 노드 + 반달 접점 가로형 40x28)
   joint.shapes.sld.TieBreakerLV = joint.dia.Element.define(
     "sld.TieBreakerLV",
     {
       size: { width: 40, height: 28 },
       markup: [
-        { tagName: "path", selector: "inLine" },
-        { tagName: "path", selector: "outLine" },
-        { tagName: "circle", selector: "leftRing" },
-        { tagName: "circle", selector: "rightRing" },
         { tagName: "path", selector: "crescent" },
+        { tagName: "circle", selector: "leftNode" },
+        { tagName: "circle", selector: "rightNode" },
         { tagName: "text", selector: "groundSymbol" },
         { tagName: "text", selector: "nameLabel" },
         { tagName: "text", selector: "specLabel" },
       ],
       attrs: {
-        inLine: {
-          d: "M 0 14 L 6 14",
-          stroke: "#377DFF",
-          strokeWidth: 2,
-          strokeLinecap: "round",
-        },
-        outLine: {
-          d: "M 34 14 L 40 14",
-          stroke: "#377DFF",
-          strokeWidth: 2,
-          strokeLinecap: "round",
-        },
-        leftRing: {
-          cx: 8,
-          cy: 14,
-          r: 3,
-          stroke: "#377DFF",
-          strokeWidth: 1.4,
-          fill: "none",
-        },
-        rightRing: {
-          cx: 32,
-          cy: 14,
-          r: 3,
-          stroke: "#377DFF",
-          strokeWidth: 1.4,
-          fill: "none",
-        },
         crescent: {
-          d: "M 14 8 C 17 11, 23 11, 26 8 C 24 17, 16 17, 14 8 Z",
+          d: "M 6 17 C 12 22, 28 22, 34 17 C 30 33, 10 33, 6 17 Z",
           stroke: "#377DFF",
           strokeWidth: 1.5,
+          strokeLinejoin: "round",
           fill: "#000000",
           cursor: "pointer",
+        },
+        leftNode: {
+          cx: 6,
+          cy: 14,
+          r: 4.5,
+          stroke: "#377DFF",
+          strokeWidth: 2,
+          fill: "#ffffff",
+        },
+        rightNode: {
+          cx: 34,
+          cy: 14,
+          r: 4.5,
+          stroke: "#377DFF",
+          strokeWidth: 2,
+          fill: "#ffffff",
         },
         groundSymbol: {
           text: "⏚",
           x: 20,
-          y: 22,
+          y: 14,
           textAnchor: "middle",
           textVerticalAnchor: "middle",
-          fontSize: 11,
+          fontSize: 13,
           fontWeight: "bold",
           fill: "#16a34a",
           display: "none",
@@ -727,25 +672,13 @@
       },
       ports: {
         groups: {
-          "port-left": {
-            position: { name: "left" },
+          ports: {
+            position: { name: "absolute" },
             attrs: {
               circle: {
                 r: 3.5,
                 magnet: true,
-                fill: "#ffffff",
-                stroke: "#377DFF",
-                strokeWidth: 1.5,
-              },
-            },
-          },
-          "port-right": {
-            position: { name: "right" },
-            attrs: {
-              circle: {
-                r: 3.5,
-                magnet: true,
-                fill: "#ffffff",
+                fill: "#fff",
                 stroke: "#377DFF",
                 strokeWidth: 1.5,
               },
@@ -753,16 +686,17 @@
           },
         },
         items: [
-          { id: "in", group: "port-left" },
-          { id: "out", group: "port-right" },
+          { id: "in", group: "ports", args: { x: 0, y: 14 } },
+          { id: "out", group: "ports", args: { x: 40, y: 14 } },
         ],
       },
     },
     {
       initialize: function () {
         joint.dia.Element.prototype.initialize.apply(this, arguments);
-        this.on("change:sldData", this.updateContactVisual, this);
         this.updateContactVisual();
+        this.on("change:sldData", this.updateContactVisual, this);
+        this.on("change:size", this.updateContactVisual, this);
       },
       updateContactVisual: function () {
         const data = this.get("sldData") || {};
@@ -790,10 +724,8 @@
         }
 
         this.attr({
-          inLine: { stroke: strokeColor },
-          outLine: { stroke: strokeColor },
-          leftRing: { stroke: strokeColor },
-          rightRing: { stroke: strokeColor },
+          leftNode: { stroke: strokeColor, fill: "#ffffff" },
+          rightNode: { stroke: strokeColor, fill: "#ffffff" },
           crescent: {
             stroke: crescentStroke,
             fill: crescentFill,

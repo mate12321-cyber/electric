@@ -356,7 +356,7 @@ const EQUIPMENT_CATALOG = {
     subCategory: "SWITCH",
     isTieBreaker: true,
     nameKo: "고압 TIE 차단기",
-    descKo: "특고압/고압 모선간 연계용 TIE 차단기 (가로형 / ATO 연동)",
+    descKo: "특고압/고압 모선간 연계용 TIE 차단기 (가로형 VCB / ATO 연동)",
     defaultProps: {
       name: "TIE VCB",
       state: "OPEN",
@@ -374,7 +374,7 @@ const EQUIPMENT_CATALOG = {
     },
     ports: ["in", "out"],
     iconSvg:
-      '<rect x="4" y="6" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M1 12h3M20 12h3" stroke="currentColor" stroke-width="1.4"/><text x="12" y="14.5" text-anchor="middle" font-size="5.5" font-weight="bold" fill="currentColor">TIE</text>',
+      '<rect x="4" y="7" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>',
   },
   CB_TIE_LV: {
     type: "CB_TIE_LV",
@@ -383,7 +383,7 @@ const EQUIPMENT_CATALOG = {
     subCategory: "SWITCH",
     isTieBreaker: true,
     nameKo: "저압 TIE 차단기",
-    descKo: "저압 모선간 연계용 TIE 차단기 (가로형 / ATO 연동)",
+    descKo: "저압 모선간 연계용 TIE 차단기 (가로형 ACB / ATO 연동)",
     defaultProps: {
       name: "TIE ACB",
       state: "OPEN",
@@ -401,7 +401,7 @@ const EQUIPMENT_CATALOG = {
     },
     ports: ["in", "out"],
     iconSvg:
-      '<circle cx="5" cy="12" r="2.5" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="19" cy="12" r="2.5" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M1 12h1.5M21.5 12h1.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 8 C 10 10, 14 10, 16 8 C 15 15, 9 15, 8 8 Z" stroke="currentColor" stroke-width="0.8" fill="currentColor"/>',
+      '<circle cx="5" cy="12" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="19" cy="12" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M5 13 C 8 16, 16 16, 19 13 C 17 21, 7 21, 5 13 Z" stroke="currentColor" stroke-width="1" stroke-linejoin="round" fill="currentColor"/>',
   },
   FUSE: {
     type: "FUSE",
