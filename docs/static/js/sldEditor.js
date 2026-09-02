@@ -90,6 +90,7 @@ class SLDEditor {
     this.selectedCell = null;
     this.isAreaSelecting = false;
     this.areaSelectStart = { x: 0, y: 0 };
+    this._clipboard = null;
     this.history = [];
     this.historyIndex = -1;
     this.isHistoryTracking = true;
@@ -2277,6 +2278,25 @@ class SLDEditor {
         return;
       }
 
+      if ((e.ctrlKey || e.metaKey) && (e.key === "c" || e.key === "C")) {
+        e.preventDefault();
+        this.copySelected();
+        return;
+      }
+
+      if ((e.ctrlKey || e.metaKey) && (e.key === "v" || e.key === "V")) {
+        e.preventDefault();
+        this.pasteCopied();
+        return;
+      }
+
+      if ((e.ctrlKey || e.metaKey) && (e.key === "d" || e.key === "D")) {
+        e.preventDefault();
+        this.copySelected();
+        this.pasteCopied();
+        return;
+      }
+
       if (e.code === "Space") {
         if (this.selectedCells && this.selectedCells.length > 0) {
           e.preventDefault();
@@ -2302,6 +2322,155 @@ class SLDEditor {
         this.saveDiagram();
       }
     });
+  }
+
+  copySelected() {
+    if (!this.selectedCells || this.selectedCells.length === 0) {
+      if (this.selectedCell) {
+        this.selectedCells = [this.selectedCell];
+      } else {
+        return;
+      }
+    }
+
+    const selectedElements = this.selectedCells.filter(
+      (c) => c && c.isElement && c.isElement(),
+    );
+    if (selectedElements.length === 0) return;
+
+    const selectedIds = new Set(selectedElements.map((el) => el.id));
+
+    // Find internal links whose both source and target are in the selected set
+    const internalLinks = this.graph.getLinks().filter((link) => {
+      const srcId = link.get("source")?.id;
+      const tgtId = link.get("target")?.id;
+      return srcId && tgtId && selectedIds.has(srcId) && selectedIds.has(tgtId);
+    });
+
+    const elementsJson = selectedElements.map((el) => el.toJSON());
+    const linksJson = internalLinks.map((l) => l.toJSON());
+
+    this._clipboard = {
+      elements: elementsJson,
+      links: linksJson,
+      pasteCount: 0,
+    };
+
+    this.showToast(`${selectedElements.length}개 설비가 복사되었습니다.`);
+  }
+
+  pasteCopied() {
+    if (
+      !this._clipboard ||
+      !this._clipboard.elements ||
+      this._clipboard.elements.length === 0
+    ) {
+      return;
+    }
+
+    this._clipboard.pasteCount = (this._clipboard.pasteCount || 0) + 1;
+    const offset = this._clipboard.pasteCount * 40;
+    const gridSize = this.options.gridSize || 10;
+    const dx = Math.round(offset / gridSize) * gridSize;
+    const dy = Math.round(offset / gridSize) * gridSize;
+
+    const idMap = new Map();
+    const newElements = [];
+
+    // 1. Clone and instantiate Elements
+    this._clipboard.elements.forEach((elJson) => {
+      const clonedJson = JSON.parse(JSON.stringify(elJson));
+      const oldId = clonedJson.id;
+      const typePrefix = clonedJson.sldData?.type
+        ? clonedJson.sldData.type.toLowerCase().replace(/_/g, "-")
+        : "el";
+      const newId =
+        typePrefix + "_" + Math.random().toString(36).substr(2, 9);
+      idMap.set(oldId, newId);
+
+      clonedJson.id = newId;
+      clonedJson.position = {
+        x: Math.round((clonedJson.position.x + dx) / gridSize) * gridSize,
+        y: Math.round((clonedJson.position.y + dy) / gridSize) * gridSize,
+      };
+
+      // Clone ports if present (e.g. Busbar or custom element)
+      if (clonedJson.ports && clonedJson.ports.items) {
+        clonedJson.ports.items = clonedJson.ports.items.map((p) => {
+          const newPortId =
+            p.id.startsWith("bus_p_") || p.id.startsWith("p_")
+              ? "bus_p_" + Math.random().toString(36).substr(2, 9)
+              : p.id;
+          idMap.set(`${oldId}:${p.id}`, newPortId);
+          return Object.assign({}, p, { id: newPortId });
+        });
+      }
+
+      // Resolve Shape Constructor
+      let shapeType = clonedJson.type;
+      let shapeClass = null;
+      if (shapeType && shapeType.startsWith("sld.") && joint.shapes.sld) {
+        shapeClass = joint.shapes.sld[shapeType.replace("sld.", "")];
+      }
+      if (
+        !shapeClass &&
+        joint.util &&
+        typeof joint.util.getByPath === "function"
+      ) {
+        shapeClass = joint.util.getByPath(joint.shapes, shapeType, ".");
+      }
+      if (!shapeClass) {
+        shapeClass =
+          joint.shapes.sld.Breaker || joint.shapes.standard.Rectangle;
+      }
+
+      const newEl = new shapeClass(clonedJson);
+      this.graph.addCell(newEl);
+      newElements.push(newEl);
+    });
+
+    // 2. Clone internal Links connecting the cloned elements
+    this._clipboard.links.forEach((lJson) => {
+      const clonedLink = JSON.parse(JSON.stringify(lJson));
+      const oldSrcId = clonedLink.source?.id;
+      const oldTgtId = clonedLink.target?.id;
+      const newSrcId = idMap.get(oldSrcId);
+      const newTgtId = idMap.get(oldTgtId);
+
+      if (newSrcId && newTgtId) {
+        clonedLink.id = "link_" + Math.random().toString(36).substr(2, 9);
+        const oldSrcPort = clonedLink.source?.port;
+        const oldTgtPort = clonedLink.target?.port;
+        const newSrcPort =
+          (oldSrcPort && idMap.get(`${oldSrcId}:${oldSrcPort}`)) ||
+          oldSrcPort;
+        const newTgtPort =
+          (oldTgtPort && idMap.get(`${oldTgtId}:${oldTgtPort}`)) ||
+          oldTgtPort;
+
+        clonedLink.source = Object.assign({}, clonedLink.source, {
+          id: newSrcId,
+          port: newSrcPort,
+        });
+        clonedLink.target = Object.assign({}, clonedLink.target, {
+          id: newTgtId,
+          port: newTgtPort,
+        });
+        clonedLink.router = { name: "sldOrthogonal" };
+        clonedLink.connector = { name: "normal" };
+
+        const link = new joint.shapes.standard.Link(clonedLink);
+        this.graph.addCell(link);
+      }
+    });
+
+    // 3. Select all newly pasted elements
+    this.selectCells(newElements);
+    this.topologyTracker.applyStyles(this.paper);
+    this.updateMinimap();
+    this.pushHistory();
+    this.scheduleAutoSave();
+    this.showToast(`${newElements.length}개 설비가 붙여넣기되었습니다.`);
   }
 
   toggleSelectedEquipmentState(forcedState) {
