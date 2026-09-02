@@ -233,10 +233,11 @@ class SLDEditor {
   }
 
   zoomToFit() {
+    // 1. Get invariant model bounding box from graph
     let bbox = null;
-    try {
-      bbox = this.paper.getContentBBox();
-    } catch (e) {}
+    if (this.graph && typeof this.graph.getBBox === "function") {
+      bbox = this.graph.getBBox();
+    }
 
     if (!bbox || bbox.width === 0 || bbox.height === 0) {
       let minX = Infinity,
@@ -270,10 +271,13 @@ class SLDEditor {
     this.scale = Math.round(newScale * 100) / 100;
     this.paper.scale(this.scale, this.scale);
 
-    const centerX = containerWidth / 2 - (bbox.x + bbox.width / 2) * this.scale;
-    const centerY =
-      containerHeight / 2 - (bbox.y + bbox.height / 2) * this.scale;
-    this.origin = { x: centerX, y: centerY };
+    const modelCenterX = bbox.x + bbox.width / 2;
+    const modelCenterY = bbox.y + bbox.height / 2;
+
+    this.origin = {
+      x: containerWidth / 2 - modelCenterX * this.scale,
+      y: containerHeight / 2 - modelCenterY * this.scale,
+    };
     this.paper.setOrigin(this.origin.x, this.origin.y);
 
     const zoomBadge = document.getElementById("zoom-percentage");
