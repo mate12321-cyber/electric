@@ -177,20 +177,51 @@ class PowerSystemTopologyTracker {
         let nextVoltage = currentVoltage;
         let nextColor = currentColor;
 
-        if (neighborSldData.type === "TR_2W") {
+        if (
+          neighborSldData.type === "TR_2W" ||
+          neighborSldData.type === "TR_3W" ||
+          neighborEl.get("type") === "sld.Transformer2W" ||
+          neighborEl.get("type") === "sld.Transformer3W"
+        ) {
           // Transformer step down/up
           if (edge.portTo === "sec") {
-            nextVoltage = neighborSldData.secVoltage || 22.9;
-            nextColor = neighborSldData.secColor || "#9C27B0";
+            nextVoltage =
+              neighborSldData.secVoltage ||
+              (currentVoltage === 154 ? 22.9 : 0.4);
+            const preset =
+              window.DEFAULT_VOLTAGE_PRESETS &&
+              Object.values(window.DEFAULT_VOLTAGE_PRESETS).find(
+                (p) => p.value === nextVoltage,
+              );
+            nextColor =
+              neighborSldData.secColor ||
+              (preset
+                ? preset.color
+                : currentVoltage === 154
+                  ? "#9C27B0"
+                  : "#059669");
           } else {
-            nextVoltage = neighborSldData.priVoltage || 154;
-            nextColor = neighborSldData.color || "#2E7D32";
+            nextVoltage = neighborSldData.priVoltage || currentVoltage;
+            const preset =
+              window.DEFAULT_VOLTAGE_PRESETS &&
+              Object.values(window.DEFAULT_VOLTAGE_PRESETS).find(
+                (p) => p.value === nextVoltage,
+              );
+            nextColor =
+              neighborSldData.color ||
+              (preset ? preset.color : currentColor);
           }
-        } else if (neighborSldData.type === "BUSBAR") {
+        } else if (
+          neighborSldData.type === "BUSBAR" ||
+          neighborEl.get("type") === "sld.Busbar"
+        ) {
           if (neighborSldData.color) nextColor = neighborSldData.color;
           if (neighborSldData.voltage) nextVoltage = neighborSldData.voltage;
-        } else if (neighborSldData.color) {
-          nextColor = neighborSldData.color;
+        } else {
+          // Pass-through equipment (JUNCTION, CB, DS, MCCB, ACB, FUSE, CT, PT, LOAD, etc.):
+          // PRESERVE the incoming voltage and color!
+          nextVoltage = currentVoltage;
+          nextColor = currentColor;
         }
 
         liveLinks.add(edge.link.id);
@@ -236,7 +267,10 @@ class PowerSystemTopologyTracker {
 
     links.forEach((link) => {
       if (groundedLinks.has(link.id)) {
-        linkStatus.set(link.id, { state: "GROUNDED", voltageColor: "#84CC16" });
+        linkStatus.set(link.id, {
+          state: "GROUNDED",
+          voltageColor: "#84CC16",
+        });
       } else if (liveLinks.has(link.id)) {
         const info = linkStatus.get(link.id) || {
           state: "LIVE",
@@ -263,68 +297,41 @@ class PowerSystemTopologyTracker {
       if (!link || !link.isLink()) return;
 
       const view = paper.findViewByModel(link);
-      if (!view) return;
+      const isLive = status.state === "LIVE";
+      const isGrounded = status.state === "GROUNDED";
+      const strokeColor = isLive
+        ? status.voltageColor || "#377DFF"
+        : isGrounded
+          ? "#84CC16"
+          : "#595959";
 
-      if (status.state === "LIVE") {
-        link.attr({
-          line: {
-            stroke: status.voltageColor,
-            strokeWidth: 2.5,
-            strokeDasharray: "none",
-            class: "link-live",
-            targetMarker: { type: "none" },
-            sourceMarker: { type: "none" },
-          },
+      link.attr({
+        line: {
+          stroke: strokeColor,
+          strokeWidth: 2.5,
+          strokeDasharray: "none",
+          class: isLive
+            ? "link-live"
+            : isGrounded
+              ? "link-grounded"
+              : "link-dead",
+          targetMarker: { type: "none" },
+          sourceMarker: { type: "none" },
+        },
+      });
+
+      if (view && view.el) {
+        view.el.classList.toggle("link-live", isLive);
+        view.el.classList.toggle("link-grounded", isGrounded);
+        view.el.classList.toggle("link-dead", !isLive && !isGrounded);
+
+        const paths = view.el.querySelectorAll("path");
+        paths.forEach((p) => {
+          p.removeAttribute("marker-end");
+          p.removeAttribute("marker-start");
+          p.setAttribute("stroke", strokeColor);
+          p.style.stroke = strokeColor;
         });
-        if (view.el) {
-          view.el.classList.add("link-live");
-          view.el.classList.remove("link-dead", "link-grounded");
-          const paths = view.el.querySelectorAll("path");
-          paths.forEach((p) => {
-            p.removeAttribute("marker-end");
-            p.removeAttribute("marker-start");
-          });
-        }
-      } else if (status.state === "GROUNDED") {
-        link.attr({
-          line: {
-            stroke: "#84CC16",
-            strokeWidth: 2.5,
-            strokeDasharray: "none",
-            class: "link-grounded",
-            targetMarker: { type: "none" },
-            sourceMarker: { type: "none" },
-          },
-        });
-        if (view.el) {
-          view.el.classList.add("link-grounded");
-          view.el.classList.remove("link-live", "link-dead");
-          const paths = view.el.querySelectorAll("path");
-          paths.forEach((p) => {
-            p.removeAttribute("marker-end");
-            p.removeAttribute("marker-start");
-          });
-        }
-      } else {
-        link.attr({
-          line: {
-            stroke: "#595959",
-            strokeWidth: 2.5,
-            strokeDasharray: "none",
-            class: "link-dead",
-            targetMarker: { type: "none" },
-            sourceMarker: { type: "none" },
-          },
-        });
-        if (view.el) {
-          view.el.classList.add("link-dead");
-          view.el.classList.remove("link-live", "link-grounded");
-          const paths = view.el.querySelectorAll("path");
-          paths.forEach((p) => {
-            p.removeAttribute("marker-end");
-            p.removeAttribute("marker-start");
-          });
-        }
       }
     });
 
@@ -370,10 +377,19 @@ class PowerSystemTopologyTracker {
       }
       // If it is a junction node, update visual based on topological state
       if (
-        typeof el.updateVisual === "function" &&
-        (sldData.type === "JUNCTION" || el.get("type") === "sld.Junction")
+        sldData.type === "JUNCTION" ||
+        el.get("type") === "sld.Junction"
       ) {
-        el.updateVisual(status.state, status.voltageColor);
+        const fillColor =
+          status.state === "LIVE"
+            ? status.voltageColor || "#377DFF"
+            : status.state === "GROUNDED"
+              ? "#84CC16"
+              : "#595959";
+        el.attr("circle/fill", fillColor);
+        if (typeof el.updateVisual === "function") {
+          el.updateVisual(status.state, status.voltageColor);
+        }
       }
     });
 

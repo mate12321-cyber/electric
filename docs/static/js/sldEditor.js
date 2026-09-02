@@ -950,8 +950,7 @@ class SLDEditor {
         const l2 = dx * dx + dy * dy;
         if (l2 === 0) continue;
 
-        let t =
-          ((paperPoint.x - p1.x) * dx + (paperPoint.y - p1.y) * dy) / l2;
+        let t = ((paperPoint.x - p1.x) * dx + (paperPoint.y - p1.y) * dy) / l2;
         t = Math.max(0, Math.min(1, t));
 
         const proj = {
@@ -959,10 +958,7 @@ class SLDEditor {
           y: p1.y + t * dy,
         };
 
-        const dist = Math.hypot(
-          paperPoint.x - proj.x,
-          paperPoint.y - proj.y,
-        );
+        const dist = Math.hypot(paperPoint.x - proj.x, paperPoint.y - proj.y);
         if (dist < bestDist) {
           bestDist = dist;
           bestLink = link;
