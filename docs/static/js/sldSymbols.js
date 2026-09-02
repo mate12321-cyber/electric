@@ -98,7 +98,7 @@
     },
   );
 
-  // 2. Circuit Breaker (차단기류 - ACB, VCB, MCCB, GCB: 활선/사선/접지 내부 색상 지원, 내부 선 제거)
+  // 2. Circuit Breaker (차단기류 - ACB, VCB, MCCB, GCB: 내부 텍스트 제거, 활선/사선/접지 내부 색상 지원)
   joint.shapes.sld.Breaker = joint.dia.Element.define(
     "sld.Breaker",
     {
@@ -106,7 +106,6 @@
       markup: [
         { tagName: "rect", selector: "box" },
         { tagName: "text", selector: "groundSymbol" },
-        { tagName: "text", selector: "typeLabel" },
         { tagName: "circle", selector: "stateBadge" },
         { tagName: "text", selector: "nameLabel" },
         { tagName: "text", selector: "specLabel" },
@@ -131,17 +130,6 @@
           fontWeight: "bold",
           fill: "#16a34a",
           display: "none",
-          pointerEvents: "none",
-        },
-        typeLabel: {
-          text: "CB",
-          refX: "50%",
-          refY: "50%",
-          textAnchor: "middle",
-          textVerticalAnchor: "middle",
-          fontSize: 8.5,
-          fontWeight: "bold",
-          fill: "#377DFF",
           pointerEvents: "none",
         },
         nameLabel: {
@@ -210,23 +198,18 @@
         let boxFill = "#fee2e2"; // Live Red Tint
         let boxStroke = color;
         let badgeColor = "#ef4444";
-        let labelColor = color;
         let showGround = "none";
-        let showType = "block";
 
         if (isGrounded) {
           boxFill = "#dcfce7"; // Ground Green Tint
           boxStroke = "#16a34a";
           badgeColor = "#16a34a";
-          labelColor = "#15803d";
           showGround = "block";
-          showType = "none";
         } else if (!isLive) {
           // DEAD (사선)
           boxFill = "#ffffff"; // Dead White
           boxStroke = "#94a3b8";
           badgeColor = "#94a3b8";
-          labelColor = "#64748b";
         }
 
         this.attr({
@@ -235,12 +218,6 @@
             stroke: boxStroke,
             width: sz.width,
             height: sz.height,
-          },
-          typeLabel: {
-            text:
-              data.name || (data.type ? data.type.replace("CB_", "") : "CB"),
-            fill: labelColor,
-            display: showType,
           },
           groundSymbol: { display: showGround },
           nameLabel: { text: data.name || "CB" },
@@ -873,12 +850,11 @@
     },
   });
 
-  // 9. Relay (보호계전기 OCR)
+  // 9. Relay (보호계전기 OCR - 내부 텍스트 제거)
   joint.shapes.sld.Relay = joint.dia.Element.define("sld.Relay", {
     size: { width: 38, height: 38 },
     markup: [
       { tagName: "rect", selector: "box" },
-      { tagName: "text", selector: "text" },
       { tagName: "text", selector: "nameLabel" },
     ],
     attrs: {
@@ -889,15 +865,6 @@
         fill: "#ffffff",
         stroke: "#2E7D32",
         strokeWidth: 2,
-      },
-      text: {
-        text: "51",
-        x: 19,
-        y: 24,
-        textAnchor: "middle",
-        fontSize: 12,
-        fontWeight: "bold",
-        fill: "#2E7D32",
       },
       nameLabel: {
         text: "OCR",
@@ -1115,13 +1082,12 @@
     },
   );
 
-  // 13. Generator (발전기)
+  // 13. Generator (발전기 - 내부 G 텍스트 제거)
   joint.shapes.sld.Generator = joint.dia.Element.define("sld.Generator", {
     size: { width: 44, height: 44 },
     markup: [
       { tagName: "circle", selector: "circle" },
       { tagName: "path", selector: "lead" },
-      { tagName: "text", selector: "text" },
       { tagName: "text", selector: "nameLabel" },
       { tagName: "text", selector: "specLabel" },
     ],
@@ -1135,15 +1101,6 @@
         fill: "#ffffff",
       },
       lead: { d: "M 22 0 L 22 4", stroke: "#E65100", strokeWidth: 2 },
-      text: {
-        text: "G",
-        x: 22,
-        y: 26,
-        textAnchor: "middle",
-        fontSize: 14,
-        fontWeight: "bold",
-        fill: "#E65100",
-      },
       nameLabel: {
         text: "비상 발전기",
         refX: "50%",
@@ -1181,13 +1138,12 @@
     },
   });
 
-  // 14. Motor (전동기)
+  // 14. Motor (전동기 - 내부 M 텍스트 제거)
   joint.shapes.sld.Motor = joint.dia.Element.define("sld.Motor", {
     size: { width: 42, height: 42 },
     markup: [
       { tagName: "circle", selector: "circle" },
       { tagName: "path", selector: "lead" },
-      { tagName: "text", selector: "text" },
       { tagName: "text", selector: "nameLabel" },
     ],
     attrs: {
@@ -1200,15 +1156,6 @@
         fill: "#ffffff",
       },
       lead: { d: "M 21 0 L 21 4", stroke: "#377DFF", strokeWidth: 2 },
-      text: {
-        text: "M",
-        x: 21,
-        y: 25,
-        textAnchor: "middle",
-        fontSize: 14,
-        fontWeight: "bold",
-        fill: "#377DFF",
-      },
       nameLabel: {
         text: "모터",
         refX: "50%",
@@ -1238,54 +1185,79 @@
     },
   });
 
-  // 15. Load (부하)
-  joint.shapes.sld.Load = joint.dia.Element.define("sld.Load", {
-    size: { width: 34, height: 36 },
-    markup: [
-      { tagName: "path", selector: "lead" },
-      { tagName: "rect", selector: "box" },
-      { tagName: "text", selector: "text" },
-    ],
-    attrs: {
-      lead: { d: "M 17 0 L 17 8", stroke: "#64748b", strokeWidth: 2 },
-      box: {
-        x: 2,
-        y: 8,
-        width: 30,
-        height: 26,
-        rx: 2,
-        fill: "#ffffff",
-        stroke: "#64748b",
-        strokeWidth: 1.5,
+  // 15. Load (부하 - 내부 부하 텍스트 제거, 외부에 nameLabel 배치)
+  joint.shapes.sld.Load = joint.dia.Element.define(
+    "sld.Load",
+    {
+      size: { width: 34, height: 36 },
+      markup: [
+        { tagName: "path", selector: "lead" },
+        { tagName: "rect", selector: "box" },
+        { tagName: "path", selector: "arrow" },
+        { tagName: "text", selector: "nameLabel" },
+      ],
+      attrs: {
+        lead: { d: "M 17 0 L 17 8", stroke: "#64748b", strokeWidth: 2 },
+        box: {
+          x: 2,
+          y: 8,
+          width: 30,
+          height: 26,
+          rx: 2,
+          fill: "#ffffff",
+          stroke: "#64748b",
+          strokeWidth: 1.5,
+        },
+        arrow: {
+          d: "M 17 12 L 17 28 M 12 23 L 17 28 L 22 23",
+          stroke: "#64748b",
+          strokeWidth: 1.5,
+          fill: "none",
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        },
+        nameLabel: {
+          text: "부하",
+          refX: "50%",
+          refY: 40,
+          textAnchor: "middle",
+          fontSize: 9.5,
+          fontWeight: "500",
+          fill: "#475569",
+        },
       },
-      text: {
-        text: "부하",
-        x: 17,
-        y: 24,
-        textAnchor: "middle",
-        fontSize: 9,
-        fontWeight: "bold",
-        fill: "#475569",
-      },
-    },
-    ports: {
-      groups: {
-        ports: {
-          position: { name: "absolute" },
-          attrs: {
-            circle: {
-              r: 3,
-              magnet: true,
-              fill: "#fff",
-              stroke: "#64748b",
-              strokeWidth: 1.5,
+      ports: {
+        groups: {
+          ports: {
+            position: { name: "absolute" },
+            attrs: {
+              circle: {
+                r: 3,
+                magnet: true,
+                fill: "#fff",
+                stroke: "#64748b",
+                strokeWidth: 1.5,
+              },
             },
           },
         },
+        items: [{ id: "in", group: "ports", args: { x: 17, y: 0 } }],
       },
-      items: [{ id: "in", group: "ports", args: { x: 17, y: 0 } }],
     },
-  });
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateVisual();
+        this.on("change:sldData", this.updateVisual, this);
+      },
+      updateVisual: function () {
+        const data = this.get("sldData") || {};
+        this.attr({
+          nameLabel: { text: data.name || "부하" },
+        });
+      },
+    },
+  );
 
   // 16. Ground (대지 접지)
   joint.shapes.sld.Ground = joint.dia.Element.define("sld.Ground", {
@@ -1330,14 +1302,14 @@
     },
   });
 
-  // 17. UPS (무정전 전원장치)
+  // 17. UPS (무정전 전원장치 - 내부 텍스트 제거, AC/DC 기호는 벡터 선으로 표현)
   joint.shapes.sld.UPS = joint.dia.Element.define("sld.UPS", {
     size: { width: 56, height: 48 },
     markup: [
       { tagName: "rect", selector: "box" },
       { tagName: "path", selector: "diag" },
       { tagName: "path", selector: "acSymbol" },
-      { tagName: "text", selector: "dcSymbol" },
+      { tagName: "path", selector: "dcSymbol" },
       { tagName: "text", selector: "label" },
     ],
     attrs: {
@@ -1357,12 +1329,9 @@
         fill: "none",
       },
       dcSymbol: {
-        text: "=",
-        x: 42,
-        y: 38,
-        fontSize: 13,
-        fontWeight: "bold",
-        fill: "#00838F",
+        d: "M 36 32 L 46 32 M 36 36 L 46 36",
+        stroke: "#00838F",
+        strokeWidth: 1.5,
       },
       label: {
         text: "UPS",
@@ -1457,13 +1426,13 @@
     },
   });
 
-  // 19. Battery (축전지)
+  // 19. Battery (축전지 - 내부 텍스트 제거, +/- 극성은 깔끔한 벡터 기호로 표현)
   joint.shapes.sld.Battery = joint.dia.Element.define("sld.Battery", {
     size: { width: 52, height: 34 },
     markup: [
       { tagName: "rect", selector: "box" },
-      { tagName: "text", selector: "plus" },
-      { tagName: "text", selector: "minus" },
+      { tagName: "path", selector: "plus" },
+      { tagName: "path", selector: "minus" },
       { tagName: "text", selector: "nameLabel" },
       { tagName: "text", selector: "specLabel" },
     ],
@@ -1477,22 +1446,16 @@
         strokeWidth: 2,
       },
       plus: {
-        text: "+",
-        x: 14,
-        y: 22,
-        textAnchor: "middle",
-        fontSize: 14,
-        fontWeight: "bold",
-        fill: "#00838F",
+        d: "M 11 17 H 19 M 15 13 V 21",
+        stroke: "#00838F",
+        strokeWidth: 1.8,
+        strokeLinecap: "round",
       },
       minus: {
-        text: "-",
-        x: 38,
-        y: 22,
-        textAnchor: "middle",
-        fontSize: 16,
-        fontWeight: "bold",
-        fill: "#00838F",
+        d: "M 33 17 H 41",
+        stroke: "#00838F",
+        strokeWidth: 1.8,
+        strokeLinecap: "round",
       },
       nameLabel: {
         text: "배터리 뱅크",
