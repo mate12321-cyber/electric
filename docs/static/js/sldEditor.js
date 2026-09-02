@@ -225,15 +225,12 @@ class SLDEditor {
       if (isPanTrigger) {
         this.isPanning = true;
         this.panStart = { x: e.clientX, y: e.clientY };
+        this._panOriginStart = { x: e.clientX, y: e.clientY };
         paperEl.style.cursor = "grabbing";
         return;
       }
 
-      // Area Selection on left-click drag on canvas background
-      if (
-        e.button === 0 &&
-        (this.activeTool === "select" || this.activeTool === "lasso")
-      ) {
+      if (e.button === 0) {
         const isSvgTarget =
           e.target.tagName === "svg" ||
           e.target.classList.contains("joint-paper") ||
@@ -242,10 +239,19 @@ class SLDEditor {
           e.target.tagName === "DIV";
 
         if (isSvgTarget) {
-          if (!e.shiftKey) {
-            this.deselectAll();
+          if (this.activeTool === "lasso") {
+            // Lasso / Area Selection Tool: start rubberband multi-selection box
+            if (!e.shiftKey) {
+              this.deselectAll();
+            }
+            this.startAreaSelection(e.clientX, e.clientY);
+          } else if (this.activeTool === "select") {
+            // Select Tool: empty canvas drag PANs the screen (화면 이동)
+            this.isPanning = true;
+            this.panStart = { x: e.clientX, y: e.clientY };
+            this._panOriginStart = { x: e.clientX, y: e.clientY };
+            paperEl.style.cursor = "grabbing";
           }
-          this.startAreaSelection(e.clientX, e.clientY);
         }
       }
     });
@@ -254,6 +260,18 @@ class SLDEditor {
       if (this.isPanning) {
         this.isPanning = false;
         paperEl.style.cursor = this.isSpacePressed ? "grab" : "default";
+
+        // If in 'select' mode and user just clicked on empty canvas without moving (< 4px), deselect
+        if (this._panOriginStart) {
+          const dist = Math.hypot(
+            e.clientX - this._panOriginStart.x,
+            e.clientY - this._panOriginStart.y,
+          );
+          if (dist < 4 && this.activeTool === "select" && !e.shiftKey) {
+            this.deselectAll();
+          }
+          this._panOriginStart = null;
+        }
       }
       if (this.isAreaSelecting) {
         this.finishAreaSelection(e.clientX, e.clientY, e.shiftKey);
@@ -2178,9 +2196,8 @@ class SLDEditor {
     const toolBtns = document.querySelectorAll(".tool-btn[data-tool]");
     toolBtns.forEach((btn) => {
       btn.addEventListener("click", () => {
-        toolBtns.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        this.activeTool = btn.getAttribute("data-tool");
+        const tool = btn.getAttribute("data-tool");
+        this.setActiveTool(tool);
       });
     });
 
@@ -2220,10 +2237,35 @@ class SLDEditor {
     }
   }
 
+  setActiveTool(toolName) {
+    this.activeTool = toolName;
+    const toolBtns = document.querySelectorAll(".tool-btn[data-tool]");
+    toolBtns.forEach((b) => {
+      b.classList.toggle("active", b.getAttribute("data-tool") === toolName);
+    });
+  }
+
   setupKeyboardShortcuts() {
     window.addEventListener("keydown", (e) => {
       if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
         return;
+
+      // Tool shortcut keys
+      if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (e.key === "v" || e.key === "V") {
+          this.setActiveTool("select");
+          this.showToast("선택 도구 (V)");
+          return;
+        } else if (e.key === "l" || e.key === "L") {
+          this.setActiveTool("lasso");
+          this.showToast("영역 선택 도구 (L)");
+          return;
+        } else if (e.key === "w" || e.key === "W") {
+          this.setActiveTool("wire");
+          this.showToast("직교 배선 도구 (W)");
+          return;
+        }
+      }
 
       if ((e.ctrlKey || e.metaKey) && (e.key === "a" || e.key === "A")) {
         e.preventDefault();
