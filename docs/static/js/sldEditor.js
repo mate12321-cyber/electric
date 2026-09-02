@@ -271,7 +271,8 @@ class SLDEditor {
     this.paper.scale(this.scale, this.scale);
 
     const centerX = containerWidth / 2 - (bbox.x + bbox.width / 2) * this.scale;
-    const centerY = containerHeight / 2 - (bbox.y + bbox.height / 2) * this.scale;
+    const centerY =
+      containerHeight / 2 - (bbox.y + bbox.height / 2) * this.scale;
     this.origin = { x: centerX, y: centerY };
     this.paper.setOrigin(this.origin.x, this.origin.y);
 
@@ -829,25 +830,40 @@ class SLDEditor {
   }
 
   loadDiagram(diagramId) {
+    try {
+      localStorage.removeItem("sld_diagram_" + diagramId);
+      localStorage.removeItem("sld_diagram_v1_" + diagramId);
+      localStorage.removeItem("sld_diagram_v2_" + diagramId);
+      localStorage.removeItem("sld_diagram_v3_" + diagramId);
+    } catch (e) {}
+
+    const cacheKey = "sld_diagram_v4_" + diagramId;
+
     fetch("/api/sld/" + diagramId + "/")
       .then((res) => {
         if (!res.ok) throw new Error("API not available");
         return res.json();
       })
       .then((data) => {
-        if (data.schema_data && data.schema_data.cells) {
+        if (
+          data.schema_data &&
+          data.schema_data.cells &&
+          data.schema_data.cells.length > 0
+        ) {
           this.applyLoadedSchema(data.schema_data);
+        } else if (window.DEFAULT_SLD_SCHEMA) {
+          this.applyLoadedSchema(window.DEFAULT_SLD_SCHEMA);
         }
       })
       .catch(() => {
         console.info(
           "Static mode or offline: loading from LocalStorage or default schema",
         );
-        const cached = localStorage.getItem("sld_diagram_" + diagramId);
+        const cached = localStorage.getItem(cacheKey);
         if (cached) {
           try {
             const schema = JSON.parse(cached);
-            if (schema && schema.cells) {
+            if (schema && schema.cells && schema.cells.length > 0) {
               this.applyLoadedSchema(schema);
               this.startStaticTelemetrySimulation();
               return;
@@ -926,7 +942,7 @@ class SLDEditor {
 
     try {
       localStorage.setItem(
-        "sld_diagram_" + this.options.diagramId,
+        "sld_diagram_v4_" + this.options.diagramId,
         JSON.stringify(schemaData),
       );
     } catch (e) {}
