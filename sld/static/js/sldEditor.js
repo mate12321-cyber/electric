@@ -84,6 +84,7 @@ class SLDEditor {
     this.origin = { x: 0, y: 0 };
     this.isPanning = false;
     this.panStart = { x: 0, y: 0 };
+    this.isSpacePressed = false;
     this.activeTool = "select"; // 'select' | 'lasso' | 'wire' | 'busbar' | 'pen' | 'text' | 'group'
     this.selectedCell = null;
     this.history = [];
@@ -172,7 +173,7 @@ class SLDEditor {
         e.target.tagName !== "TEXTAREA"
       ) {
         if (!this.selectedCell) {
-          isSpacePressed = true;
+          this.isSpacePressed = true;
           paperEl.style.cursor = "grab";
         }
       }
@@ -180,7 +181,7 @@ class SLDEditor {
 
     window.addEventListener("keyup", (e) => {
       if (e.code === "Space") {
-        isSpacePressed = false;
+        this.isSpacePressed = false;
         if (!this.isPanning) {
           paperEl.style.cursor = "default";
         }
@@ -214,7 +215,7 @@ class SLDEditor {
       if (
         e.button === 2 ||
         e.button === 1 ||
-        isSpacePressed ||
+        this.isSpacePressed ||
         this.activeTool === "pan" ||
         (e.target.tagName === "svg" && e.button === 0 && !this.selectedCell)
       ) {
@@ -227,7 +228,7 @@ class SLDEditor {
     window.addEventListener("mouseup", () => {
       if (this.isPanning) {
         this.isPanning = false;
-        paperEl.style.cursor = isSpacePressed ? "grab" : "default";
+        paperEl.style.cursor = this.isSpacePressed ? "grab" : "default";
       }
     });
 
