@@ -538,8 +538,27 @@ class PowerSystemTopologyTracker {
         paths.forEach((p) => {
           p.removeAttribute("marker-end");
           p.removeAttribute("marker-start");
-          p.setAttribute("stroke", strokeColor);
-          p.style.stroke = strokeColor;
+          const isWrapper =
+            p.getAttribute("joint-selector") === "wrapper" ||
+            p.classList.contains("wrapper") ||
+            p.classList.contains("connection-wrap");
+
+          if (isWrapper) {
+            p.setAttribute("stroke", "transparent");
+            p.style.stroke = "transparent";
+            p.style.opacity = "0";
+            return;
+          }
+
+          if (isConflict) {
+            p.style.removeProperty("stroke");
+            p.removeAttribute("stroke");
+            p.style.strokeDasharray = "10 5";
+          } else {
+            p.setAttribute("stroke", strokeColor);
+            p.style.stroke = strokeColor;
+            p.style.removeProperty("stroke-dasharray");
+          }
         });
       }
     });
@@ -554,6 +573,7 @@ class PowerSystemTopologyTracker {
 
       if (view && view.el) {
         view.el.dataset.topologyState = status.state;
+        view.el.classList.toggle("node-voltage-conflict", !!status.isConflict);
       }
 
       // If it is a switch/breaker, update visual contact state

@@ -601,28 +601,58 @@ g[data-type*="Link"].link-dead path.connection {
   opacity: 0.7 !important;
 }
 
-/* Voltage Conflict / Mismatch Warning */
-@keyframes hazardPulse {
-  0% {
-    stroke: #ef4444 !important;
-    stroke-width: 3.5px !important;
+/* Voltage Conflict / Mismatch Warning Flow & Flash Animation */
+@keyframes conflictFlow {
+  from {
+    stroke-dashoffset: 30;
   }
-  50% {
-    stroke: #f59e0b !important;
-    stroke-width: 4.5px !important;
-  }
-  100% {
-    stroke: #ef4444 !important;
-    stroke-width: 3.5px !important;
+  to {
+    stroke-dashoffset: 0;
   }
 }
 
+@keyframes conflictFlash {
+  0%,
+  100% {
+    stroke: #ef4444 !important;
+    filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.95))
+      drop-shadow(0 0 2px #ef4444);
+  }
+  50% {
+    stroke: #fbbf24 !important;
+    filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.95))
+      drop-shadow(0 0 2px #fbbf24);
+  }
+}
+
+@keyframes conflictNodePulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.9));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(251, 191, 36, 1));
+  }
+}
+
+.link-voltage-conflict path[joint-selector="line"],
 .link-voltage-conflict path.connection,
-g[data-type*="Link"].link-voltage-conflict path.connection {
-  stroke-dasharray: 8, 4 !important;
-  animation: hazardPulse 1.2s infinite ease-in-out !important;
+.link-voltage-conflict path:not([joint-selector="wrapper"]),
+g[data-type*="Link"].link-voltage-conflict path[joint-selector="line"],
+.joint-link.link-voltage-conflict path[joint-selector="line"],
+.joint-link.link-voltage-conflict path:not([joint-selector="wrapper"]) {
   stroke: #ef4444 !important;
+  stroke-dasharray: 10 5 !important;
+  stroke-width: 4px !important;
+  animation:
+    conflictFlow 0.6s linear infinite,
+    conflictFlash 1.2s ease-in-out infinite !important;
   cursor: pointer;
+}
+
+.node-voltage-conflict,
+g[data-type*="sld"].node-voltage-conflict {
+  animation: conflictNodePulse 1.2s ease-in-out infinite !important;
 }
 
 .sld-conflict-alert-banner {
