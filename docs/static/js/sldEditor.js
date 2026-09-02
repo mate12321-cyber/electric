@@ -47,8 +47,8 @@ class SLDEditor {
       linkPinning: false,
       markAvailable: true,
       defaultLink: new joint.shapes.standard.Link({
-        router: { name: "manhattan", args: { step: 10, padding: 10 } },
-        connector: { name: "rounded", args: { radius: 4 } },
+        router: { name: "orthogonal", args: { padding: 0 } },
+        connector: { name: "normal" },
         attrs: {
           line: {
             stroke: "#377DFF",
@@ -389,7 +389,8 @@ class SLDEditor {
       });
     });
 
-    const dropArea = document.querySelector(".sld-canvas-wrapper") || this.container;
+    const dropArea =
+      document.querySelector(".sld-canvas-wrapper") || this.container;
 
     dropArea.addEventListener("dragover", (e) => {
       e.preventDefault();
@@ -426,7 +427,11 @@ class SLDEditor {
   createElement(type, x, y) {
     // Prevent duplicate placement within 200ms
     const now = Date.now();
-    if (this._lastCreated && (now - this._lastCreated.time < 200) && this._lastCreated.type === type) {
+    if (
+      this._lastCreated &&
+      now - this._lastCreated.time < 200 &&
+      this._lastCreated.type === type
+    ) {
       return null;
     }
     this._lastCreated = { time: now, type: type };
@@ -832,6 +837,14 @@ class SLDEditor {
   }
 
   applyLoadedSchema(schema) {
+    if (schema && schema.cells) {
+      schema.cells.forEach((cell) => {
+        if (cell.type === "standard.Link" || cell.type === "link") {
+          cell.router = { name: "orthogonal", args: { padding: 0 } };
+          cell.connector = { name: "normal" };
+        }
+      });
+    }
     this.isHistoryTracking = false;
     this.graph.fromJSON(schema);
     this.topologyTracker.applyStyles(this.paper);

@@ -22,8 +22,8 @@ def get_default_sld_schema():
             'id': lid,
             'source': {'id': src_id, 'port': src_port},
             'target': {'id': tgt_id, 'port': tgt_port},
-            'router': {'name': 'manhattan', 'args': {'step': 10, 'padding': 10}},
-            'connector': {'name': 'rounded', 'args': {'radius': 4}},
+            'router': {'name': 'orthogonal', 'args': {'padding': 0}},
+            'connector': {'name': 'normal'},
             'attrs': {
                 'line': {
                     'stroke': color,

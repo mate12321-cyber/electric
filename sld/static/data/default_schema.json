@@ -99,17 +99,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -135,17 +131,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -171,17 +163,13 @@
         "port": "pri"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -227,17 +215,13 @@
         "port": "p5"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -326,17 +310,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -362,17 +342,13 @@
         "port": "pri"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -398,17 +374,13 @@
         "port": "p5"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -473,17 +445,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -509,17 +477,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -583,17 +547,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -619,17 +579,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -693,17 +649,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -729,17 +681,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -827,17 +775,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -863,17 +807,13 @@
         "port": "pri"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -899,17 +839,13 @@
         "port": "p5"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -972,17 +908,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1008,17 +940,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1081,17 +1009,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1117,17 +1041,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1190,17 +1110,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1226,17 +1142,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1324,17 +1236,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1360,17 +1268,13 @@
         "port": "pri"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1396,17 +1300,13 @@
         "port": "p5"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1469,17 +1369,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1505,17 +1401,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1578,17 +1470,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1614,17 +1502,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1687,17 +1571,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1723,17 +1603,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1800,17 +1676,13 @@
         "port": "out"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -1836,17 +1708,13 @@
         "port": "p10"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -2058,17 +1926,13 @@
         "port": "ac_in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -2094,17 +1958,13 @@
         "port": "dc_bat"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -2130,17 +1990,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -2166,17 +2022,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -2202,17 +2054,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -2238,17 +2086,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -2274,17 +2118,13 @@
         "port": "in"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
@@ -2368,17 +2208,13 @@
         "port": "out"
       },
       "router": {
-        "name": "manhattan",
+        "name": "orthogonal",
         "args": {
-          "step": 10,
-          "padding": 10
+          "padding": 0
         }
       },
       "connector": {
-        "name": "rounded",
-        "args": {
-          "radius": 4
-        }
+        "name": "normal"
       },
       "attrs": {
         "line": {
