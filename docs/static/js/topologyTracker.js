@@ -368,6 +368,13 @@ class PowerSystemTopologyTracker {
       ) {
         el.updateVisual(sldData.state || "DEAD");
       }
+      // If it is a junction node, update visual based on topological state
+      if (
+        typeof el.updateVisual === "function" &&
+        (sldData.type === "JUNCTION" || el.get("type") === "sld.Junction")
+      ) {
+        el.updateVisual(status.state, status.voltageColor);
+      }
     });
 
     return { nodeStatus, linkStatus };

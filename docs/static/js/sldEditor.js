@@ -91,6 +91,8 @@ class SLDEditor {
     this.isAreaSelecting = false;
     this.areaSelectStart = { x: 0, y: 0 };
     this._clipboard = null;
+    this._activeDrawingLink = null;
+    this._wireSource = null;
     this.history = [];
     this.historyIndex = -1;
     this.isHistoryTracking = true;
@@ -288,6 +290,26 @@ class SLDEditor {
         this.updateMinimap();
         this.pushHistory();
         this.scheduleAutoSave();
+      }
+
+      // Check if user was dragging a wire and dropped it over an existing wire line
+      if (this._activeDrawingLink) {
+        const link = this._activeDrawingLink;
+        this._activeDrawingLink = null;
+        const src = link.get("source");
+        const tgt = link.get("target");
+
+        if (src && src.id && (!tgt || !tgt.id)) {
+          const paperPt = this.paper.clientToLocalPoint({
+            x: e.clientX,
+            y: e.clientY,
+          });
+          const found = this.findLinkAtPoint(paperPt, 25, link.id);
+          if (found) {
+            link.remove();
+            this.splitLinkAtPoint(found.link, found.projection, src);
+          }
+        }
       }
     });
 
@@ -529,11 +551,70 @@ class SLDEditor {
   }
 
   setupCellInteractions() {
-    // Element Pointer Down (Select, Shift Multi-Select, Multi-Drag)
+    // Element Pointer Down (Select, Shift Multi-Select, Multi-Drag, Wire Tool Connect)
     this.paper.on("element:pointerdown", (elementView, evt) => {
       const el = elementView.model;
       const sldData = el.get("sldData") || {};
       const catalog = window.EQUIPMENT_CATALOG[sldData.type] || {};
+
+      // Wire Tool Click-to-Connect
+      if (this.activeTool === "wire") {
+        const target = evt.target;
+        let portEl =
+          target.closest("[port]") ||
+          target.closest("[data-port]") ||
+          target.closest(".joint-port");
+        let portId = portEl
+          ? portEl.getAttribute("port") ||
+            portEl.getAttribute("data-port") ||
+            portEl.getAttribute("joint-port")
+          : null;
+
+        if (!portId && typeof el.getPorts === "function") {
+          const ports = el.getPorts() || [];
+          if (ports.length > 0) {
+            portId = this._wireSource ? "in" : "out";
+            if (!ports.some((p) => p.id === portId)) portId = ports[0].id;
+          }
+        }
+
+        if (!this._wireSource) {
+          this._wireSource = { id: el.id, port: portId || "out" };
+          this.showToast(
+            "시작 포트가 선택되었습니다. 연결할 설비 포트 또는 연결선을 클릭하세요.",
+          );
+          return;
+        } else {
+          if (
+            this._wireSource.id === el.id &&
+            this._wireSource.port === portId
+          ) {
+            this._wireSource = null;
+            return;
+          }
+
+          const link = new joint.shapes.standard.Link({
+            source: { id: this._wireSource.id, port: this._wireSource.port },
+            target: { id: el.id, port: portId || "in" },
+            router: { name: "sldOrthogonal" },
+            connector: { name: "normal" },
+            attrs: {
+              line: {
+                stroke: sldData.color || "#377DFF",
+                strokeWidth: 2.5,
+                targetMarker: { type: "none" },
+              },
+            },
+          });
+          this.graph.addCell(link);
+          this._wireSource = null;
+          this.topologyTracker.applyStyles(this.paper);
+          this.pushHistory();
+          this.scheduleAutoSave();
+          this.showToast("연결선이 생성되었습니다.");
+          return;
+        }
+      }
 
       this._isDraggingElement = true;
 
@@ -649,7 +730,36 @@ class SLDEditor {
       this.scheduleAutoSave();
     });
 
-    this.paper.on("link:pointerdown", (linkView) => {
+    this.paper.on("link:pointerdown", (linkView, evt) => {
+      // Wire Tool Click on Existing Link
+      if (this.activeTool === "wire") {
+        const paperPt = this.paper.clientToLocalPoint({
+          x: evt.clientX,
+          y: evt.clientY,
+        });
+        const found = this.findLinkAtPoint(paperPt, 25);
+        if (found) {
+          if (this._wireSource) {
+            this.splitLinkAtPoint(
+              found.link,
+              found.projection,
+              this._wireSource,
+            );
+            this._wireSource = null;
+            return;
+          } else {
+            const res = this.splitLinkAtPoint(found.link, found.projection);
+            if (res && res.junction) {
+              this._wireSource = { id: res.junction.id, port: "p1" };
+              this.showToast(
+                "분기 접속점(T-분기)이 생성되었습니다. 연결할 다른 설비를 클릭하세요.",
+              );
+              return;
+            }
+          }
+        }
+      }
+
       this.selectCell(linkView.model);
     });
 
@@ -731,6 +841,7 @@ class SLDEditor {
     // Dynamic Busbar Port Auto-Generation & Auto-Deletion
     this.paper.on("link:connect", (linkView) => {
       const link = linkView.model;
+      this._activeDrawingLink = null;
       this.autoCreateBusbarPort(link);
       this.cleanupUnusedBusbarPorts();
       this.topologyTracker.applyStyles(this.paper);
@@ -740,12 +851,19 @@ class SLDEditor {
 
     this.graph.on("add", (cell) => {
       if (cell.isLink && cell.isLink()) {
+        const tgt = cell.get("target");
+        if (!tgt || !tgt.id) {
+          this._activeDrawingLink = cell;
+        }
         this.autoCreateBusbarPort(cell);
       }
     });
 
     this.graph.on("remove", (cell) => {
       if (cell.isLink && cell.isLink()) {
+        if (this._activeDrawingLink === cell) {
+          this._activeDrawingLink = null;
+        }
         this.cleanupUnusedBusbarPorts();
       }
     });
@@ -762,6 +880,232 @@ class SLDEditor {
         this.syncConnectedBusbarPorts(element);
       }
     });
+  }
+
+  getLinkPoints(link) {
+    if (!link || !this.paper) return null;
+    const linkView = this.paper.findViewByModel(link);
+    if (!linkView) return null;
+
+    let srcPt = linkView.sourceAnchor || linkView.sourcePoint;
+    let tgtPt = linkView.targetAnchor || linkView.targetPoint;
+
+    if (!srcPt) {
+      const src = link.get("source");
+      if (src && src.id) {
+        const srcEl = this.graph.getCell(src.id);
+        if (srcEl) {
+          const pos = srcEl.position();
+          const size = srcEl.size();
+          srcPt = { x: pos.x + size.width / 2, y: pos.y + size.height / 2 };
+        }
+      }
+    }
+
+    if (!tgtPt) {
+      const tgt = link.get("target");
+      if (tgt && tgt.id) {
+        const tgtEl = this.graph.getCell(tgt.id);
+        if (tgtEl) {
+          const pos = tgtEl.position();
+          const size = tgtEl.size();
+          tgtPt = { x: pos.x + size.width / 2, y: pos.y + size.height / 2 };
+        }
+      }
+    }
+
+    if (!srcPt || !tgtPt) return null;
+
+    const vertices = link.get("vertices") || [];
+    let routePoints = [];
+    if (linkView._route && linkView._route.length > 0) {
+      routePoints = linkView._route;
+    } else if (vertices.length > 0) {
+      routePoints = vertices;
+    }
+
+    return [srcPt, ...routePoints, tgtPt];
+  }
+
+  findLinkAtPoint(paperPoint, maxDist = 25, excludeLinkId = null) {
+    if (!paperPoint || !this.graph) return null;
+
+    const links = this.graph.getLinks();
+    let bestLink = null;
+    let bestDist = maxDist;
+    let bestProjection = null;
+
+    links.forEach((link) => {
+      if (excludeLinkId && link.id === excludeLinkId) return;
+
+      const pts = this.getLinkPoints(link);
+      if (!pts || pts.length < 2) return;
+
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const l2 = dx * dx + dy * dy;
+        if (l2 === 0) continue;
+
+        let t =
+          ((paperPoint.x - p1.x) * dx + (paperPoint.y - p1.y) * dy) / l2;
+        t = Math.max(0, Math.min(1, t));
+
+        const proj = {
+          x: p1.x + t * dx,
+          y: p1.y + t * dy,
+        };
+
+        const dist = Math.hypot(
+          paperPoint.x - proj.x,
+          paperPoint.y - proj.y,
+        );
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestLink = link;
+          bestProjection = proj;
+        }
+      }
+    });
+
+    if (bestLink && bestProjection) {
+      return {
+        link: bestLink,
+        projection: bestProjection,
+        dist: bestDist,
+      };
+    }
+    return null;
+  }
+
+  splitLinkAtPoint(targetLink, projPoint, newSourceInfo = null) {
+    if (!targetLink || !projPoint) return null;
+
+    const gridSize = this.options.gridSize || 10;
+    let jx = Math.round(projPoint.x / gridSize) * gridSize;
+    let jy = Math.round(projPoint.y / gridSize) * gridSize;
+
+    // Smart Alignment: If branching from a source element, align junction coordinate with source port
+    if (newSourceInfo && newSourceInfo.id) {
+      const srcEl = this.graph.getCell(newSourceInfo.id);
+      if (srcEl && srcEl.isElement && srcEl.isElement()) {
+        const srcPos = srcEl.position();
+        const srcSize = srcEl.size();
+        let srcPortX = srcPos.x + srcSize.width / 2;
+        let srcPortY = srcPos.y + srcSize.height / 2;
+
+        if (typeof srcEl.getPorts === "function") {
+          const ports = srcEl.getPorts() || [];
+          const portObj = ports.find((p) => p.id === newSourceInfo.port);
+          if (portObj && portObj.args) {
+            srcPortX =
+              srcPos.x +
+              (portObj.args.x !== undefined
+                ? portObj.args.x
+                : srcSize.width / 2);
+            srcPortY =
+              srcPos.y +
+              (portObj.args.y !== undefined
+                ? portObj.args.y
+                : srcSize.height / 2);
+          }
+        }
+
+        const pts = this.getLinkPoints(targetLink);
+        if (pts && pts.length >= 2) {
+          const isHorizontal = Math.abs(pts[0].y - pts[pts.length - 1].y) < 10;
+          const isVertical = Math.abs(pts[0].x - pts[pts.length - 1].x) < 10;
+
+          if (isHorizontal) {
+            const minX = Math.min(...pts.map((p) => p.x));
+            const maxX = Math.max(...pts.map((p) => p.x));
+            if (srcPortX >= minX - 10 && srcPortX <= maxX + 10) {
+              jx = srcPortX;
+              jy = pts[0].y;
+            }
+          } else if (isVertical) {
+            const minY = Math.min(...pts.map((p) => p.y));
+            const maxY = Math.max(...pts.map((p) => p.y));
+            if (srcPortY >= minY - 10 && srcPortY <= maxY + 10) {
+              jy = srcPortY;
+              jx = pts[0].x;
+            }
+          }
+        }
+      }
+    }
+
+    // 1. Create Junction Node at (jx, jy)
+    const junction = new joint.shapes.sld.Junction({
+      position: { x: jx - 6, y: jy - 6 },
+      size: { width: 12, height: 12 },
+      sldData: {
+        type: "JUNCTION",
+        name: "분기점",
+        state: "LIVE",
+        color:
+          targetLink.get("sldData")?.color ||
+          targetLink.attr("line/stroke") ||
+          "#377DFF",
+      },
+    });
+    this.graph.addCell(junction);
+
+    const origSource = Object.assign({}, targetLink.get("source"));
+    const origTarget = Object.assign({}, targetLink.get("target"));
+    const linkColor =
+      targetLink.attr("line/stroke") ||
+      targetLink.get("sldData")?.color ||
+      "#377DFF";
+
+    // 2. Re-route original link: origSource -> Junction
+    targetLink.set("target", { id: junction.id, port: "p1" });
+
+    // 3. Create second link: Junction -> origTarget
+    const link2 = new joint.shapes.standard.Link({
+      source: { id: junction.id, port: "p1" },
+      target: origTarget,
+      router: { name: "sldOrthogonal" },
+      connector: { name: "normal" },
+      attrs: {
+        line: {
+          stroke: linkColor,
+          strokeWidth: 2.5,
+          targetMarker: { type: "none" },
+        },
+      },
+    });
+    this.graph.addCell(link2);
+
+    // 4. If a third incoming source was provided, create/connect: newSource -> Junction
+    let branchLink = null;
+    if (newSourceInfo && newSourceInfo.id) {
+      branchLink = new joint.shapes.standard.Link({
+        source: { id: newSourceInfo.id, port: newSourceInfo.port },
+        target: { id: junction.id, port: "p1" },
+        router: { name: "sldOrthogonal" },
+        connector: { name: "normal" },
+        attrs: {
+          line: {
+            stroke: linkColor,
+            strokeWidth: 2.5,
+            targetMarker: { type: "none" },
+          },
+        },
+      });
+      this.graph.addCell(branchLink);
+    }
+
+    this.topologyTracker.applyStyles(this.paper);
+    this.updateMinimap();
+    this.pushHistory();
+    this.scheduleAutoSave();
+    this.showToast("연결선에 분기 접속점(T-분기)이 연결되었습니다.");
+
+    return { junction, link1: targetLink, link2, branchLink };
   }
 
   showToast(message) {
@@ -2384,8 +2728,7 @@ class SLDEditor {
       const typePrefix = clonedJson.sldData?.type
         ? clonedJson.sldData.type.toLowerCase().replace(/_/g, "-")
         : "el";
-      const newId =
-        typePrefix + "_" + Math.random().toString(36).substr(2, 9);
+      const newId = typePrefix + "_" + Math.random().toString(36).substr(2, 9);
       idMap.set(oldId, newId);
 
       clonedJson.id = newId;
@@ -2442,11 +2785,9 @@ class SLDEditor {
         const oldSrcPort = clonedLink.source?.port;
         const oldTgtPort = clonedLink.target?.port;
         const newSrcPort =
-          (oldSrcPort && idMap.get(`${oldSrcId}:${oldSrcPort}`)) ||
-          oldSrcPort;
+          (oldSrcPort && idMap.get(`${oldSrcId}:${oldSrcPort}`)) || oldSrcPort;
         const newTgtPort =
-          (oldTgtPort && idMap.get(`${oldTgtId}:${oldTgtPort}`)) ||
-          oldTgtPort;
+          (oldTgtPort && idMap.get(`${oldTgtId}:${oldTgtPort}`)) || oldTgtPort;
 
         clonedLink.source = Object.assign({}, clonedLink.source, {
           id: newSrcId,

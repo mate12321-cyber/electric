@@ -2305,32 +2305,54 @@
     },
   });
 
-  // 22. Junction Node (접속점)
-  joint.shapes.sld.Junction = joint.dia.Element.define("sld.Junction", {
-    size: { width: 12, height: 12 },
-    markup: [{ tagName: "circle", selector: "circle" }],
-    attrs: {
-      circle: {
-        cx: 6,
-        cy: 6,
-        r: 5,
-        fill: "#377DFF",
-        stroke: "#ffffff",
-        strokeWidth: 1.5,
-      },
-    },
-    ports: {
-      groups: {
-        ports: {
-          position: { name: "absolute" },
-          attrs: {
-            circle: { r: 4, magnet: true, fill: "#377DFF", opacity: 0 },
-          },
+  // 22. Junction Node (접속점 / T-분기점)
+  joint.shapes.sld.Junction = joint.dia.Element.define(
+    "sld.Junction",
+    {
+      size: { width: 12, height: 12 },
+      markup: [{ tagName: "circle", selector: "circle" }],
+      attrs: {
+        circle: {
+          cx: 6,
+          cy: 6,
+          r: 4.5,
+          fill: "#377DFF",
+          stroke: "#ffffff",
+          strokeWidth: 1.5,
+          cursor: "pointer",
         },
       },
-      items: [{ id: "p1", group: "ports", args: { x: 6, y: 6 } }],
+      ports: {
+        groups: {
+          ports: {
+            position: { name: "absolute" },
+            attrs: {
+              circle: {
+                r: 6,
+                magnet: true,
+                fill: "#377DFF",
+                opacity: 0,
+                cursor: "crosshair",
+              },
+            },
+          },
+        },
+        items: [{ id: "p1", group: "ports", args: { x: 6, y: 6 } }],
+      },
     },
-  });
+    {
+      updateVisual: function (state, voltageColor) {
+        const sldData = this.get("sldData") || {};
+        const color =
+          state === "LIVE"
+            ? voltageColor || sldData.color || "#377DFF"
+            : state === "GROUNDED"
+              ? "#84CC16"
+              : "#595959";
+        this.attr("circle/fill", color);
+      },
+    },
+  );
 
   // 23. Text Label (텍스트 주석)
   joint.shapes.sld.TextLabel = joint.dia.Element.define("sld.TextLabel", {
