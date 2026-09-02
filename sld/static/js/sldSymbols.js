@@ -491,61 +491,87 @@
     },
   );
 
-  // 3. Disconnector (DS - 단로기: 활선/사선/접지 내부 색상 지원)
+  // 3. Disconnector (DS - 단로기: 사각박스 제거, 상/하단 원형 링 + 우측 외곽 접선 연결선 디자인)
   joint.shapes.sld.Disconnector = joint.dia.Element.define(
     "sld.Disconnector",
     {
-      size: { width: 30, height: 40 },
+      size: { width: 28, height: 40 },
       markup: [
-        { tagName: "rect", selector: "bgBox" },
         { tagName: "path", selector: "inLine" },
         { tagName: "path", selector: "outLine" },
+        { tagName: "path", selector: "blade" },
         { tagName: "circle", selector: "topNode" },
         { tagName: "circle", selector: "botNode" },
-        { tagName: "path", selector: "blade" },
         { tagName: "text", selector: "groundSymbol" },
         { tagName: "text", selector: "nameLabel" },
+        { tagName: "text", selector: "specLabel" },
       ],
       attrs: {
-        bgBox: {
-          width: 30,
-          height: 40,
-          rx: 3,
-          ry: 3,
-          fill: "#000000",
+        inLine: {
+          d: "M 14 0 L 14 6",
           stroke: "#7A3E9D",
-          strokeWidth: 1.5,
+          strokeWidth: 2,
+          strokeLinecap: "round",
         },
-        inLine: { d: "M 15 0 L 15 12", stroke: "#7A3E9D", strokeWidth: 2 },
-        outLine: { d: "M 15 28 L 15 40", stroke: "#7A3E9D", strokeWidth: 2 },
-        topNode: { cx: 15, cy: 12, r: 2.5, fill: "#7A3E9D" },
-        botNode: { cx: 15, cy: 28, r: 2.5, fill: "#7A3E9D" },
+        outLine: {
+          d: "M 14 34 L 14 40",
+          stroke: "#7A3E9D",
+          strokeWidth: 2,
+          strokeLinecap: "round",
+        },
         blade: {
-          d: "M 15 12 L 15 28",
+          d: "M 18.5 6 L 18.5 34",
           stroke: "#7A3E9D",
           strokeWidth: 2.5,
           strokeLinecap: "round",
           cursor: "pointer",
         },
+        topNode: {
+          cx: 14,
+          cy: 6,
+          r: 4.5,
+          stroke: "#7A3E9D",
+          strokeWidth: 2,
+          fill: "#ffffff",
+        },
+        botNode: {
+          cx: 14,
+          cy: 34,
+          r: 4.5,
+          stroke: "#7A3E9D",
+          strokeWidth: 2,
+          fill: "#ffffff",
+        },
         groundSymbol: {
           text: "⏚",
-          x: 23,
+          x: 5,
           y: 20,
           textAnchor: "middle",
           textVerticalAnchor: "middle",
-          fontSize: 10,
-          fill: "#ffffff",
+          fontSize: 13,
+          fontWeight: "bold",
+          fill: "#16a34a",
           display: "none",
+          pointerEvents: "none",
         },
         nameLabel: {
           text: "154kV DS",
           refX: 34,
-          refY: "50%",
+          refY: "25%",
           textAnchor: "start",
           textVerticalAnchor: "middle",
-          fontSize: 11,
+          fontSize: 9.5,
           fontWeight: "600",
           fill: "#1e293b",
+        },
+        specLabel: {
+          text: "2000A",
+          refX: 34,
+          refY: "65%",
+          textAnchor: "start",
+          textVerticalAnchor: "middle",
+          fontSize: 8.5,
+          fill: "#64748b",
         },
       },
       ports: {
@@ -564,8 +590,8 @@
           },
         },
         items: [
-          { id: "in", group: "ports", args: { x: 15, y: 0 } },
-          { id: "out", group: "ports", args: { x: 15, y: 40 } },
+          { id: "in", group: "ports", args: { x: 14, y: 0 } },
+          { id: "out", group: "ports", args: { x: 14, y: 40 } },
         ],
       },
     },
@@ -574,6 +600,7 @@
         joint.dia.Element.prototype.initialize.apply(this, arguments);
         this.updateContactVisual();
         this.on("change:sldData", this.updateContactVisual, this);
+        this.on("change:size", this.updateContactVisual, this);
       },
       updateContactVisual: function () {
         const data = this.get("sldData") || {};
@@ -583,37 +610,28 @@
         const isLive = state === "LIVE" || state === "CLOSED";
         const isGrounded = state === "GROUNDED" || state === "EARTH";
 
-        let boxFill = "#000000"; // 활선: 검정색 (Live Black)
-        let boxStroke = color;
-        let nodeColor = color;
-        let bladeColor = color;
+        let strokeColor = color;
+        let bladeD = "M 18.5 6 L 18.5 34";
         let showGround = "none";
-        let bladeD = "M 15 12 L 15 28";
 
         if (isGrounded) {
-          boxFill = "#16a34a"; // 접지: 초록색 (Ground Green)
-          boxStroke = "#16a34a";
-          nodeColor = "#ffffff";
-          bladeColor = "#ffffff";
+          strokeColor = "#16a34a";
           showGround = "block";
         } else if (!isLive) {
           // DEAD (사선)
-          boxFill = "#94a3b8"; // 사선: 회색 (Dead Gray)
-          boxStroke = "#94a3b8";
-          nodeColor = "#475569";
-          bladeColor = "#475569";
-          bladeD = "M 15 12 L 23 24";
+          strokeColor = "#94a3b8";
+          bladeD = "M 18.5 6 L 26 30";
         }
 
         this.attr({
-          bgBox: { fill: boxFill, stroke: boxStroke },
-          inLine: { stroke: nodeColor },
-          outLine: { stroke: nodeColor },
-          topNode: { fill: nodeColor },
-          botNode: { fill: nodeColor },
-          blade: { d: bladeD, stroke: bladeColor },
-          groundSymbol: { display: showGround, fill: "#ffffff" },
+          inLine: { stroke: strokeColor },
+          outLine: { stroke: strokeColor },
+          topNode: { stroke: strokeColor, fill: "#ffffff" },
+          botNode: { stroke: strokeColor, fill: "#ffffff" },
+          blade: { d: bladeD, stroke: strokeColor },
+          groundSymbol: { display: showGround, fill: "#16a34a" },
           nameLabel: { text: data.name || "DS" },
+          specLabel: { text: data.current ? data.current + "A" : "" },
         });
       },
     },

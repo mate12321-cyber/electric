@@ -267,7 +267,7 @@ const EQUIPMENT_CATALOG = {
     },
     ports: ["in", "out"],
     iconSvg:
-      '<path d="M12 3v5M12 16v5M12 8l4 6M12 14h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/><circle cx="12" cy="8" r="1.5" fill="currentColor"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/>',
+      '<path d="M12 2v4M12 18v4M15 6v12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="12" cy="6" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="12" cy="18" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/>',
   },
   LA: {
     type: "LA",

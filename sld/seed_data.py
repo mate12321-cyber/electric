@@ -49,7 +49,7 @@ def get_default_sld_schema():
     ))
 
     cells.append(make_cell(
-        'ds-154', 'sld.Disconnector', 503, 205, 30, 40,
+        'ds-154', 'sld.Disconnector', 504, 205, 28, 40,
         {'type': 'DS', 'name': '154kV DS', 'state': 'LIVE', 'voltage': 154, 'current': 2000, 'color': '#E53935', 'memo': '154kV 수전 단로기'}
     ))
 

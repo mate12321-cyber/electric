@@ -47,11 +47,11 @@
       "type": "sld.Disconnector",
       "id": "ds-154",
       "position": {
-        "x": 503,
+        "x": 504,
         "y": 205
       },
       "size": {
-        "width": 30,
+        "width": 28,
         "height": 40
       },
       "sldData": {
