@@ -850,11 +850,12 @@
     },
   });
 
-  // 9. Relay (보호계전기 OCR - 내부 텍스트 제거)
+  // 9. Relay (보호계전기 OCR)
   joint.shapes.sld.Relay = joint.dia.Element.define("sld.Relay", {
     size: { width: 38, height: 38 },
     markup: [
       { tagName: "rect", selector: "box" },
+      { tagName: "text", selector: "text" },
       { tagName: "text", selector: "nameLabel" },
     ],
     attrs: {
@@ -865,6 +866,15 @@
         fill: "#ffffff",
         stroke: "#2E7D32",
         strokeWidth: 2,
+      },
+      text: {
+        text: "51",
+        x: 19,
+        y: 24,
+        textAnchor: "middle",
+        fontSize: 12,
+        fontWeight: "bold",
+        fill: "#2E7D32",
       },
       nameLabel: {
         text: "OCR",
@@ -1082,12 +1092,13 @@
     },
   );
 
-  // 13. Generator (발전기 - 내부 G 텍스트 제거)
+  // 13. Generator (발전기)
   joint.shapes.sld.Generator = joint.dia.Element.define("sld.Generator", {
     size: { width: 44, height: 44 },
     markup: [
       { tagName: "circle", selector: "circle" },
       { tagName: "path", selector: "lead" },
+      { tagName: "text", selector: "text" },
       { tagName: "text", selector: "nameLabel" },
       { tagName: "text", selector: "specLabel" },
     ],
@@ -1101,6 +1112,15 @@
         fill: "#ffffff",
       },
       lead: { d: "M 22 0 L 22 4", stroke: "#E65100", strokeWidth: 2 },
+      text: {
+        text: "G",
+        x: 22,
+        y: 26,
+        textAnchor: "middle",
+        fontSize: 14,
+        fontWeight: "bold",
+        fill: "#E65100",
+      },
       nameLabel: {
         text: "비상 발전기",
         refX: "50%",
@@ -1138,12 +1158,13 @@
     },
   });
 
-  // 14. Motor (전동기 - 내부 M 텍스트 제거)
+  // 14. Motor (전동기)
   joint.shapes.sld.Motor = joint.dia.Element.define("sld.Motor", {
     size: { width: 42, height: 42 },
     markup: [
       { tagName: "circle", selector: "circle" },
       { tagName: "path", selector: "lead" },
+      { tagName: "text", selector: "text" },
       { tagName: "text", selector: "nameLabel" },
     ],
     attrs: {
@@ -1156,6 +1177,15 @@
         fill: "#ffffff",
       },
       lead: { d: "M 21 0 L 21 4", stroke: "#377DFF", strokeWidth: 2 },
+      text: {
+        text: "M",
+        x: 21,
+        y: 25,
+        textAnchor: "middle",
+        fontSize: 14,
+        fontWeight: "bold",
+        fill: "#377DFF",
+      },
       nameLabel: {
         text: "모터",
         refX: "50%",
