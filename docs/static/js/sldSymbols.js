@@ -313,7 +313,7 @@
     },
   );
 
-  // 4. Transformer 2W (2권선 변압기 - 델타/와이 표시 지원)
+  // 4. Transformer 2W (2권선 & 3권선 동적 결선 변압기)
   joint.shapes.sld.Transformer2W = joint.dia.Element.define(
     "sld.Transformer2W",
     {
@@ -321,10 +321,13 @@
       markup: [
         { tagName: "circle", selector: "topCircle" },
         { tagName: "circle", selector: "botCircle" },
+        { tagName: "circle", selector: "tertCircle" },
         { tagName: "path", selector: "topLead" },
         { tagName: "path", selector: "botLead" },
+        { tagName: "path", selector: "tertLead" },
         { tagName: "text", selector: "topVectorLabel" },
         { tagName: "text", selector: "botVectorLabel" },
+        { tagName: "text", selector: "tertVectorLabel" },
         { tagName: "text", selector: "nameLabel" },
         { tagName: "text", selector: "specLabel" },
       ],
@@ -345,8 +348,23 @@
           strokeWidth: 2,
           fill: "#ffffff",
         },
+        tertCircle: {
+          cx: 39,
+          cy: 42,
+          r: 13,
+          stroke: "#2E7D32",
+          strokeWidth: 2,
+          fill: "#ffffff",
+          display: "none",
+        },
         topLead: { d: "M 22 0 L 22 6", stroke: "#2E7D32", strokeWidth: 2 },
         botLead: { d: "M 22 58 L 22 64", stroke: "#2E7D32", strokeWidth: 2 },
+        tertLead: {
+          d: "M 39 55 L 39 64",
+          stroke: "#2E7D32",
+          strokeWidth: 2,
+          display: "none",
+        },
         topVectorLabel: {
           text: "Δ",
           x: 22,
@@ -370,6 +388,19 @@
           fill: "#2E7D32",
           fontFamily: "Pretendard, -apple-system, sans-serif",
           pointerEvents: "none",
+        },
+        tertVectorLabel: {
+          text: "Δ",
+          x: 39,
+          y: 42,
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          fontSize: 10,
+          fontWeight: "bold",
+          fill: "#2E7D32",
+          fontFamily: "Pretendard, -apple-system, sans-serif",
+          pointerEvents: "none",
+          display: "none",
         },
         nameLabel: {
           text: "TR",
@@ -421,181 +452,180 @@
         const data = this.get("sldData") || {};
         const color = data.color || "#2E7D32";
 
-        let priVector = data.priVector || "";
-        let secVector = data.secVector || "";
-        if (!priVector && !secVector && data.connection) {
-          const parts = data.connection.split(/[-/]/);
-          priVector = parts[0] ? parts[0].trim() : "";
-          secVector = parts[1] ? parts[1].trim() : "";
-        }
-        if (!priVector && !secVector) {
-          priVector =
-            data.priVoltage === 154 || data.voltage === 154 ? "Y" : "Δ";
-          secVector =
-            data.priVoltage === 154 || data.voltage === 154 ? "Δ" : "Y";
-        }
-
-        this.attr({
-          topCircle: { stroke: color },
-          botCircle: { stroke: color },
-          topLead: { stroke: color },
-          botLead: { stroke: color },
-          topVectorLabel: { text: priVector, fill: color },
-          botVectorLabel: { text: secVector, fill: color },
-          nameLabel: { text: data.name || "TR" },
-          specLabel: { text: data.capacity || "" },
-        });
-      },
-    },
-  );
-
-  // 5. Transformer 3W (3권선 변압기 - 델타/와이 표시 지원)
-  joint.shapes.sld.Transformer3W = joint.dia.Element.define(
-    "sld.Transformer3W",
-    {
-      size: { width: 56, height: 60 },
-      markup: [
-        { tagName: "circle", selector: "c1" },
-        { tagName: "circle", selector: "c2" },
-        { tagName: "circle", selector: "c3" },
-        { tagName: "path", selector: "p1" },
-        { tagName: "path", selector: "p2" },
-        { tagName: "path", selector: "p3" },
-        { tagName: "text", selector: "v1Label" },
-        { tagName: "text", selector: "v2Label" },
-        { tagName: "text", selector: "v3Label" },
-        { tagName: "text", selector: "nameLabel" },
-      ],
-      attrs: {
-        c1: {
-          cx: 28,
-          cy: 16,
-          r: 12,
-          stroke: "#2E7D32",
-          strokeWidth: 2,
-          fill: "#ffffff",
-        },
-        c2: {
-          cx: 16,
-          cy: 38,
-          r: 12,
-          stroke: "#2E7D32",
-          strokeWidth: 2,
-          fill: "#ffffff",
-        },
-        c3: {
-          cx: 40,
-          cy: 38,
-          r: 12,
-          stroke: "#2E7D32",
-          strokeWidth: 2,
-          fill: "#ffffff",
-        },
-        p1: { d: "M 28 0 L 28 4", stroke: "#2E7D32", strokeWidth: 2 },
-        p2: { d: "M 16 50 L 16 60", stroke: "#2E7D32", strokeWidth: 2 },
-        p3: { d: "M 40 50 L 40 60", stroke: "#2E7D32", strokeWidth: 2 },
-        v1Label: {
-          text: "Y",
-          x: 28,
-          y: 16,
-          textAnchor: "middle",
-          textVerticalAnchor: "middle",
-          fontSize: 9.5,
-          fontWeight: "bold",
-          fill: "#2E7D32",
-          fontFamily: "Pretendard, -apple-system, sans-serif",
-          pointerEvents: "none",
-        },
-        v2Label: {
-          text: "Y",
-          x: 16,
-          y: 38,
-          textAnchor: "middle",
-          textVerticalAnchor: "middle",
-          fontSize: 9.5,
-          fontWeight: "bold",
-          fill: "#2E7D32",
-          fontFamily: "Pretendard, -apple-system, sans-serif",
-          pointerEvents: "none",
-        },
-        v3Label: {
-          text: "Δ",
-          x: 40,
-          y: 38,
-          textAnchor: "middle",
-          textVerticalAnchor: "middle",
-          fontSize: 9.5,
-          fontWeight: "bold",
-          fill: "#2E7D32",
-          fontFamily: "Pretendard, -apple-system, sans-serif",
-          pointerEvents: "none",
-        },
-        nameLabel: {
-          text: "TR-3W",
-          refX: 58,
-          refY: "50%",
-          textAnchor: "start",
-          fontSize: 10.5,
-          fontWeight: "600",
-          fill: "#1e293b",
-        },
-      },
-      ports: {
-        groups: {
-          ports: {
-            position: { name: "absolute" },
-            attrs: {
-              circle: {
-                r: 3.5,
-                magnet: true,
-                fill: "#fff",
-                stroke: "#2E7D32",
-                strokeWidth: 1.5,
-              },
-            },
-          },
-        },
-        items: [
-          { id: "pri", group: "ports", args: { x: 28, y: 0 } },
-          { id: "sec", group: "ports", args: { x: 16, y: 60 } },
-          { id: "tert", group: "ports", args: { x: 40, y: 60 } },
-        ],
-      },
-    },
-    {
-      initialize: function () {
-        joint.dia.Element.prototype.initialize.apply(this, arguments);
-        this.updateVisual();
-        this.on("change:sldData", this.updateVisual, this);
-        this.on("change:size", this.updateVisual, this);
-      },
-      updateVisual: function () {
-        const data = this.get("sldData") || {};
-        const color = data.color || "#2E7D32";
-        let v1 = data.v1 || "Y";
-        let v2 = data.v2 || "Y";
-        let v3 = data.v3 || "Δ";
+        let parts = [];
         if (data.connection) {
-          const parts = data.connection.split(/[-/]/);
-          if (parts[0]) v1 = parts[0].trim();
-          if (parts[1]) v2 = parts[1].trim();
-          if (parts[2]) v3 = parts[2].trim();
+          parts = data.connection
+            .split(/[-/]/)
+            .map((s) => s.trim())
+            .filter(Boolean);
         }
-        this.attr({
-          c1: { stroke: color },
-          c2: { stroke: color },
-          c3: { stroke: color },
-          p1: { stroke: color },
-          p2: { stroke: color },
-          p3: { stroke: color },
-          v1Label: { text: v1, fill: color },
-          v2Label: { text: v2, fill: color },
-          v3Label: { text: v3, fill: color },
-          nameLabel: { text: data.name || "TR-3W" },
-        });
+        const is3W =
+          parts.length >= 3 ||
+          (data.connection && data.connection.includes("3권선"));
+
+        if (is3W) {
+          const v1 = parts[0] || "Y";
+          const v2 = parts[1] || "Y";
+          const v3 = parts[2] || "Δ";
+
+          this.attr({
+            topCircle: {
+              cx: 28,
+              cy: 18,
+              r: 13,
+              stroke: color,
+              fill: "#ffffff",
+              display: "block",
+            },
+            botCircle: {
+              cx: 17,
+              cy: 42,
+              r: 13,
+              stroke: color,
+              fill: "#ffffff",
+              display: "block",
+            },
+            tertCircle: {
+              cx: 39,
+              cy: 42,
+              r: 13,
+              stroke: color,
+              fill: "#ffffff",
+              display: "block",
+            },
+            topLead: {
+              d: "M 28 0 L 28 5",
+              stroke: color,
+              strokeWidth: 2,
+              display: "block",
+            },
+            botLead: {
+              d: "M 17 55 L 17 64",
+              stroke: color,
+              strokeWidth: 2,
+              display: "block",
+            },
+            tertLead: {
+              d: "M 39 55 L 39 64",
+              stroke: color,
+              strokeWidth: 2,
+              display: "block",
+            },
+            topVectorLabel: {
+              text: v1,
+              x: 28,
+              y: 18,
+              fill: color,
+              fontSize: 10,
+              display: "block",
+            },
+            botVectorLabel: {
+              text: v2,
+              x: 17,
+              y: 42,
+              fill: color,
+              fontSize: 10,
+              display: "block",
+            },
+            tertVectorLabel: {
+              text: v3,
+              x: 39,
+              y: 42,
+              fill: color,
+              fontSize: 10,
+              display: "block",
+            },
+            nameLabel: { text: data.name || "TR-3W", refX: 58, refY: "35%" },
+            specLabel: { text: data.capacity || "", refX: 58, refY: "60%" },
+          });
+
+          const curSize = this.get("size") || {};
+          if (curSize.width !== 56) {
+            this.resize(56, 64);
+          }
+          this.prop("ports/items", [
+            { id: "pri", group: "ports", args: { x: 28, y: 0 } },
+            { id: "sec", group: "ports", args: { x: 17, y: 64 } },
+            { id: "tert", group: "ports", args: { x: 39, y: 64 } },
+          ]);
+        } else {
+          // 2-Winding mode
+          let priVector = data.priVector || parts[0] || "";
+          let secVector = data.secVector || parts[1] || "";
+          if (!priVector && !secVector) {
+            priVector =
+              data.priVoltage === 154 || data.voltage === 154 ? "Y" : "Δ";
+            secVector =
+              data.priVoltage === 154 || data.voltage === 154 ? "Δ" : "Y";
+          }
+
+          this.attr({
+            topCircle: {
+              cx: 22,
+              cy: 22,
+              r: 16,
+              stroke: color,
+              fill: "#ffffff",
+              display: "block",
+            },
+            botCircle: {
+              cx: 22,
+              cy: 42,
+              r: 16,
+              stroke: color,
+              fill: "#ffffff",
+              display: "block",
+            },
+            tertCircle: { display: "none" },
+            topLead: {
+              d: "M 22 0 L 22 6",
+              stroke: color,
+              strokeWidth: 2,
+              display: "block",
+            },
+            botLead: {
+              d: "M 22 58 L 22 64",
+              stroke: color,
+              strokeWidth: 2,
+              display: "block",
+            },
+            tertLead: { display: "none" },
+            topVectorLabel: {
+              text: priVector,
+              x: 22,
+              y: 22,
+              fill: color,
+              fontSize: 12,
+              display: "block",
+            },
+            botVectorLabel: {
+              text: secVector,
+              x: 22,
+              y: 42,
+              fill: color,
+              fontSize: 12,
+              display: "block",
+            },
+            tertVectorLabel: { display: "none" },
+            nameLabel: { text: data.name || "TR", refX: 46, refY: "35%" },
+            specLabel: { text: data.capacity || "", refX: 46, refY: "60%" },
+          });
+
+          const curSize = this.get("size") || {};
+          if (curSize.width !== 44) {
+            this.resize(44, 64);
+          }
+          this.prop("ports/items", [
+            { id: "pri", group: "ports", args: { x: 22, y: 0 } },
+            { id: "sec", group: "ports", args: { x: 22, y: 64 } },
+          ]);
+        }
       },
     },
   );
+
+  // 5. Transformer 3W (3권선 변압기 - 2W 클래스와 동일한 동적 구조 사용)
+  joint.shapes.sld.Transformer3W = joint.shapes.sld.Transformer2W;
 
   // 6. Transmission Tower (송전철탑)
   joint.shapes.sld.TransmissionTower = joint.dia.Element.define(
