@@ -401,7 +401,7 @@ const EQUIPMENT_CATALOG = {
     },
     ports: ["in", "out"],
     iconSvg:
-      '<circle cx="5" cy="12" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="19" cy="12" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M5 13 C 8 16, 16 16, 19 13 C 17 21, 7 21, 5 13 Z" stroke="currentColor" stroke-width="1" stroke-linejoin="round" fill="currentColor"/>',
+      '<circle cx="5" cy="12" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="19" cy="12" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M5 11 C 8 8, 16 8, 19 11 C 17 3, 7 3, 5 11 Z" stroke="currentColor" stroke-width="1" stroke-linejoin="round" fill="currentColor"/>',
   },
   FUSE: {
     type: "FUSE",

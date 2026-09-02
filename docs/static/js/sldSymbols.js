@@ -615,7 +615,7 @@
       ],
       attrs: {
         crescent: {
-          d: "M 6 17 C 12 22, 28 22, 34 17 C 30 33, 10 33, 6 17 Z",
+          d: "M 6 11 C 12 6, 28 6, 34 11 C 30 -5, 10 -5, 6 11 Z",
           stroke: "#377DFF",
           strokeWidth: 1.5,
           strokeLinejoin: "round",
@@ -653,7 +653,7 @@
         nameLabel: {
           text: "TIE ACB",
           refX: "50%",
-          refY: -8,
+          refY: -14,
           textAnchor: "middle",
           textVerticalAnchor: "middle",
           fontSize: 9.5,
@@ -663,7 +663,7 @@
         specLabel: {
           text: "2000A",
           refX: "50%",
-          refY: 34,
+          refY: 28,
           textAnchor: "middle",
           textVerticalAnchor: "middle",
           fontSize: 8.5,
