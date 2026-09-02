@@ -511,6 +511,10 @@
             ? window.getVoltageColor
             : (v) => data.color || "#2E7D32";
 
+        const state = (data.state || "LIVE").toUpperCase();
+        const isDead = state === "DEAD" || state === "OPEN";
+        const isGrounded = state === "GROUNDED";
+
         const priV =
           data.priVoltage !== undefined
             ? data.priVoltage
@@ -520,9 +524,38 @@
         const secV = data.secVoltage !== undefined ? data.secVoltage : 22.9;
         const tertV = data.tertVoltage !== undefined ? data.tertVoltage : 6.6;
 
-        const priColor = getVColor(priV, vUnit);
-        const secColor = getVColor(secV, vUnit);
-        const tertColor = getVColor(tertV, vUnit);
+        let priColor, secColor, tertColor;
+        let priFill, secFill, tertFill;
+        let labelFill = "#ffffff";
+
+        if (isDead) {
+          // 사선 상태 (회색 계열)
+          priColor = "#94a3b8";
+          secColor = "#94a3b8";
+          tertColor = "#94a3b8";
+          priFill = "#cbd5e1";
+          secFill = "#cbd5e1";
+          tertFill = "#cbd5e1";
+          labelFill = "#334155";
+        } else if (isGrounded) {
+          // 접지 상태 (녹색 계열)
+          priColor = "#16a34a";
+          secColor = "#16a34a";
+          tertColor = "#16a34a";
+          priFill = "#16a34a";
+          secFill = "#16a34a";
+          tertFill = "#16a34a";
+          labelFill = "#ffffff";
+        } else {
+          // 활선 상태 (각 권선별 전압 색상)
+          priColor = getVColor(priV, vUnit);
+          secColor = getVColor(secV, vUnit);
+          tertColor = getVColor(tertV, vUnit);
+          priFill = priColor;
+          secFill = secColor;
+          tertFill = tertColor;
+          labelFill = "#ffffff";
+        }
 
         let parts = [];
         if (data.connection) {
@@ -547,7 +580,7 @@
               r: 16,
               stroke: priColor,
               strokeWidth: 2,
-              fill: priColor,
+              fill: priFill,
               display: "block",
             },
             botCircle: {
@@ -556,7 +589,7 @@
               r: 16,
               stroke: secColor,
               strokeWidth: 2,
-              fill: secColor,
+              fill: secFill,
               display: "block",
             },
             tertCircle: {
@@ -565,7 +598,7 @@
               r: 16,
               stroke: tertColor,
               strokeWidth: 2,
-              fill: tertColor,
+              fill: tertFill,
               display: "block",
             },
             topLead: {
@@ -589,27 +622,30 @@
             topVectorLabel: {
               text: v1,
               x: 22,
-              y: 22,
-              fill: "#ffffff",
-              fontSize: 13,
+              y: 17,
+              textAnchor: "middle",
+              fill: labelFill,
+              fontSize: 12,
               fontWeight: "bold",
               display: "block",
             },
             botVectorLabel: {
               text: v2,
               x: 22,
-              y: 42,
-              fill: "#ffffff",
-              fontSize: 13,
+              y: 49,
+              textAnchor: "middle",
+              fill: labelFill,
+              fontSize: 12,
               fontWeight: "bold",
               display: "block",
             },
             tertVectorLabel: {
               text: v3,
-              x: 38,
-              y: 32,
-              fill: "#ffffff",
-              fontSize: 13,
+              x: 44,
+              y: 36,
+              textAnchor: "middle",
+              fill: labelFill,
+              fontSize: 12,
               fontWeight: "bold",
               display: "block",
             },
@@ -642,7 +678,7 @@
               r: 16,
               stroke: priColor,
               strokeWidth: 2,
-              fill: priColor,
+              fill: priFill,
               display: "block",
             },
             botCircle: {
@@ -651,7 +687,7 @@
               r: 16,
               stroke: secColor,
               strokeWidth: 2,
-              fill: secColor,
+              fill: secFill,
               display: "block",
             },
             tertCircle: { display: "none" },
@@ -671,18 +707,20 @@
             topVectorLabel: {
               text: priVector,
               x: 22,
-              y: 22,
-              fill: "#ffffff",
-              fontSize: 13,
+              y: 17,
+              textAnchor: "middle",
+              fill: labelFill,
+              fontSize: 12,
               fontWeight: "bold",
               display: "block",
             },
             botVectorLabel: {
               text: secVector,
               x: 22,
-              y: 42,
-              fill: "#ffffff",
-              fontSize: 13,
+              y: 49,
+              textAnchor: "middle",
+              fill: labelFill,
+              fontSize: 12,
               fontWeight: "bold",
               display: "block",
             },
