@@ -215,7 +215,7 @@
     },
   );
 
-  // 2-2. Air Circuit Breaker (ACB - 기중차단기 원형 노드 + 전압 테두리 적용 두꺼운 호 ) 심볼)
+  // 2-2. Air Circuit Breaker (ACB - 기중차단기 원형 노드 + 전압 테두리 적용 양끝이 가늘고 가운데가 두꺼운 반달/초승달 접점 심볼)
   joint.shapes.sld.ACB = joint.dia.Element.define(
     "sld.ACB",
     {
@@ -223,8 +223,7 @@
       markup: [
         { tagName: "path", selector: "topLead" },
         { tagName: "path", selector: "botLead" },
-        { tagName: "path", selector: "arcOutline" },
-        { tagName: "path", selector: "arc" },
+        { tagName: "path", selector: "crescent" },
         { tagName: "circle", selector: "topNode" },
         { tagName: "circle", selector: "botNode" },
         { tagName: "text", selector: "groundSymbol" },
@@ -233,41 +232,38 @@
       ],
       attrs: {
         topLead: {
-          d: "M 12 0 L 12 8",
+          d: "M 6 2.5 L 18 2.5 M 12 0 L 12 7",
           stroke: "#377DFF",
           strokeWidth: 2,
+          strokeLinecap: "round",
+          fill: "none",
         },
         botLead: {
-          d: "M 12 36 L 12 44",
+          d: "M 6 41.5 L 18 41.5 M 12 37 L 12 44",
           stroke: "#377DFF",
           strokeWidth: 2,
+          strokeLinecap: "round",
+          fill: "none",
         },
-        arcOutline: {
-          d: "M 14.5 13.5 C 25 14, 25 30, 14.5 30.5",
+        crescent: {
+          d: "M 14.5 11 C 18.5 15.5, 18.5 28.5, 14.5 33 C 27.5 30.5, 27.5 13.5, 14.5 11 Z",
           stroke: "#377DFF",
-          strokeWidth: 6.2,
-          strokeLinecap: "round",
-          fill: "none",
-        },
-        arc: {
-          d: "M 14.5 13.5 C 25 14, 25 30, 14.5 30.5",
-          stroke: "#000000",
-          strokeWidth: 3.8,
-          strokeLinecap: "round",
-          fill: "none",
+          strokeWidth: 1.4,
+          strokeLinejoin: "round",
+          fill: "#000000",
         },
         topNode: {
           cx: 12,
-          cy: 12,
-          r: 3.5,
+          cy: 11,
+          r: 4,
           stroke: "#377DFF",
           strokeWidth: 2,
           fill: "#ffffff",
         },
         botNode: {
           cx: 12,
-          cy: 32,
-          r: 3.5,
+          cy: 33,
+          r: 4,
           stroke: "#377DFF",
           strokeWidth: 2,
           fill: "#ffffff",
@@ -286,7 +282,7 @@
         },
         nameLabel: {
           text: "ACB",
-          refX: 28,
+          refX: 30,
           refY: "30%",
           textAnchor: "start",
           textVerticalAnchor: "middle",
@@ -296,7 +292,7 @@
         },
         specLabel: {
           text: "3200A",
-          refX: 28,
+          refX: 30,
           refY: "70%",
           textAnchor: "start",
           textVerticalAnchor: "middle",
@@ -341,20 +337,20 @@
         const isGrounded = state === "GROUNDED" || state === "EARTH";
 
         let strokeColor = color;
-        let arcColor = "#000000"; // 활선: 검정색 (Live Black)
-        let arcOutlineColor = color; // 활선: 전압별 테두리 색상
+        let crescentFill = "#000000"; // 활선: 검정색 (Live Black)
+        let crescentStroke = color; // 활선: 전압별 테두리 색상
         let showGround = "none";
 
         if (isGrounded) {
           strokeColor = "#16a34a";
-          arcColor = "#16a34a"; // 접지: 초록색 (Ground Green)
-          arcOutlineColor = "#16a34a";
+          crescentFill = "#16a34a"; // 접지: 초록색 (Ground Green)
+          crescentStroke = "#16a34a";
           showGround = "block";
         } else if (!isLive) {
           // DEAD (사선)
           strokeColor = "#94a3b8";
-          arcColor = "#94a3b8"; // 사선: 회색 (Dead Gray)
-          arcOutlineColor = "#94a3b8";
+          crescentFill = "#94a3b8"; // 사선: 회색 (Dead Gray)
+          crescentStroke = "#94a3b8";
         }
 
         this.attr({
@@ -362,8 +358,7 @@
           botLead: { stroke: strokeColor },
           topNode: { stroke: strokeColor, fill: "#ffffff" },
           botNode: { stroke: strokeColor, fill: "#ffffff" },
-          arcOutline: { stroke: arcOutlineColor, strokeWidth: 6.2 },
-          arc: { stroke: arcColor, strokeWidth: 3.8 },
+          crescent: { stroke: crescentStroke, fill: crescentFill, strokeWidth: 1.4 },
           groundSymbol: { display: showGround, fill: "#16a34a" },
           nameLabel: { text: data.name || "ACB" },
           specLabel: { text: data.current ? data.current + "A" : "" },

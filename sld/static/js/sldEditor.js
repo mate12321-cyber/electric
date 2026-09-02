@@ -239,7 +239,13 @@ class SLDEditor {
       bbox = this.graph.getBBox();
     }
 
-    if (!bbox || !bbox.width || !bbox.height || bbox.width <= 0 || bbox.height <= 0) {
+    if (
+      !bbox ||
+      !bbox.width ||
+      !bbox.height ||
+      bbox.width <= 0 ||
+      bbox.height <= 0
+    ) {
       let minX = Infinity,
         minY = Infinity,
         maxX = -Infinity,
@@ -257,7 +263,14 @@ class SLDEditor {
       }
     }
 
-    if (!bbox || !bbox.width || !bbox.height || bbox.width <= 0 || bbox.height <= 0) return;
+    if (
+      !bbox ||
+      !bbox.width ||
+      !bbox.height ||
+      bbox.width <= 0 ||
+      bbox.height <= 0
+    )
+      return;
 
     const rect = this.container.getBoundingClientRect();
     const containerWidth = rect.width || this.container.clientWidth || 1000;
@@ -1063,8 +1076,18 @@ class SLDEditor {
       if (cell.type === "standard.Link" || cell.type === "link") {
         const srcId = cell.source?.id;
         const tgtId = cell.target?.id;
-        if (!srcId || !tgtId || !elementIds.has(srcId) || !elementIds.has(tgtId)) {
-          console.warn("Skipping invalid link with missing endpoint:", cell.id, srcId, tgtId);
+        if (
+          !srcId ||
+          !tgtId ||
+          !elementIds.has(srcId) ||
+          !elementIds.has(tgtId)
+        ) {
+          console.warn(
+            "Skipping invalid link with missing endpoint:",
+            cell.id,
+            srcId,
+            tgtId,
+          );
           return;
         }
         cell.router = { name: "sldOrthogonal" };
@@ -1074,7 +1097,10 @@ class SLDEditor {
         }
       } else {
         // Safety check: ensure shape type exists
-        if (cell.type === "sld.ACB" && (!joint.shapes.sld || !joint.shapes.sld.ACB)) {
+        if (
+          cell.type === "sld.ACB" &&
+          (!joint.shapes.sld || !joint.shapes.sld.ACB)
+        ) {
           cell.type = "sld.Breaker";
         }
       }
@@ -1089,7 +1115,12 @@ class SLDEditor {
     } catch (e) {
       console.warn("Retrying graph loading with fallback types:", e);
       schema.cells.forEach((cell) => {
-        if (cell.type && cell.type.startsWith("sld.") && (!joint.shapes.sld || !joint.shapes.sld[cell.type.replace("sld.", "")])) {
+        if (
+          cell.type &&
+          cell.type.startsWith("sld.") &&
+          (!joint.shapes.sld ||
+            !joint.shapes.sld[cell.type.replace("sld.", "")])
+        ) {
           cell.type = "sld.Breaker";
         }
       });
