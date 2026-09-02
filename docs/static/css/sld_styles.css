@@ -810,11 +810,15 @@ g[data-type*="Link"].link-dead path {
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.2),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
   z-index: 99999;
   opacity: 0;
   transform: translateY(10px);
-  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
   display: flex;
   align-items: center;
@@ -825,4 +829,3 @@ g[data-type*="Link"].link-dead path {
   opacity: 1;
   transform: translateY(0);
 }
-

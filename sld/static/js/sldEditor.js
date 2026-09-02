@@ -165,23 +165,25 @@ class SLDEditor {
 
   setupCanvasEvents() {
     const paperEl = this.paper.el;
-    let isSpacePressed = false;
-
     window.addEventListener("keydown", (e) => {
       if (
         e.code === "Space" &&
         e.target.tagName !== "INPUT" &&
         e.target.tagName !== "TEXTAREA"
       ) {
-        isSpacePressed = true;
-        paperEl.style.cursor = "grab";
+        if (!this.selectedCell) {
+          isSpacePressed = true;
+          paperEl.style.cursor = "grab";
+        }
       }
     });
 
     window.addEventListener("keyup", (e) => {
       if (e.code === "Space") {
         isSpacePressed = false;
-        paperEl.style.cursor = "default";
+        if (!this.isPanning) {
+          paperEl.style.cursor = "default";
+        }
       }
     });
 
@@ -1637,6 +1639,15 @@ class SLDEditor {
       if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
         return;
 
+      if (e.code === "Space") {
+        if (this.selectedCell) {
+          e.preventDefault();
+          e.stopPropagation();
+          this.toggleSelectedEquipmentState();
+          return;
+        }
+      }
+
       if (e.key === "Delete" || e.key === "Backspace") {
         this.deleteSelected();
       } else if ((e.ctrlKey || e.metaKey) && e.key === "z") {
@@ -1653,6 +1664,52 @@ class SLDEditor {
         this.saveDiagram();
       }
     });
+  }
+
+  toggleSelectedEquipmentState() {
+    if (!this.selectedCell) return;
+    const cell = this.selectedCell;
+    const sldData = cell.get("sldData") || {};
+
+    const curState = (sldData.state || "LIVE").toUpperCase();
+    const normState =
+      curState === "CLOSED" ? "LIVE" : curState === "OPEN" ? "DEAD" : curState;
+
+    // Cycle: LIVE (활선) -> DEAD (사선) -> GROUND (접지) -> LIVE (활선)
+    const nextState =
+      normState === "LIVE" ? "DEAD" : normState === "DEAD" ? "GROUND" : "LIVE";
+
+    sldData.state = nextState;
+    cell.set("sldData", Object.assign({}, sldData));
+
+    if (typeof cell.updateContactVisual === "function") {
+      cell.updateContactVisual();
+    }
+    if (typeof cell.updateVisual === "function") {
+      cell.updateVisual();
+    }
+
+    const stateBtns = document.querySelectorAll(".state-toggle-btn");
+    stateBtns.forEach((b) => {
+      const bState = b.getAttribute("data-state");
+      b.classList.toggle("active", bState === nextState);
+    });
+
+    const stateSelect = document.getElementById("prop-state");
+    if (stateSelect) stateSelect.value = nextState;
+
+    this.topologyTracker.applyStyles(this.paper);
+    this.populateProperties(cell);
+    this.updateMinimap();
+    this.pushHistory();
+    this.scheduleAutoSave();
+
+    const stateNames = {
+      LIVE: "🔴 활선 (Live)",
+      DEAD: "⚪ 사선 (Dead)",
+      GROUND: "🟢 접지 (Ground)",
+    };
+    this.showToast(`설비 상태: ${stateNames[nextState] || nextState}`);
   }
 
   pushHistory() {
