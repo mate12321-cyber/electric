@@ -264,7 +264,9 @@ class SLDEditor {
       const isBreakerOrSwitch =
         catalog.subCategory === "SWITCH" || sldData.type === "GROUND_SWITCH";
 
-      const targetSel = evt.target ? evt.target.getAttribute("data-selector") : "";
+      const targetSel = evt.target
+        ? evt.target.getAttribute("data-selector")
+        : "";
       const isClickOnBlade =
         targetSel === "blade" ||
         targetSel === "contactPath" ||
@@ -352,10 +354,13 @@ class SLDEditor {
 
   setupPaletteDragDrop() {
     const paletteItems = document.querySelectorAll(".palette-item");
+    let isItemDragging = false;
+
     paletteItems.forEach((item) => {
       item.setAttribute("draggable", "true");
 
       item.addEventListener("dragstart", (e) => {
+        isItemDragging = true;
         const type = item.getAttribute("data-symbol-type");
         e.dataTransfer.setData("text/plain", type);
         e.dataTransfer.setData("text", type);
@@ -364,11 +369,15 @@ class SLDEditor {
       });
 
       item.addEventListener("dragend", () => {
-        window.__draggedSymbolType = null;
+        setTimeout(() => {
+          isItemDragging = false;
+          window.__draggedSymbolType = null;
+        }, 150);
       });
 
-      // Click to add at center of visible canvas
-      item.addEventListener("click", () => {
+      // Click to add at center of visible canvas (only when NOT dragged)
+      item.addEventListener("click", (e) => {
+        if (isItemDragging) return;
         const type = item.getAttribute("data-symbol-type");
         if (!type) return;
         const rect = this.container.getBoundingClientRect();
@@ -380,49 +389,48 @@ class SLDEditor {
       });
     });
 
-    const canvasWrapper = document.querySelector(".sld-canvas-wrapper");
-    const dropTargets = [canvasWrapper, this.container, this.paper.el].filter(
-      Boolean,
-    );
+    const dropArea = document.querySelector(".sld-canvas-wrapper") || this.container;
 
-    dropTargets.forEach((target) => {
-      target.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        if (e.dataTransfer) {
-          e.dataTransfer.dropEffect = "copy";
-        }
-      });
+    dropArea.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = "copy";
+      }
+    });
 
-      target.addEventListener("dragenter", (e) => {
-        e.preventDefault();
-        if (e.dataTransfer) {
-          e.dataTransfer.dropEffect = "copy";
-        }
-      });
+    dropArea.addEventListener("dragenter", (e) => {
+      e.preventDefault();
+    });
 
-      target.addEventListener("drop", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+    dropArea.addEventListener("drop", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-        let type = null;
-        if (e.dataTransfer) {
-          type =
-            e.dataTransfer.getData("text/plain") ||
-            e.dataTransfer.getData("text");
-        }
-        if (!type) {
-          type = window.__draggedSymbolType;
-        }
-        if (!type) return;
+      let type = null;
+      if (e.dataTransfer) {
+        type =
+          e.dataTransfer.getData("text/plain") ||
+          e.dataTransfer.getData("text");
+      }
+      if (!type) {
+        type = window.__draggedSymbolType;
+      }
+      if (!type) return;
 
-        const p = this.getPaperPoint(e.clientX, e.clientY);
-        this.createElement(type, p.x - 20, p.y - 20);
-        window.__draggedSymbolType = null;
-      });
+      const p = this.getPaperPoint(e.clientX, e.clientY);
+      this.createElement(type, p.x - 20, p.y - 20);
+      window.__draggedSymbolType = null;
     });
   }
 
   createElement(type, x, y) {
+    // Prevent duplicate placement within 200ms
+    const now = Date.now();
+    if (this._lastCreated && (now - this._lastCreated.time < 200) && this._lastCreated.type === type) {
+      return null;
+    }
+    this._lastCreated = { time: now, type: type };
+
     const catalog = window.EQUIPMENT_CATALOG[type];
     if (!catalog) {
       console.warn("Unknown symbol type:", type);
