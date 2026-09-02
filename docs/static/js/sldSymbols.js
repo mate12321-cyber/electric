@@ -215,7 +215,7 @@
     },
   );
 
-  // 2-2. Air Circuit Breaker (ACB - 기중차단기 원형 노드 + 두꺼운 호 ) 심볼)
+  // 2-2. Air Circuit Breaker (ACB - 기중차단기 원형 노드 + 전압 테두리 적용 두꺼운 호 ) 심볼)
   joint.shapes.sld.ACB = joint.dia.Element.define(
     "sld.ACB",
     {
@@ -223,9 +223,10 @@
       markup: [
         { tagName: "path", selector: "topLead" },
         { tagName: "path", selector: "botLead" },
+        { tagName: "path", selector: "arcOutline" },
+        { tagName: "path", selector: "arc" },
         { tagName: "circle", selector: "topNode" },
         { tagName: "circle", selector: "botNode" },
-        { tagName: "path", selector: "arc" },
         { tagName: "text", selector: "groundSymbol" },
         { tagName: "text", selector: "nameLabel" },
         { tagName: "text", selector: "specLabel" },
@@ -240,6 +241,20 @@
           d: "M 12 36 L 12 44",
           stroke: "#377DFF",
           strokeWidth: 2,
+        },
+        arcOutline: {
+          d: "M 14.5 13.5 C 25 14, 25 30, 14.5 30.5",
+          stroke: "#377DFF",
+          strokeWidth: 6.2,
+          strokeLinecap: "round",
+          fill: "none",
+        },
+        arc: {
+          d: "M 14.5 13.5 C 25 14, 25 30, 14.5 30.5",
+          stroke: "#000000",
+          strokeWidth: 3.8,
+          strokeLinecap: "round",
+          fill: "none",
         },
         topNode: {
           cx: 12,
@@ -256,13 +271,6 @@
           stroke: "#377DFF",
           strokeWidth: 2,
           fill: "#ffffff",
-        },
-        arc: {
-          d: "M 14.5 13.5 C 25 14, 25 30, 14.5 30.5",
-          stroke: "#000000",
-          strokeWidth: 3.8,
-          strokeLinecap: "round",
-          fill: "none",
         },
         groundSymbol: {
           text: "⏚",
@@ -334,16 +342,19 @@
 
         let strokeColor = color;
         let arcColor = "#000000"; // 활선: 검정색 (Live Black)
+        let arcOutlineColor = color; // 활선: 전압별 테두리 색상
         let showGround = "none";
 
         if (isGrounded) {
           strokeColor = "#16a34a";
           arcColor = "#16a34a"; // 접지: 초록색 (Ground Green)
+          arcOutlineColor = "#16a34a";
           showGround = "block";
         } else if (!isLive) {
           // DEAD (사선)
           strokeColor = "#94a3b8";
           arcColor = "#94a3b8"; // 사선: 회색 (Dead Gray)
+          arcOutlineColor = "#94a3b8";
         }
 
         this.attr({
@@ -351,6 +362,7 @@
           botLead: { stroke: strokeColor },
           topNode: { stroke: strokeColor, fill: "#ffffff" },
           botNode: { stroke: strokeColor, fill: "#ffffff" },
+          arcOutline: { stroke: arcOutlineColor, strokeWidth: 6.2 },
           arc: { stroke: arcColor, strokeWidth: 3.8 },
           groundSymbol: { display: showGround, fill: "#16a34a" },
           nameLabel: { text: data.name || "ACB" },
