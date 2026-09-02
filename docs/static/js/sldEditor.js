@@ -36,11 +36,16 @@ class SLDEditor {
     this.graph = new joint.dia.Graph();
     this.topologyTracker = new PowerSystemTopologyTracker(this.graph);
 
+    const rect = this.container.getBoundingClientRect();
+    const paperWidth = rect.width || this.container.clientWidth || 2000;
+    const paperHeight = rect.height || this.container.clientHeight || 1200;
+
     this.paper = new joint.dia.Paper({
       el: this.container,
       model: this.graph,
-      width: "100%",
-      height: "100%",
+      width: paperWidth,
+      height: paperHeight,
+      async: false,
       gridSize: this.options.gridSize,
       drawGrid: { name: "dot", args: { color: "#cbd5e1", thickness: 1 } },
       snapLinks: { radius: 20 },
@@ -228,20 +233,45 @@ class SLDEditor {
   }
 
   zoomToFit() {
-    const bbox = this.paper.getContentBBox();
-    if (bbox.width === 0 || bbox.height === 0) return;
+    let bbox = null;
+    try {
+      bbox = this.paper.getContentBBox();
+    } catch (e) {}
+
+    if (!bbox || bbox.width === 0 || bbox.height === 0) {
+      let minX = Infinity,
+        minY = Infinity,
+        maxX = -Infinity,
+        maxY = -Infinity;
+      this.graph.getElements().forEach((el) => {
+        const pos = el.position();
+        const sz = el.size();
+        if (pos.x < minX) minX = pos.x;
+        if (pos.y < minY) minY = pos.y;
+        if (pos.x + sz.width > maxX) maxX = pos.x + sz.width;
+        if (pos.y + sz.height > maxY) maxY = pos.y + sz.height;
+      });
+      if (minX !== Infinity) {
+        bbox = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+      }
+    }
+
+    if (!bbox || bbox.width === 0 || bbox.height === 0) return;
 
     const rect = this.container.getBoundingClientRect();
-    const padding = 60;
-    const scaleX = (rect.width - padding * 2) / bbox.width;
-    const scaleY = (rect.height - padding * 2) / bbox.height;
-    const newScale = Math.min(Math.max(0.4, Math.min(scaleX, scaleY)), 1.5);
+    const containerWidth = rect.width || this.container.clientWidth || 1000;
+    const containerHeight = rect.height || this.container.clientHeight || 700;
 
-    this.scale = Math.round(newScale * 10) / 10;
+    const padding = 50;
+    const scaleX = (containerWidth - padding * 2) / bbox.width;
+    const scaleY = (containerHeight - padding * 2) / bbox.height;
+    const newScale = Math.min(Math.max(0.45, Math.min(scaleX, scaleY)), 1.15);
+
+    this.scale = Math.round(newScale * 100) / 100;
     this.paper.scale(this.scale, this.scale);
 
-    const centerX = rect.width / 2 - (bbox.x + bbox.width / 2) * this.scale;
-    const centerY = rect.height / 2 - (bbox.y + bbox.height / 2) * this.scale;
+    const centerX = containerWidth / 2 - (bbox.x + bbox.width / 2) * this.scale;
+    const centerY = containerHeight / 2 - (bbox.y + bbox.height / 2) * this.scale;
     this.origin = { x: centerX, y: centerY };
     this.paper.setOrigin(this.origin.x, this.origin.y);
 
@@ -840,7 +870,7 @@ class SLDEditor {
     if (schema && schema.cells) {
       schema.cells.forEach((cell) => {
         if (cell.type === "standard.Link" || cell.type === "link") {
-          cell.router = { name: "orthogonal", args: { padding: 0 } };
+          cell.router = { name: "sldOrthogonal" };
           cell.connector = { name: "normal" };
         }
       });
@@ -851,7 +881,9 @@ class SLDEditor {
     this.isHistoryTracking = true;
     this.pushHistory();
     this.updateMinimap();
-    setTimeout(() => this.zoomToFit(), 120);
+    this.zoomToFit();
+    setTimeout(() => this.zoomToFit(), 100);
+    setTimeout(() => this.zoomToFit(), 400);
   }
 
   startStaticTelemetrySimulation() {

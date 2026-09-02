@@ -178,11 +178,11 @@
       "type": "sld.Busbar",
       "id": "bus-22-9",
       "position": {
-        "x": 240,
+        "x": 200,
         "y": 370
       },
       "size": {
-        "width": 640,
+        "width": 700,
         "height": 12
       },
       "sldData": {
@@ -192,7 +192,67 @@
         "voltageUnit": "kV",
         "color": "#9C27B0"
       },
-      "attrs": {}
+      "attrs": {},
+      "ports": {
+        "groups": {
+          "bus-ports": {
+            "position": {
+              "name": "absolute"
+            },
+            "attrs": {
+              "circle": {
+                "r": 3.5,
+                "magnet": true,
+                "fill": "#ffffff",
+                "stroke": "#9C27B0",
+                "strokeWidth": 1.5
+              }
+            }
+          }
+        },
+        "items": [
+          {
+            "id": "p_f1",
+            "group": "bus-ports",
+            "args": {
+              "x": 78,
+              "y": 6
+            }
+          },
+          {
+            "id": "p_f2",
+            "group": "bus-ports",
+            "args": {
+              "x": 288,
+              "y": 6
+            }
+          },
+          {
+            "id": "p_in",
+            "group": "bus-ports",
+            "args": {
+              "x": 318,
+              "y": 6
+            }
+          },
+          {
+            "id": "p_f3",
+            "group": "bus-ports",
+            "args": {
+              "x": 498,
+              "y": 6
+            }
+          },
+          {
+            "id": "p_gen",
+            "group": "bus-ports",
+            "args": {
+              "x": 628,
+              "y": 6
+            }
+          }
+        ]
+      }
     },
     {
       "type": "standard.Link",
@@ -203,7 +263,7 @@
       },
       "target": {
         "id": "bus-22-9",
-        "port": "p5"
+        "port": "p_in"
       },
       "router": {
         "name": "sldOrthogonal"
@@ -270,11 +330,11 @@
       "type": "sld.Busbar",
       "id": "bus-04-a",
       "position": {
-        "x": 190,
+        "x": 180,
         "y": 575
       },
       "size": {
-        "width": 180,
+        "width": 196,
         "height": 10
       },
       "sldData": {
@@ -284,14 +344,66 @@
         "voltageUnit": "kV",
         "color": "#2E7D32"
       },
-      "attrs": {}
+      "attrs": {},
+      "ports": {
+        "groups": {
+          "bus-ports": {
+            "position": {
+              "name": "absolute"
+            },
+            "attrs": {
+              "circle": {
+                "r": 3.5,
+                "magnet": true,
+                "fill": "#fff",
+                "stroke": "#2E7D32",
+                "strokeWidth": 1.5
+              }
+            }
+          }
+        },
+        "items": [
+          {
+            "id": "p1",
+            "group": "bus-ports",
+            "args": {
+              "x": 36,
+              "y": 5
+            }
+          },
+          {
+            "id": "p_tr",
+            "group": "bus-ports",
+            "args": {
+              "x": 98,
+              "y": 5
+            }
+          },
+          {
+            "id": "p2",
+            "group": "bus-ports",
+            "args": {
+              "x": 98,
+              "y": 5
+            }
+          },
+          {
+            "id": "p3",
+            "group": "bus-ports",
+            "args": {
+              "x": 160,
+              "y": 5
+            }
+          }
+        ]
+      }
     },
     {
       "type": "standard.Link",
       "id": "link-bus22-vcba",
       "source": {
         "id": "bus-22-9",
-        "port": "p2"
+        "port": "p_f1"
       },
       "target": {
         "id": "vcb-a",
@@ -353,7 +465,7 @@
       },
       "target": {
         "id": "bus-04-a",
-        "port": "p5"
+        "port": "p_tr"
       },
       "router": {
         "name": "sldOrthogonal"
@@ -377,7 +489,7 @@
       "type": "sld.Breaker",
       "id": "acb-a1",
       "position": {
-        "x": 200,
+        "x": 198,
         "y": 615
       },
       "size": {
@@ -399,7 +511,7 @@
       "type": "sld.Load",
       "id": "load-a1",
       "position": {
-        "x": 201,
+        "x": 199,
         "y": 680
       },
       "size": {
@@ -417,7 +529,7 @@
       "id": "link-busa-acba1",
       "source": {
         "id": "bus-04-a",
-        "port": "p2"
+        "port": "p1"
       },
       "target": {
         "id": "acb-a1",
@@ -474,7 +586,7 @@
       "type": "sld.Breaker",
       "id": "mccb-a2",
       "position": {
-        "x": 250,
+        "x": 260,
         "y": 615
       },
       "size": {
@@ -495,7 +607,7 @@
       "type": "sld.Load",
       "id": "load-a2",
       "position": {
-        "x": 251,
+        "x": 261,
         "y": 680
       },
       "size": {
@@ -513,7 +625,7 @@
       "id": "link-busa-mccba2",
       "source": {
         "id": "bus-04-a",
-        "port": "p5"
+        "port": "p2"
       },
       "target": {
         "id": "mccb-a2",
@@ -570,7 +682,7 @@
       "type": "sld.Breaker",
       "id": "mccb-a3",
       "position": {
-        "x": 300,
+        "x": 322,
         "y": 615
       },
       "size": {
@@ -591,7 +703,7 @@
       "type": "sld.Load",
       "id": "load-a3",
       "position": {
-        "x": 301,
+        "x": 323,
         "y": 680
       },
       "size": {
@@ -609,7 +721,7 @@
       "id": "link-busa-mccba3",
       "source": {
         "id": "bus-04-a",
-        "port": "p8"
+        "port": "p3"
       },
       "target": {
         "id": "mccb-a3",
@@ -708,11 +820,11 @@
       "type": "sld.Busbar",
       "id": "bus-04-b",
       "position": {
-        "x": 410,
+        "x": 390,
         "y": 575
       },
       "size": {
-        "width": 180,
+        "width": 196,
         "height": 10
       },
       "sldData": {
@@ -722,14 +834,66 @@
         "voltageUnit": "kV",
         "color": "#2B6CB0"
       },
-      "attrs": {}
+      "attrs": {},
+      "ports": {
+        "groups": {
+          "bus-ports": {
+            "position": {
+              "name": "absolute"
+            },
+            "attrs": {
+              "circle": {
+                "r": 3.5,
+                "magnet": true,
+                "fill": "#fff",
+                "stroke": "#2B6CB0",
+                "strokeWidth": 1.5
+              }
+            }
+          }
+        },
+        "items": [
+          {
+            "id": "p1",
+            "group": "bus-ports",
+            "args": {
+              "x": 36,
+              "y": 5
+            }
+          },
+          {
+            "id": "p_tr",
+            "group": "bus-ports",
+            "args": {
+              "x": 98,
+              "y": 5
+            }
+          },
+          {
+            "id": "p2",
+            "group": "bus-ports",
+            "args": {
+              "x": 98,
+              "y": 5
+            }
+          },
+          {
+            "id": "p3",
+            "group": "bus-ports",
+            "args": {
+              "x": 160,
+              "y": 5
+            }
+          }
+        ]
+      }
     },
     {
       "type": "standard.Link",
       "id": "link-bus22-vcbb",
       "source": {
         "id": "bus-22-9",
-        "port": "p5"
+        "port": "p_f2"
       },
       "target": {
         "id": "vcb-b",
@@ -791,7 +955,7 @@
       },
       "target": {
         "id": "bus-04-b",
-        "port": "p5"
+        "port": "p_tr"
       },
       "router": {
         "name": "sldOrthogonal"
@@ -815,7 +979,7 @@
       "type": "sld.Breaker",
       "id": "mccb-b1",
       "position": {
-        "x": 420,
+        "x": 408,
         "y": 615
       },
       "size": {
@@ -835,7 +999,7 @@
       "type": "sld.Load",
       "id": "load-b1",
       "position": {
-        "x": 421,
+        "x": 409,
         "y": 680
       },
       "size": {
@@ -853,7 +1017,7 @@
       "id": "link-busb-mccbb1",
       "source": {
         "id": "bus-04-b",
-        "port": "p2"
+        "port": "p1"
       },
       "target": {
         "id": "mccb-b1",
@@ -948,7 +1112,7 @@
       "id": "link-busb-mccbb2",
       "source": {
         "id": "bus-04-b",
-        "port": "p5"
+        "port": "p2"
       },
       "target": {
         "id": "mccb-b2",
@@ -1005,7 +1169,7 @@
       "type": "sld.Breaker",
       "id": "mccb-b3",
       "position": {
-        "x": 520,
+        "x": 532,
         "y": 615
       },
       "size": {
@@ -1025,7 +1189,7 @@
       "type": "sld.Load",
       "id": "load-b3",
       "position": {
-        "x": 521,
+        "x": 533,
         "y": 680
       },
       "size": {
@@ -1043,7 +1207,7 @@
       "id": "link-busb-mccbb3",
       "source": {
         "id": "bus-04-b",
-        "port": "p8"
+        "port": "p3"
       },
       "target": {
         "id": "mccb-b3",
@@ -1142,11 +1306,11 @@
       "type": "sld.Busbar",
       "id": "bus-04-c",
       "position": {
-        "x": 620,
+        "x": 600,
         "y": 575
       },
       "size": {
-        "width": 180,
+        "width": 196,
         "height": 10
       },
       "sldData": {
@@ -1156,14 +1320,66 @@
         "voltageUnit": "kV",
         "color": "#E65100"
       },
-      "attrs": {}
+      "attrs": {},
+      "ports": {
+        "groups": {
+          "bus-ports": {
+            "position": {
+              "name": "absolute"
+            },
+            "attrs": {
+              "circle": {
+                "r": 3.5,
+                "magnet": true,
+                "fill": "#fff",
+                "stroke": "#E65100",
+                "strokeWidth": 1.5
+              }
+            }
+          }
+        },
+        "items": [
+          {
+            "id": "p1",
+            "group": "bus-ports",
+            "args": {
+              "x": 36,
+              "y": 5
+            }
+          },
+          {
+            "id": "p_tr",
+            "group": "bus-ports",
+            "args": {
+              "x": 98,
+              "y": 5
+            }
+          },
+          {
+            "id": "p2",
+            "group": "bus-ports",
+            "args": {
+              "x": 98,
+              "y": 5
+            }
+          },
+          {
+            "id": "p3",
+            "group": "bus-ports",
+            "args": {
+              "x": 160,
+              "y": 5
+            }
+          }
+        ]
+      }
     },
     {
       "type": "standard.Link",
       "id": "link-bus22-vcbc",
       "source": {
         "id": "bus-22-9",
-        "port": "p8"
+        "port": "p_f3"
       },
       "target": {
         "id": "vcb-c",
@@ -1225,7 +1441,7 @@
       },
       "target": {
         "id": "bus-04-c",
-        "port": "p5"
+        "port": "p_tr"
       },
       "router": {
         "name": "sldOrthogonal"
@@ -1249,7 +1465,7 @@
       "type": "sld.Breaker",
       "id": "mccb-c1",
       "position": {
-        "x": 630,
+        "x": 618,
         "y": 615
       },
       "size": {
@@ -1269,7 +1485,7 @@
       "type": "sld.Load",
       "id": "load-c1",
       "position": {
-        "x": 631,
+        "x": 619,
         "y": 680
       },
       "size": {
@@ -1287,7 +1503,7 @@
       "id": "link-busc-mccbc1",
       "source": {
         "id": "bus-04-c",
-        "port": "p2"
+        "port": "p1"
       },
       "target": {
         "id": "mccb-c1",
@@ -1382,7 +1598,7 @@
       "id": "link-busc-mccbc2",
       "source": {
         "id": "bus-04-c",
-        "port": "p5"
+        "port": "p2"
       },
       "target": {
         "id": "mccb-c2",
@@ -1439,7 +1655,7 @@
       "type": "sld.Breaker",
       "id": "mccb-c3",
       "position": {
-        "x": 730,
+        "x": 742,
         "y": 615
       },
       "size": {
@@ -1459,7 +1675,7 @@
       "type": "sld.Load",
       "id": "load-c3",
       "position": {
-        "x": 731,
+        "x": 743,
         "y": 680
       },
       "size": {
@@ -1477,7 +1693,7 @@
       "id": "link-busc-mccbc3",
       "source": {
         "id": "bus-04-c",
-        "port": "p8"
+        "port": "p3"
       },
       "target": {
         "id": "mccb-c3",
@@ -1534,8 +1750,8 @@
       "type": "sld.Generator",
       "id": "gen-1",
       "position": {
-        "x": 820,
-        "y": 540
+        "x": 806,
+        "y": 520
       },
       "size": {
         "width": 44,
@@ -1554,8 +1770,8 @@
       "type": "sld.Breaker",
       "id": "acb-gen",
       "position": {
-        "x": 824,
-        "y": 440
+        "x": 810,
+        "y": 430
       },
       "size": {
         "width": 36,
@@ -1609,7 +1825,7 @@
       },
       "target": {
         "id": "bus-22-9",
-        "port": "p10"
+        "port": "p_gen"
       },
       "router": {
         "name": "sldOrthogonal"
@@ -1633,11 +1849,11 @@
       "type": "sld.GroupBox",
       "id": "group-ups",
       "position": {
-        "x": 190,
-        "y": 740
+        "x": 180,
+        "y": 750
       },
       "size": {
-        "width": 490,
+        "width": 680,
         "height": 240
       },
       "sldData": {
@@ -1650,16 +1866,16 @@
       "type": "sld.TextLabel",
       "id": "text-comm-power",
       "position": {
-        "x": 210,
-        "y": 780
+        "x": 200,
+        "y": 775
       },
       "size": {
-        "width": 130,
-        "height": 30
+        "width": 140,
+        "height": 26
       },
       "sldData": {
         "type": "TEXT_LABEL",
-        "text": "상용 전원 AC 3Φ 4W 380/220V",
+        "text": "상용 전원 AC 3Φ 380V",
         "color": "#1e293b"
       },
       "attrs": {}
@@ -1668,8 +1884,8 @@
       "type": "sld.Breaker",
       "id": "acb-ups-in",
       "position": {
-        "x": 300,
-        "y": 785
+        "x": 220,
+        "y": 810
       },
       "size": {
         "width": 36,
@@ -1688,8 +1904,8 @@
       "type": "sld.UPS",
       "id": "ups-1",
       "position": {
-        "x": 370,
-        "y": 780
+        "x": 310,
+        "y": 808
       },
       "size": {
         "width": 56,
@@ -1707,8 +1923,8 @@
       "type": "sld.Battery",
       "id": "battery-1",
       "position": {
-        "x": 372,
-        "y": 885
+        "x": 312,
+        "y": 905
       },
       "size": {
         "width": 52,
@@ -1727,8 +1943,8 @@
       "type": "sld.Switchgear",
       "id": "swg-ups",
       "position": {
-        "x": 480,
-        "y": 775
+        "x": 430,
+        "y": 802
       },
       "size": {
         "width": 44,
@@ -1742,11 +1958,75 @@
       "attrs": {}
     },
     {
+      "type": "sld.Busbar",
+      "id": "bus-ups",
+      "position": {
+        "x": 520,
+        "y": 828
+      },
+      "size": {
+        "width": 160,
+        "height": 8
+      },
+      "sldData": {
+        "type": "BUSBAR",
+        "name": "UPS 모선 (380V)",
+        "voltage": 0.38,
+        "voltageUnit": "kV",
+        "color": "#377DFF"
+      },
+      "attrs": {},
+      "ports": {
+        "groups": {
+          "bus-ports": {
+            "position": {
+              "name": "absolute"
+            },
+            "attrs": {
+              "circle": {
+                "r": 3.5,
+                "magnet": true,
+                "fill": "#fff",
+                "stroke": "#377DFF",
+                "strokeWidth": 1.5
+              }
+            }
+          }
+        },
+        "items": [
+          {
+            "id": "p_in",
+            "group": "bus-ports",
+            "args": {
+              "x": 0,
+              "y": 4
+            }
+          },
+          {
+            "id": "p1",
+            "group": "bus-ports",
+            "args": {
+              "x": 48,
+              "y": 8
+            }
+          },
+          {
+            "id": "p2",
+            "group": "bus-ports",
+            "args": {
+              "x": 128,
+              "y": 8
+            }
+          }
+        ]
+      }
+    },
+    {
       "type": "sld.Breaker",
       "id": "mccb-ups1",
       "position": {
         "x": 550,
-        "y": 785
+        "y": 860
       },
       "size": {
         "width": 36,
@@ -1766,7 +2046,7 @@
       "id": "load-ups1",
       "position": {
         "x": 551,
-        "y": 860
+        "y": 925
       },
       "size": {
         "width": 34,
@@ -1774,7 +2054,7 @@
       },
       "sldData": {
         "type": "LOAD",
-        "name": "중요 부하"
+        "name": "중요 부하 1"
       },
       "attrs": {}
     },
@@ -1782,8 +2062,8 @@
       "type": "sld.Breaker",
       "id": "mccb-ups2",
       "position": {
-        "x": 605,
-        "y": 785
+        "x": 630,
+        "y": 860
       },
       "size": {
         "width": 36,
@@ -1802,8 +2082,8 @@
       "type": "sld.Load",
       "id": "load-ups2",
       "position": {
-        "x": 606,
-        "y": 860
+        "x": 631,
+        "y": 925
       },
       "size": {
         "width": 34,
@@ -1811,7 +2091,7 @@
       },
       "sldData": {
         "type": "LOAD",
-        "name": "중요 부하"
+        "name": "중요 부하 2"
       },
       "attrs": {}
     },
@@ -1904,10 +2184,39 @@
     },
     {
       "type": "standard.Link",
-      "id": "link-swg-mccb1",
+      "id": "link-swg-busups",
       "source": {
         "id": "swg-ups",
         "port": "out"
+      },
+      "target": {
+        "id": "bus-ups",
+        "port": "p_in"
+      },
+      "router": {
+        "name": "sldOrthogonal"
+      },
+      "connector": {
+        "name": "normal"
+      },
+      "attrs": {
+        "line": {
+          "stroke": "#377DFF",
+          "strokeWidth": 2.5,
+          "strokeDasharray": "8,4",
+          "class": "link-live",
+          "targetMarker": {
+            "type": "none"
+          }
+        }
+      }
+    },
+    {
+      "type": "standard.Link",
+      "id": "link-busups-mccb1",
+      "source": {
+        "id": "bus-ups",
+        "port": "p1"
       },
       "target": {
         "id": "mccb-ups1",
@@ -1962,10 +2271,10 @@
     },
     {
       "type": "standard.Link",
-      "id": "link-swg-mccb2",
+      "id": "link-busups-mccb2",
       "source": {
-        "id": "swg-ups",
-        "port": "out"
+        "id": "bus-ups",
+        "port": "p2"
       },
       "target": {
         "id": "mccb-ups2",
@@ -2022,8 +2331,8 @@
       "type": "sld.TextLabel",
       "id": "text-ac220",
       "position": {
-        "x": 710,
-        "y": 745
+        "x": 740,
+        "y": 775
       },
       "size": {
         "width": 90,
@@ -2040,8 +2349,8 @@
       "type": "sld.Rectifier",
       "id": "rect-1",
       "position": {
-        "x": 690,
-        "y": 785
+        "x": 745,
+        "y": 810
       },
       "size": {
         "width": 50,
@@ -2060,8 +2369,8 @@
       "type": "sld.Battery",
       "id": "battery-110",
       "position": {
-        "x": 689,
-        "y": 885
+        "x": 744,
+        "y": 905
       },
       "size": {
         "width": 52,
@@ -2069,7 +2378,7 @@
       },
       "sldData": {
         "type": "BATTERY",
-        "name": "배터리",
+        "name": "110V 축전지",
         "voltage": 110,
         "voltageUnit": "V DC",
         "color": "#2E7D32"

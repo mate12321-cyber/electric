@@ -32,10 +32,10 @@
         },
         label: {
           text: "22.9kV 모선",
-          refX: "100%",
-          refY: -8,
-          textAnchor: "end",
-          fontSize: 12,
+          refX: "50%",
+          refY: -14,
+          textAnchor: "middle",
+          fontSize: 11,
           fontWeight: "bold",
           fill: "#9C27B0",
           fontFamily: "Pretendard, -apple-system, sans-serif",
@@ -68,6 +68,10 @@
         this.updateFromSldData();
       },
       distributePorts: function () {
+        const existing = this.prop("ports/items");
+        if (existing && existing.length > 0) {
+          return;
+        }
         const width = this.get("size").width || 500;
         const height = this.get("size").height || 12;
         const count = 10;
@@ -77,7 +81,7 @@
           items.push({
             id: "p" + i,
             group: "bus-ports",
-            args: { x: x, y: height / 2 },
+            args: { x: Math.round(x), y: height / 2 },
           });
         }
         this.prop("ports/items", items);
@@ -137,19 +141,19 @@
         },
         nameLabel: {
           text: "ACB",
-          refX: 42,
-          refY: "30%",
+          refX: 40,
+          refY: "25%",
           textAnchor: "start",
-          fontSize: 11,
+          fontSize: 9.5,
           fontWeight: "600",
           fill: "#1e293b",
         },
         specLabel: {
           text: "3200A",
-          refX: 42,
+          refX: 40,
           refY: "65%",
           textAnchor: "start",
-          fontSize: 9,
+          fontSize: 8.5,
           fill: "#64748b",
         },
         stateBadge: {
@@ -1519,23 +1523,23 @@
         return vertices;
       }
 
-      // 1. Vertical alignment (tolerance 25px / ~2.5 grid units) or short vertical segment (dy <= 60px with dx <= 35px):
+      // 1. Vertical column alignment (tolerance 30px / 3 grid units) or short vertical segment (dy <= 80px with dx <= 45px):
       // Force 100% pure straight vertical line (0 bend points)!
-      if (dx <= 25 || (dy <= 60 && dx <= 35)) {
+      if (dx <= 30 || (dy <= 80 && dx <= 45)) {
         return [];
       }
 
-      // 2. Horizontal alignment (tolerance 25px / ~2.5 grid units) or short horizontal segment (dx <= 60px with dy <= 35px):
+      // 2. Horizontal row alignment (tolerance 30px / 3 grid units) or short horizontal segment (dx <= 80px with dy <= 45px):
       // Force 100% pure straight horizontal line (0 bend points)!
-      if (dy <= 25 || (dx <= 60 && dy <= 35)) {
+      if (dy <= 30 || (dx <= 80 && dy <= 45)) {
         return [];
       }
 
-      // 3. Short angled gap (dy <= 50px or dx <= 50px): Single clean L-turn instead of double-turn zigzag
-      if (dy <= 50) {
+      // 3. Short angled gap (dy <= 60px or dx <= 60px): Single clean L-turn instead of double-turn zigzag
+      if (dy <= 60) {
         return [{ x: sx, y: ty }];
       }
-      if (dx <= 50) {
+      if (dx <= 60) {
         return [{ x: tx, y: sy }];
       }
 
