@@ -81,6 +81,7 @@
         "name": "154/22.9kV TR#1",
         "priVoltage": 154,
         "secVoltage": 22.9,
+        "connection": "Y-Δ",
         "capacity": "20MVA",
         "color": "#2E7D32",
         "memo": "154kV / 22.9kV 20MVA 변압기"
@@ -321,6 +322,7 @@
         "name": "22.9/0.4kV TR#2",
         "priVoltage": 22.9,
         "secVoltage": 0.4,
+        "connection": "Δ-Y",
         "capacity": "1000kVA",
         "color": "#2E7D32"
       },
@@ -811,6 +813,7 @@
         "name": "22.9/0.4kV TR#3",
         "priVoltage": 22.9,
         "secVoltage": 0.4,
+        "connection": "Δ-Y",
         "capacity": "1000kVA",
         "color": "#2E7D32"
       },
@@ -1297,6 +1300,7 @@
         "name": "22.9/0.4kV TR#4",
         "priVoltage": 22.9,
         "secVoltage": 0.4,
+        "connection": "Δ-Y",
         "capacity": "1000kVA",
         "color": "#2E7D32"
       },

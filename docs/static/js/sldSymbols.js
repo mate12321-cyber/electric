@@ -313,7 +313,7 @@
     },
   );
 
-  // 4. Transformer 2W (2권선 변압기)
+  // 4. Transformer 2W (2권선 변압기 - 델타/와이 표시 지원)
   joint.shapes.sld.Transformer2W = joint.dia.Element.define(
     "sld.Transformer2W",
     {
@@ -323,6 +323,8 @@
         { tagName: "circle", selector: "botCircle" },
         { tagName: "path", selector: "topLead" },
         { tagName: "path", selector: "botLead" },
+        { tagName: "text", selector: "topVectorLabel" },
+        { tagName: "text", selector: "botVectorLabel" },
         { tagName: "text", selector: "nameLabel" },
         { tagName: "text", selector: "specLabel" },
       ],
@@ -333,7 +335,7 @@
           r: 16,
           stroke: "#2E7D32",
           strokeWidth: 2,
-          fill: "none",
+          fill: "#ffffff",
         },
         botCircle: {
           cx: 22,
@@ -341,25 +343,49 @@
           r: 16,
           stroke: "#2E7D32",
           strokeWidth: 2,
-          fill: "none",
+          fill: "#ffffff",
         },
         topLead: { d: "M 22 0 L 22 6", stroke: "#2E7D32", strokeWidth: 2 },
         botLead: { d: "M 22 58 L 22 64", stroke: "#2E7D32", strokeWidth: 2 },
+        topVectorLabel: {
+          text: "Δ",
+          x: 22,
+          y: 22,
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          fontSize: 12,
+          fontWeight: "bold",
+          fill: "#2E7D32",
+          fontFamily: "Pretendard, -apple-system, sans-serif",
+          pointerEvents: "none",
+        },
+        botVectorLabel: {
+          text: "Y",
+          x: 22,
+          y: 42,
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          fontSize: 12,
+          fontWeight: "bold",
+          fill: "#2E7D32",
+          fontFamily: "Pretendard, -apple-system, sans-serif",
+          pointerEvents: "none",
+        },
         nameLabel: {
           text: "TR",
-          refX: 48,
+          refX: 46,
           refY: "35%",
           textAnchor: "start",
-          fontSize: 11,
+          fontSize: 10.5,
           fontWeight: "600",
           fill: "#1e293b",
         },
         specLabel: {
           text: "",
-          refX: 48,
+          refX: 46,
           refY: "60%",
           textAnchor: "start",
-          fontSize: 9,
+          fontSize: 8.5,
           fill: "#64748b",
         },
       },
@@ -389,15 +415,33 @@
         joint.dia.Element.prototype.initialize.apply(this, arguments);
         this.updateVisual();
         this.on("change:sldData", this.updateVisual, this);
+        this.on("change:size", this.updateVisual, this);
       },
       updateVisual: function () {
         const data = this.get("sldData") || {};
         const color = data.color || "#2E7D32";
+
+        let priVector = data.priVector || "";
+        let secVector = data.secVector || "";
+        if (!priVector && !secVector && data.connection) {
+          const parts = data.connection.split(/[-/]/);
+          priVector = parts[0] ? parts[0].trim() : "";
+          secVector = parts[1] ? parts[1].trim() : "";
+        }
+        if (!priVector && !secVector) {
+          priVector =
+            data.priVoltage === 154 || data.voltage === 154 ? "Y" : "Δ";
+          secVector =
+            data.priVoltage === 154 || data.voltage === 154 ? "Δ" : "Y";
+        }
+
         this.attr({
           topCircle: { stroke: color },
           botCircle: { stroke: color },
           topLead: { stroke: color },
           botLead: { stroke: color },
+          topVectorLabel: { text: priVector, fill: color },
+          botVectorLabel: { text: secVector, fill: color },
           nameLabel: { text: data.name || "TR" },
           specLabel: { text: data.capacity || "" },
         });
@@ -405,7 +449,7 @@
     },
   );
 
-  // 5. Transformer 3W (3권선 변압기)
+  // 5. Transformer 3W (3권선 변압기 - 델타/와이 표시 지원)
   joint.shapes.sld.Transformer3W = joint.dia.Element.define(
     "sld.Transformer3W",
     {
@@ -417,6 +461,9 @@
         { tagName: "path", selector: "p1" },
         { tagName: "path", selector: "p2" },
         { tagName: "path", selector: "p3" },
+        { tagName: "text", selector: "v1Label" },
+        { tagName: "text", selector: "v2Label" },
+        { tagName: "text", selector: "v3Label" },
         { tagName: "text", selector: "nameLabel" },
       ],
       attrs: {
@@ -426,7 +473,7 @@
           r: 12,
           stroke: "#2E7D32",
           strokeWidth: 2,
-          fill: "none",
+          fill: "#ffffff",
         },
         c2: {
           cx: 16,
@@ -434,7 +481,7 @@
           r: 12,
           stroke: "#2E7D32",
           strokeWidth: 2,
-          fill: "none",
+          fill: "#ffffff",
         },
         c3: {
           cx: 40,
@@ -442,17 +489,53 @@
           r: 12,
           stroke: "#2E7D32",
           strokeWidth: 2,
-          fill: "none",
+          fill: "#ffffff",
         },
         p1: { d: "M 28 0 L 28 4", stroke: "#2E7D32", strokeWidth: 2 },
         p2: { d: "M 16 50 L 16 60", stroke: "#2E7D32", strokeWidth: 2 },
         p3: { d: "M 40 50 L 40 60", stroke: "#2E7D32", strokeWidth: 2 },
+        v1Label: {
+          text: "Y",
+          x: 28,
+          y: 16,
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          fontSize: 9.5,
+          fontWeight: "bold",
+          fill: "#2E7D32",
+          fontFamily: "Pretendard, -apple-system, sans-serif",
+          pointerEvents: "none",
+        },
+        v2Label: {
+          text: "Y",
+          x: 16,
+          y: 38,
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          fontSize: 9.5,
+          fontWeight: "bold",
+          fill: "#2E7D32",
+          fontFamily: "Pretendard, -apple-system, sans-serif",
+          pointerEvents: "none",
+        },
+        v3Label: {
+          text: "Δ",
+          x: 40,
+          y: 38,
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          fontSize: 9.5,
+          fontWeight: "bold",
+          fill: "#2E7D32",
+          fontFamily: "Pretendard, -apple-system, sans-serif",
+          pointerEvents: "none",
+        },
         nameLabel: {
           text: "TR-3W",
-          refX: 60,
-          refY: "40%",
+          refX: 58,
+          refY: "50%",
           textAnchor: "start",
-          fontSize: 11,
+          fontSize: 10.5,
           fontWeight: "600",
           fill: "#1e293b",
         },
@@ -477,6 +560,39 @@
           { id: "sec", group: "ports", args: { x: 16, y: 60 } },
           { id: "tert", group: "ports", args: { x: 40, y: 60 } },
         ],
+      },
+    },
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateVisual();
+        this.on("change:sldData", this.updateVisual, this);
+        this.on("change:size", this.updateVisual, this);
+      },
+      updateVisual: function () {
+        const data = this.get("sldData") || {};
+        const color = data.color || "#2E7D32";
+        let v1 = data.v1 || "Y";
+        let v2 = data.v2 || "Y";
+        let v3 = data.v3 || "Δ";
+        if (data.connection) {
+          const parts = data.connection.split(/[-/]/);
+          if (parts[0]) v1 = parts[0].trim();
+          if (parts[1]) v2 = parts[1].trim();
+          if (parts[2]) v3 = parts[2].trim();
+        }
+        this.attr({
+          c1: { stroke: color },
+          c2: { stroke: color },
+          c3: { stroke: color },
+          p1: { stroke: color },
+          p2: { stroke: color },
+          p3: { stroke: color },
+          v1Label: { text: v1, fill: color },
+          v2Label: { text: v2, fill: color },
+          v3Label: { text: v3, fill: color },
+          nameLabel: { text: data.name || "TR-3W" },
+        });
       },
     },
   );

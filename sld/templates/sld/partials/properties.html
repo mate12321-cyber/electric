@@ -29,6 +29,25 @@
                 </div>
             </div>
 
+            <div class="sld-form-group" id="group-prop-connection" style="display: none;">
+                <label class="sld-form-label">결선 방식 (Vector Group)</label>
+                <select class="sld-select" id="prop-connection" style="width: 100%;">
+                    <option value="Δ-Y">Δ - Y (델타-와이)</option>
+                    <option value="Y-Δ">Y - Δ (와이-델타)</option>
+                    <option value="Δ-Δ">Δ - Δ (델타-델타)</option>
+                    <option value="Y-Y">Y - Y (와이-와이)</option>
+                    <option value="Yn-Δ">Yn - Δ (와이접지-델타)</option>
+                    <option value="Δ-Yn">Δ - Yn (델타-와이접지)</option>
+                    <option value="Y-Y-Δ">Y - Y - Δ (3권선)</option>
+                    <option value="Y-Δ-Δ">Y - Δ - Δ (3권선)</option>
+                </select>
+            </div>
+
+            <div class="sld-form-group" id="group-prop-capacity" style="display: none;">
+                <label class="sld-form-label">정격 용량 (Capacity)</label>
+                <input type="text" class="sld-input" id="prop-capacity" placeholder="예: 20MVA, 1000kVA">
+            </div>
+
             <div class="sld-form-group">
                 <label class="sld-form-label">정격 전류</label>
                 <div class="sld-input-row">

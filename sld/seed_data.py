@@ -55,7 +55,7 @@ def get_default_sld_schema():
 
     cells.append(make_cell(
         'tr-1', 'sld.Transformer2W', 496, 275, 44, 64,
-        {'type': 'TR_2W', 'name': '154/22.9kV TR#1', 'priVoltage': 154, 'secVoltage': 22.9, 'capacity': '20MVA', 'color': '#2E7D32', 'memo': '154kV / 22.9kV 20MVA 변압기'}
+        {'type': 'TR_2W', 'name': '154/22.9kV TR#1', 'priVoltage': 154, 'secVoltage': 22.9, 'connection': 'Y-Δ', 'capacity': '20MVA', 'color': '#2E7D32', 'memo': '154kV / 22.9kV 20MVA 변압기'}
     ))
 
     # Links 154kV (Pure Straight Vertical Line)
@@ -95,7 +95,7 @@ def get_default_sld_schema():
     ))
     cells.append(make_cell(
         'tr-2', 'sld.Transformer2W', 256, 480, 44, 64,
-        {'type': 'TR_2W', 'name': '22.9/0.4kV TR#2', 'priVoltage': 22.9, 'secVoltage': 0.4, 'capacity': '1000kVA', 'color': '#2E7D32'}
+        {'type': 'TR_2W', 'name': '22.9/0.4kV TR#2', 'priVoltage': 22.9, 'secVoltage': 0.4, 'connection': 'Δ-Y', 'capacity': '1000kVA', 'color': '#2E7D32'}
     ))
 
     bus04a_ports = {
@@ -140,7 +140,7 @@ def get_default_sld_schema():
     ))
     cells.append(make_cell(
         'tr-3', 'sld.Transformer2W', 466, 480, 44, 64,
-        {'type': 'TR_2W', 'name': '22.9/0.4kV TR#3', 'priVoltage': 22.9, 'secVoltage': 0.4, 'capacity': '1000kVA', 'color': '#2E7D32'}
+        {'type': 'TR_2W', 'name': '22.9/0.4kV TR#3', 'priVoltage': 22.9, 'secVoltage': 0.4, 'connection': 'Δ-Y', 'capacity': '1000kVA', 'color': '#2E7D32'}
     ))
 
     bus04b_ports = {
@@ -185,7 +185,7 @@ def get_default_sld_schema():
     ))
     cells.append(make_cell(
         'tr-4', 'sld.Transformer2W', 676, 480, 44, 64,
-        {'type': 'TR_2W', 'name': '22.9/0.4kV TR#4', 'priVoltage': 22.9, 'secVoltage': 0.4, 'capacity': '1000kVA', 'color': '#2E7D32'}
+        {'type': 'TR_2W', 'name': '22.9/0.4kV TR#4', 'priVoltage': 22.9, 'secVoltage': 0.4, 'connection': 'Δ-Y', 'capacity': '1000kVA', 'color': '#2E7D32'}
     ))
 
     bus04c_ports = {

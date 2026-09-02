@@ -635,6 +635,8 @@ class SLDEditor {
     bindInput("prop-name", "name");
     bindInput("prop-desc", "desc");
     bindInput("prop-voltage", "voltage", true);
+    bindInput("prop-connection", "connection");
+    bindInput("prop-capacity", "capacity");
     bindInput("prop-current", "current", true);
     bindInput("prop-poles", "poles");
     bindInput("prop-location", "location");
@@ -674,9 +676,22 @@ class SLDEditor {
       if (el) el.value = val !== undefined && val !== null ? val : "";
     };
 
+    const isTransformer = sldData.type === "TR_2W" || sldData.type === "TR_3W";
+    const groupConn = document.getElementById("group-prop-connection");
+    const groupCap = document.getElementById("group-prop-capacity");
+    if (groupConn) groupConn.style.display = isTransformer ? "block" : "none";
+    if (groupCap) groupCap.style.display = isTransformer ? "block" : "none";
+
+    let defConn = "Δ-Y";
+    if (sldData.type === "TR_3W") defConn = "Y-Y-Δ";
+    else if (sldData.priVoltage === 154 || sldData.voltage === 154)
+      defConn = "Y-Δ";
+
     setValue("prop-name", sldData.name || catalog.nameKo || "설비");
     setValue("prop-desc", sldData.desc || catalog.descKo || "");
     setValue("prop-voltage", sldData.voltage || sldData.priVoltage || "");
+    setValue("prop-connection", sldData.connection || defConn);
+    setValue("prop-capacity", sldData.capacity || "");
     setValue("prop-current", sldData.current || "");
     setValue("prop-poles", sldData.poles || "3P");
     setValue("prop-location", sldData.location || "");
