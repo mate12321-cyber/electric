@@ -4,7 +4,7 @@
       "type": "sld.TransmissionTower",
       "id": "tower-154",
       "position": {
-        "x": 490,
+        "x": 492,
         "y": 40
       },
       "size": {
@@ -24,7 +24,7 @@
       "type": "sld.Breaker",
       "id": "cb-154",
       "position": {
-        "x": 504,
+        "x": 506,
         "y": 130
       },
       "size": {
@@ -47,7 +47,7 @@
       "type": "sld.Disconnector",
       "id": "ds-154",
       "position": {
-        "x": 504,
+        "x": 506,
         "y": 205
       },
       "size": {
@@ -69,7 +69,7 @@
       "type": "sld.Transformer2W",
       "id": "tr-1",
       "position": {
-        "x": 496,
+        "x": 498,
         "y": 275
       },
       "size": {
@@ -216,7 +216,7 @@
             "id": "p_f1",
             "group": "bus-ports",
             "args": {
-              "x": 78,
+              "x": 80,
               "y": 6
             }
           },
@@ -224,7 +224,7 @@
             "id": "p_f2",
             "group": "bus-ports",
             "args": {
-              "x": 288,
+              "x": 290,
               "y": 6
             }
           },
@@ -232,7 +232,7 @@
             "id": "p_in",
             "group": "bus-ports",
             "args": {
-              "x": 318,
+              "x": 320,
               "y": 6
             }
           },
@@ -240,7 +240,7 @@
             "id": "p_f3",
             "group": "bus-ports",
             "args": {
-              "x": 498,
+              "x": 500,
               "y": 6
             }
           },
@@ -248,7 +248,7 @@
             "id": "p_gen",
             "group": "bus-ports",
             "args": {
-              "x": 628,
+              "x": 630,
               "y": 6
             }
           }
@@ -288,7 +288,7 @@
       "type": "sld.Breaker",
       "id": "vcb-a",
       "position": {
-        "x": 264,
+        "x": 266,
         "y": 410
       },
       "size": {
@@ -310,7 +310,7 @@
       "type": "sld.Transformer2W",
       "id": "tr-2",
       "position": {
-        "x": 256,
+        "x": 258,
         "y": 480
       },
       "size": {
@@ -336,7 +336,7 @@
         "y": 575
       },
       "size": {
-        "width": 196,
+        "width": 200,
         "height": 10
       },
       "sldData": {
@@ -369,7 +369,7 @@
             "id": "p1",
             "group": "bus-ports",
             "args": {
-              "x": 36,
+              "x": 40,
               "y": 5
             }
           },
@@ -377,7 +377,7 @@
             "id": "p_tr",
             "group": "bus-ports",
             "args": {
-              "x": 98,
+              "x": 100,
               "y": 5
             }
           },
@@ -385,7 +385,7 @@
             "id": "p2",
             "group": "bus-ports",
             "args": {
-              "x": 98,
+              "x": 100,
               "y": 5
             }
           },
@@ -491,7 +491,7 @@
       "type": "sld.ACB",
       "id": "acb-a1",
       "position": {
-        "x": 202,
+        "x": 206,
         "y": 615
       },
       "size": {
@@ -513,7 +513,7 @@
       "type": "sld.Load",
       "id": "load-a1",
       "position": {
-        "x": 199,
+        "x": 203,
         "y": 680
       },
       "size": {
@@ -589,7 +589,7 @@
       "type": "sld.MCCB",
       "id": "mccb-a2",
       "position": {
-        "x": 264,
+        "x": 266,
         "y": 615
       },
       "size": {
@@ -610,7 +610,7 @@
       "type": "sld.Load",
       "id": "load-a2",
       "position": {
-        "x": 261,
+        "x": 263,
         "y": 680
       },
       "size": {
@@ -783,7 +783,7 @@
       "type": "sld.Breaker",
       "id": "vcb-b",
       "position": {
-        "x": 474,
+        "x": 476,
         "y": 410
       },
       "size": {
@@ -804,7 +804,7 @@
       "type": "sld.Transformer2W",
       "id": "tr-3",
       "position": {
-        "x": 466,
+        "x": 468,
         "y": 480
       },
       "size": {
@@ -830,7 +830,7 @@
         "y": 575
       },
       "size": {
-        "width": 196,
+        "width": 200,
         "height": 10
       },
       "sldData": {
@@ -863,7 +863,7 @@
             "id": "p1",
             "group": "bus-ports",
             "args": {
-              "x": 36,
+              "x": 40,
               "y": 5
             }
           },
@@ -871,7 +871,7 @@
             "id": "p_tr",
             "group": "bus-ports",
             "args": {
-              "x": 98,
+              "x": 100,
               "y": 5
             }
           },
@@ -879,7 +879,7 @@
             "id": "p2",
             "group": "bus-ports",
             "args": {
-              "x": 98,
+              "x": 100,
               "y": 5
             }
           },
@@ -985,7 +985,7 @@
       "type": "sld.MCCB",
       "id": "mccb-b1",
       "position": {
-        "x": 412,
+        "x": 416,
         "y": 615
       },
       "size": {
@@ -1005,7 +1005,7 @@
       "type": "sld.Load",
       "id": "load-b1",
       "position": {
-        "x": 409,
+        "x": 413,
         "y": 680
       },
       "size": {
@@ -1081,7 +1081,7 @@
       "type": "sld.MCCB",
       "id": "mccb-b2",
       "position": {
-        "x": 474,
+        "x": 476,
         "y": 615
       },
       "size": {
@@ -1101,7 +1101,7 @@
       "type": "sld.Load",
       "id": "load-b2",
       "position": {
-        "x": 471,
+        "x": 473,
         "y": 680
       },
       "size": {
@@ -1273,7 +1273,7 @@
       "type": "sld.Breaker",
       "id": "vcb-c",
       "position": {
-        "x": 684,
+        "x": 686,
         "y": 410
       },
       "size": {
@@ -1294,7 +1294,7 @@
       "type": "sld.Transformer2W",
       "id": "tr-4",
       "position": {
-        "x": 676,
+        "x": 678,
         "y": 480
       },
       "size": {
@@ -1320,7 +1320,7 @@
         "y": 575
       },
       "size": {
-        "width": 196,
+        "width": 200,
         "height": 10
       },
       "sldData": {
@@ -1353,7 +1353,7 @@
             "id": "p1",
             "group": "bus-ports",
             "args": {
-              "x": 36,
+              "x": 40,
               "y": 5
             }
           },
@@ -1361,7 +1361,7 @@
             "id": "p_tr",
             "group": "bus-ports",
             "args": {
-              "x": 98,
+              "x": 100,
               "y": 5
             }
           },
@@ -1369,7 +1369,7 @@
             "id": "p2",
             "group": "bus-ports",
             "args": {
-              "x": 98,
+              "x": 100,
               "y": 5
             }
           },
@@ -1475,7 +1475,7 @@
       "type": "sld.MCCB",
       "id": "mccb-c1",
       "position": {
-        "x": 622,
+        "x": 626,
         "y": 615
       },
       "size": {
@@ -1495,7 +1495,7 @@
       "type": "sld.Load",
       "id": "load-c1",
       "position": {
-        "x": 619,
+        "x": 623,
         "y": 680
       },
       "size": {
@@ -1571,7 +1571,7 @@
       "type": "sld.MCCB",
       "id": "mccb-c2",
       "position": {
-        "x": 684,
+        "x": 686,
         "y": 615
       },
       "size": {
@@ -1591,7 +1591,7 @@
       "type": "sld.Load",
       "id": "load-c2",
       "position": {
-        "x": 681,
+        "x": 683,
         "y": 680
       },
       "size": {
@@ -1763,7 +1763,7 @@
       "type": "sld.Generator",
       "id": "gen-1",
       "position": {
-        "x": 806,
+        "x": 808,
         "y": 520
       },
       "size": {
@@ -1783,7 +1783,7 @@
       "type": "sld.ACB",
       "id": "acb-gen",
       "position": {
-        "x": 814,
+        "x": 816,
         "y": 430
       },
       "size": {
@@ -1897,7 +1897,7 @@
       "type": "sld.ACB",
       "id": "acb-ups-in",
       "position": {
-        "x": 220,
+        "x": 206,
         "y": 810
       },
       "size": {
@@ -1917,7 +1917,7 @@
       "type": "sld.UPS",
       "id": "ups-1",
       "position": {
-        "x": 310,
+        "x": 312,
         "y": 808
       },
       "size": {
@@ -1936,7 +1936,7 @@
       "type": "sld.Battery",
       "id": "battery-1",
       "position": {
-        "x": 312,
+        "x": 314,
         "y": 905
       },
       "size": {
@@ -1956,7 +1956,7 @@
       "type": "sld.Switchgear",
       "id": "swg-ups",
       "position": {
-        "x": 430,
+        "x": 428,
         "y": 802
       },
       "size": {
@@ -1978,7 +1978,7 @@
         "y": 828
       },
       "size": {
-        "width": 160,
+        "width": 170,
         "height": 8
       },
       "sldData": {
@@ -2019,7 +2019,7 @@
             "id": "p1",
             "group": "bus-ports",
             "args": {
-              "x": 48,
+              "x": 50,
               "y": 8
             }
           },
@@ -2027,7 +2027,7 @@
             "id": "p2",
             "group": "bus-ports",
             "args": {
-              "x": 128,
+              "x": 130,
               "y": 8
             }
           }
@@ -2038,7 +2038,7 @@
       "type": "sld.MCCB",
       "id": "mccb-ups1",
       "position": {
-        "x": 554,
+        "x": 556,
         "y": 860
       },
       "size": {
@@ -2058,7 +2058,7 @@
       "type": "sld.Load",
       "id": "load-ups1",
       "position": {
-        "x": 551,
+        "x": 553,
         "y": 925
       },
       "size": {
@@ -2076,7 +2076,7 @@
       "type": "sld.MCCB",
       "id": "mccb-ups2",
       "position": {
-        "x": 634,
+        "x": 636,
         "y": 860
       },
       "size": {
@@ -2096,7 +2096,7 @@
       "type": "sld.Load",
       "id": "load-ups2",
       "position": {
-        "x": 631,
+        "x": 633,
         "y": 925
       },
       "size": {

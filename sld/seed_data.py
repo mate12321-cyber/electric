@@ -37,24 +37,24 @@ def get_default_sld_schema():
             }
         }
 
-    # 1. 154kV Receiving Line (Center Column X = 518)
+    # 1. 154kV Receiving Line (Center Column X = 520)
     cells.append(make_cell(
-        'tower-154', 'sld.TransmissionTower', 490, 40, 56, 56,
+        'tower-154', 'sld.TransmissionTower', 492, 40, 56, 56,
         {'type': 'TRANSMISSION_TOWER', 'name': '154kV 수전', 'voltage': 154, 'voltageUnit': 'kV', 'color': '#E53935'}
     ))
 
     cells.append(make_cell(
-        'cb-154', 'sld.Breaker', 504, 130, 28, 40,
+        'cb-154', 'sld.Breaker', 506, 130, 28, 40,
         {'type': 'CB_GCB', 'name': '154kV CB', 'state': 'LIVE', 'voltage': 154, 'current': 2000, 'poles': '3P', 'color': '#E53935', 'memo': '154kV 수전 주 차단기'}
     ))
 
     cells.append(make_cell(
-        'ds-154', 'sld.Disconnector', 504, 205, 28, 40,
+        'ds-154', 'sld.Disconnector', 506, 205, 28, 40,
         {'type': 'DS', 'name': '154kV DS', 'state': 'LIVE', 'voltage': 154, 'current': 2000, 'color': '#E53935', 'memo': '154kV 수전 단로기'}
     ))
 
     cells.append(make_cell(
-        'tr-1', 'sld.Transformer2W', 496, 275, 44, 64,
+        'tr-1', 'sld.Transformer2W', 498, 275, 44, 64,
         {'type': 'TR_2W', 'name': '154/22.9kV TR#1', 'priVoltage': 154, 'secVoltage': 22.9, 'connection': 'Y-Δ', 'capacity': '20MVA', 'color': '#E53935', 'memo': '154kV / 22.9kV 20MVA 변압기'}
     ))
 
@@ -72,11 +72,11 @@ def get_default_sld_schema():
             }
         },
         'items': [
-            {'id': 'p_f1', 'group': 'bus-ports', 'args': {'x': 78, 'y': 6}},
-            {'id': 'p_f2', 'group': 'bus-ports', 'args': {'x': 288, 'y': 6}},
-            {'id': 'p_in', 'group': 'bus-ports', 'args': {'x': 318, 'y': 6}},
-            {'id': 'p_f3', 'group': 'bus-ports', 'args': {'x': 498, 'y': 6}},
-            {'id': 'p_gen', 'group': 'bus-ports', 'args': {'x': 628, 'y': 6}},
+            {'id': 'p_f1', 'group': 'bus-ports', 'args': {'x': 80, 'y': 6}},
+            {'id': 'p_f2', 'group': 'bus-ports', 'args': {'x': 290, 'y': 6}},
+            {'id': 'p_in', 'group': 'bus-ports', 'args': {'x': 320, 'y': 6}},
+            {'id': 'p_f3', 'group': 'bus-ports', 'args': {'x': 500, 'y': 6}},
+            {'id': 'p_gen', 'group': 'bus-ports', 'args': {'x': 630, 'y': 6}},
         ]
     }
     cells.append(make_cell(
@@ -86,27 +86,27 @@ def get_default_sld_schema():
     ))
     cells.append(make_link('link-tr1-bus22', 'tr-1', 'sec', 'bus-22-9', 'p_in', '#9C27B0'))
 
-    # 3. Feeder A (Column X = 278: 22.9/0.4kV TR#2 & 0.4kV Bus A)
+    # 3. Feeder A (Column X = 280: 22.9/0.4kV TR#2 & 0.4kV Bus A)
     cells.append(make_cell(
-        'vcb-a', 'sld.Breaker', 264, 410, 28, 40,
+        'vcb-a', 'sld.Breaker', 266, 410, 28, 40,
         {'type': 'CB_VCB', 'name': 'VCB', 'state': 'LIVE', 'voltage': 22.9, 'current': 630, 'color': '#9C27B0', 'location': '22.9kV 모선'}
     ))
     cells.append(make_cell(
-        'tr-2', 'sld.Transformer2W', 256, 480, 44, 64,
+        'tr-2', 'sld.Transformer2W', 258, 480, 44, 64,
         {'type': 'TR_2W', 'name': '22.9/0.4kV TR#2', 'priVoltage': 22.9, 'secVoltage': 0.4, 'connection': 'Δ-Y', 'capacity': '1000kVA', 'color': '#16A34A'}
     ))
 
     bus04a_ports = {
         'groups': {'bus-ports': {'position': {'name': 'absolute'}, 'attrs': {'circle': {'r': 3.5, 'magnet': True, 'fill': '#fff', 'stroke': '#16A34A', 'strokeWidth': 1.5}}}},
         'items': [
-            {'id': 'p1', 'group': 'bus-ports', 'args': {'x': 36, 'y': 5}},
-            {'id': 'p_tr', 'group': 'bus-ports', 'args': {'x': 98, 'y': 5}},
-            {'id': 'p2', 'group': 'bus-ports', 'args': {'x': 98, 'y': 5}},
+            {'id': 'p1', 'group': 'bus-ports', 'args': {'x': 40, 'y': 5}},
+            {'id': 'p_tr', 'group': 'bus-ports', 'args': {'x': 100, 'y': 5}},
+            {'id': 'p2', 'group': 'bus-ports', 'args': {'x': 100, 'y': 5}},
             {'id': 'p3', 'group': 'bus-ports', 'args': {'x': 160, 'y': 5}},
         ]
     }
     cells.append(make_cell(
-        'bus-04-a', 'sld.Busbar', 180, 575, 196, 10,
+        'bus-04-a', 'sld.Busbar', 180, 575, 200, 10,
         {'type': 'BUSBAR', 'name': '0.4kV 모선 (A)', 'voltage': 0.4, 'voltageUnit': 'kV', 'color': '#16A34A'},
         ports_config=bus04a_ports
     ))
@@ -115,14 +115,14 @@ def get_default_sld_schema():
     cells.append(make_link('link-vcba-tr2', 'vcb-a', 'out', 'tr-2', 'pri', '#9C27B0'))
     cells.append(make_link('link-tr2-bus04a', 'tr-2', 'sec', 'bus-04-a', 'p_tr', '#16A34A'))
 
-    # Sub-loads on 0.4kV Bus A (Columns: 216, 278, 340)
-    cells.append(make_cell('acb-a1', 'sld.ACB', 202, 615, 28, 40, {'type': 'CB_ACB', 'name': 'ACB', 'state': 'LIVE', 'voltage': 0.4, 'current': 1600, 'color': '#16A34A', 'location': '0.4kV 모선 (A)'}))
-    cells.append(make_cell('load-a1', 'sld.Load', 199, 680, 34, 36, {'type': 'LOAD', 'name': '부하', 'color': '#16A34A'}))
+    # Sub-loads on 0.4kV Bus A (Columns: 220, 280, 340)
+    cells.append(make_cell('acb-a1', 'sld.ACB', 206, 615, 28, 40, {'type': 'CB_ACB', 'name': 'ACB', 'state': 'LIVE', 'voltage': 0.4, 'current': 1600, 'color': '#16A34A', 'location': '0.4kV 모선 (A)'}))
+    cells.append(make_cell('load-a1', 'sld.Load', 203, 680, 34, 36, {'type': 'LOAD', 'name': '부하', 'color': '#16A34A'}))
     cells.append(make_link('link-busa-acba1', 'bus-04-a', 'p1', 'acb-a1', 'in', '#16A34A'))
     cells.append(make_link('link-acba1-loada1', 'acb-a1', 'out', 'load-a1', 'in', '#16A34A'))
 
-    cells.append(make_cell('mccb-a2', 'sld.MCCB', 264, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'current': 225, 'color': '#16A34A'}))
-    cells.append(make_cell('load-a2', 'sld.Load', 261, 680, 34, 36, {'type': 'LOAD', 'name': '부하', 'color': '#16A34A'}))
+    cells.append(make_cell('mccb-a2', 'sld.MCCB', 266, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'current': 225, 'color': '#16A34A'}))
+    cells.append(make_cell('load-a2', 'sld.Load', 263, 680, 34, 36, {'type': 'LOAD', 'name': '부하', 'color': '#16A34A'}))
     cells.append(make_link('link-busa-mccba2', 'bus-04-a', 'p2', 'mccb-a2', 'in', '#16A34A'))
     cells.append(make_link('link-mccba2-loada2', 'mccb-a2', 'out', 'load-a2', 'in', '#16A34A'))
 
@@ -131,27 +131,27 @@ def get_default_sld_schema():
     cells.append(make_link('link-busa-mccba3', 'bus-04-a', 'p3', 'mccb-a3', 'in', '#16A34A'))
     cells.append(make_link('link-mccba3-loada3', 'mccb-a3', 'out', 'load-a3', 'in', '#16A34A'))
 
-    # 4. Feeder B (Column X = 488: 22.9/0.4kV TR#3 & 0.4kV Bus B)
+    # 4. Feeder B (Column X = 490: 22.9/0.4kV TR#3 & 0.4kV Bus B)
     cells.append(make_cell(
-        'vcb-b', 'sld.Breaker', 474, 410, 28, 40,
+        'vcb-b', 'sld.Breaker', 476, 410, 28, 40,
         {'type': 'CB_VCB', 'name': 'VCB', 'state': 'LIVE', 'voltage': 22.9, 'current': 630, 'color': '#9C27B0'}
     ))
     cells.append(make_cell(
-        'tr-3', 'sld.Transformer2W', 466, 480, 44, 64,
+        'tr-3', 'sld.Transformer2W', 468, 480, 44, 64,
         {'type': 'TR_2W', 'name': '22.9/0.4kV TR#3', 'priVoltage': 22.9, 'secVoltage': 0.4, 'connection': 'Δ-Y', 'capacity': '1000kVA', 'color': '#16A34A'}
     ))
 
     bus04b_ports = {
         'groups': {'bus-ports': {'position': {'name': 'absolute'}, 'attrs': {'circle': {'r': 3.5, 'magnet': True, 'fill': '#fff', 'stroke': '#16A34A', 'strokeWidth': 1.5}}}},
         'items': [
-            {'id': 'p1', 'group': 'bus-ports', 'args': {'x': 36, 'y': 5}},
-            {'id': 'p_tr', 'group': 'bus-ports', 'args': {'x': 98, 'y': 5}},
-            {'id': 'p2', 'group': 'bus-ports', 'args': {'x': 98, 'y': 5}},
+            {'id': 'p1', 'group': 'bus-ports', 'args': {'x': 40, 'y': 5}},
+            {'id': 'p_tr', 'group': 'bus-ports', 'args': {'x': 100, 'y': 5}},
+            {'id': 'p2', 'group': 'bus-ports', 'args': {'x': 100, 'y': 5}},
             {'id': 'p3', 'group': 'bus-ports', 'args': {'x': 160, 'y': 5}},
         ]
     }
     cells.append(make_cell(
-        'bus-04-b', 'sld.Busbar', 390, 575, 196, 10,
+        'bus-04-b', 'sld.Busbar', 390, 575, 200, 10,
         {'type': 'BUSBAR', 'name': '0.4kV 모선 (B)', 'voltage': 0.4, 'voltageUnit': 'kV', 'color': '#16A34A'},
         ports_config=bus04b_ports
     ))
@@ -160,14 +160,14 @@ def get_default_sld_schema():
     cells.append(make_link('link-vcbb-tr3', 'vcb-b', 'out', 'tr-3', 'pri', '#9C27B0'))
     cells.append(make_link('link-tr3-bus04b', 'tr-3', 'sec', 'bus-04-b', 'p_tr', '#16A34A'))
 
-    # Sub-loads on Bus B (Columns: 426, 488, 550)
-    cells.append(make_cell('mccb-b1', 'sld.MCCB', 412, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'color': '#16A34A'}))
-    cells.append(make_cell('load-b1', 'sld.Load', 409, 680, 34, 36, {'type': 'LOAD', 'name': '부하', 'color': '#16A34A'}))
+    # Sub-loads on Bus B (Columns: 430, 490, 550)
+    cells.append(make_cell('mccb-b1', 'sld.MCCB', 416, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'color': '#16A34A'}))
+    cells.append(make_cell('load-b1', 'sld.Load', 413, 680, 34, 36, {'type': 'LOAD', 'name': '부하', 'color': '#16A34A'}))
     cells.append(make_link('link-busb-mccbb1', 'bus-04-b', 'p1', 'mccb-b1', 'in', '#16A34A'))
     cells.append(make_link('link-mccbb1-loadb1', 'mccb-b1', 'out', 'load-b1', 'in', '#16A34A'))
 
-    cells.append(make_cell('mccb-b2', 'sld.MCCB', 474, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'color': '#16A34A'}))
-    cells.append(make_cell('load-b2', 'sld.Load', 471, 680, 34, 36, {'type': 'LOAD', 'name': '부하', 'color': '#16A34A'}))
+    cells.append(make_cell('mccb-b2', 'sld.MCCB', 476, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'color': '#16A34A'}))
+    cells.append(make_cell('load-b2', 'sld.Load', 473, 680, 34, 36, {'type': 'LOAD', 'name': '부하', 'color': '#16A34A'}))
     cells.append(make_link('link-busb-mccbb2', 'bus-04-b', 'p2', 'mccb-b2', 'in', '#16A34A'))
     cells.append(make_link('link-mccbb2-loadb2', 'mccb-b2', 'out', 'load-b2', 'in', '#16A34A'))
 
@@ -176,27 +176,27 @@ def get_default_sld_schema():
     cells.append(make_link('link-busb-mccbb3', 'bus-04-b', 'p3', 'mccb-b3', 'in', '#16A34A'))
     cells.append(make_link('link-mccbb3-loadb3', 'mccb-b3', 'out', 'load-b3', 'in', '#16A34A'))
 
-    # 5. Feeder C (Column X = 698: 22.9/0.4kV TR#4 & 0.4kV Bus C)
+    # 5. Feeder C (Column X = 700: 22.9/0.4kV TR#4 & 0.4kV Bus C)
     cells.append(make_cell(
-        'vcb-c', 'sld.Breaker', 684, 410, 28, 40,
+        'vcb-c', 'sld.Breaker', 686, 410, 28, 40,
         {'type': 'CB_VCB', 'name': 'VCB', 'state': 'LIVE', 'voltage': 22.9, 'current': 630, 'color': '#9C27B0'}
     ))
     cells.append(make_cell(
-        'tr-4', 'sld.Transformer2W', 676, 480, 44, 64,
+        'tr-4', 'sld.Transformer2W', 678, 480, 44, 64,
         {'type': 'TR_2W', 'name': '22.9/0.4kV TR#4', 'priVoltage': 22.9, 'secVoltage': 0.4, 'connection': 'Δ-Y', 'capacity': '1000kVA', 'color': '#16A34A'}
     ))
 
     bus04c_ports = {
         'groups': {'bus-ports': {'position': {'name': 'absolute'}, 'attrs': {'circle': {'r': 3.5, 'magnet': True, 'fill': '#fff', 'stroke': '#16A34A', 'strokeWidth': 1.5}}}},
         'items': [
-            {'id': 'p1', 'group': 'bus-ports', 'args': {'x': 36, 'y': 5}},
-            {'id': 'p_tr', 'group': 'bus-ports', 'args': {'x': 98, 'y': 5}},
-            {'id': 'p2', 'group': 'bus-ports', 'args': {'x': 98, 'y': 5}},
+            {'id': 'p1', 'group': 'bus-ports', 'args': {'x': 40, 'y': 5}},
+            {'id': 'p_tr', 'group': 'bus-ports', 'args': {'x': 100, 'y': 5}},
+            {'id': 'p2', 'group': 'bus-ports', 'args': {'x': 100, 'y': 5}},
             {'id': 'p3', 'group': 'bus-ports', 'args': {'x': 160, 'y': 5}},
         ]
     }
     cells.append(make_cell(
-        'bus-04-c', 'sld.Busbar', 600, 575, 196, 10,
+        'bus-04-c', 'sld.Busbar', 600, 575, 200, 10,
         {'type': 'BUSBAR', 'name': '0.4kV 모선 (C)', 'voltage': 0.4, 'voltageUnit': 'kV', 'color': '#16A34A'},
         ports_config=bus04c_ports
     ))
@@ -205,14 +205,14 @@ def get_default_sld_schema():
     cells.append(make_link('link-vcbc-tr4', 'vcb-c', 'out', 'tr-4', 'pri', '#9C27B0'))
     cells.append(make_link('link-tr4-bus04c', 'tr-4', 'sec', 'bus-04-c', 'p_tr', '#16A34A'))
 
-    # Sub-loads on Bus C (Columns: 636, 698, 760)
-    cells.append(make_cell('mccb-c1', 'sld.MCCB', 622, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'color': '#16A34A'}))
-    cells.append(make_cell('load-c1', 'sld.Load', 619, 680, 34, 36, {'type': 'LOAD', 'name': '부하', 'color': '#16A34A'}))
+    # Sub-loads on Bus C (Columns: 640, 700, 760)
+    cells.append(make_cell('mccb-c1', 'sld.MCCB', 626, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'color': '#16A34A'}))
+    cells.append(make_cell('load-c1', 'sld.Load', 623, 680, 34, 36, {'type': 'LOAD', 'name': '부하', 'color': '#16A34A'}))
     cells.append(make_link('link-busc-mccbc1', 'bus-04-c', 'p1', 'mccb-c1', 'in', '#16A34A'))
     cells.append(make_link('link-mccbc1-loadc1', 'mccb-c1', 'out', 'load-c1', 'in', '#16A34A'))
 
-    cells.append(make_cell('mccb-c2', 'sld.MCCB', 684, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'color': '#16A34A'}))
-    cells.append(make_cell('load-c2', 'sld.Load', 681, 680, 34, 36, {'type': 'LOAD', 'name': '부하', 'color': '#16A34A'}))
+    cells.append(make_cell('mccb-c2', 'sld.MCCB', 686, 615, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.4, 'color': '#16A34A'}))
+    cells.append(make_cell('load-c2', 'sld.Load', 683, 680, 34, 36, {'type': 'LOAD', 'name': '부하', 'color': '#16A34A'}))
     cells.append(make_link('link-busc-mccbc2', 'bus-04-c', 'p2', 'mccb-c2', 'in', '#16A34A'))
     cells.append(make_link('link-mccbc2-loadc2', 'mccb-c2', 'out', 'load-c2', 'in', '#16A34A'))
 
@@ -221,13 +221,13 @@ def get_default_sld_schema():
     cells.append(make_link('link-busc-mccbc3', 'bus-04-c', 'p3', 'mccb-c3', 'in', '#16A34A'))
     cells.append(make_link('link-mccbc3-loadc3', 'mccb-c3', 'out', 'load-c3', 'in', '#16A34A'))
 
-    # 6. Emergency Generator (Column X = 828)
+    # 6. Emergency Generator (Column X = 830)
     cells.append(make_cell(
-        'gen-1', 'sld.Generator', 806, 520, 44, 44,
+        'gen-1', 'sld.Generator', 808, 520, 44, 44,
         {'type': 'GENERATOR', 'name': '비상 발전기', 'capacity': '500kVA', 'voltage': 22.9, 'color': '#E65100'}
     ))
     cells.append(make_cell(
-        'acb-gen', 'sld.ACB', 814, 430, 28, 40,
+        'acb-gen', 'sld.ACB', 816, 430, 28, 40,
         {'type': 'CB_ACB', 'name': 'ACB', 'state': 'LIVE', 'voltage': 22.9, 'current': 800, 'color': '#9C27B0'}
     ))
     cells.append(make_link('link-gen-acb', 'gen-1', 'out', 'acb-gen', 'out', '#E65100'))
@@ -245,19 +245,19 @@ def get_default_sld_schema():
         {'type': 'TEXT_LABEL', 'text': '상용 전원 AC 3Φ 380V', 'color': '#16A34A'}
     ))
     cells.append(make_cell(
-        'acb-ups-in', 'sld.ACB', 220, 810, 28, 40,
+        'acb-ups-in', 'sld.ACB', 206, 810, 28, 40,
         {'type': 'CB_ACB', 'name': 'ACB', 'state': 'LIVE', 'voltage': 0.38, 'color': '#16A34A'}
     ))
     cells.append(make_cell(
-        'ups-1', 'sld.UPS', 310, 808, 56, 48,
+        'ups-1', 'sld.UPS', 312, 808, 56, 48,
         {'type': 'UPS', 'name': 'UPS', 'capacity': '100kVA', 'color': '#EA580C'}
     ))
     cells.append(make_cell(
-        'battery-1', 'sld.Battery', 312, 905, 52, 34,
+        'battery-1', 'sld.Battery', 314, 905, 52, 34,
         {'type': 'BATTERY', 'name': '배터리 뱅크', 'voltage': 384, 'voltageUnit': 'V DC', 'color': '#EA580C'}
     ))
     cells.append(make_cell(
-        'swg-ups', 'sld.Switchgear', 430, 802, 44, 60,
+        'swg-ups', 'sld.Switchgear', 428, 802, 44, 60,
         {'type': 'SWITCHGEAR', 'name': 'UPS 배전반', 'color': '#16A34A'}
     ))
 
@@ -266,21 +266,21 @@ def get_default_sld_schema():
         'groups': {'bus-ports': {'position': {'name': 'absolute'}, 'attrs': {'circle': {'r': 3.5, 'magnet': True, 'fill': '#fff', 'stroke': '#16A34A', 'strokeWidth': 1.5}}}},
         'items': [
             {'id': 'p_in', 'group': 'bus-ports', 'args': {'x': 0, 'y': 4}},
-            {'id': 'p1', 'group': 'bus-ports', 'args': {'x': 48, 'y': 8}},
-            {'id': 'p2', 'group': 'bus-ports', 'args': {'x': 128, 'y': 8}},
+            {'id': 'p1', 'group': 'bus-ports', 'args': {'x': 50, 'y': 8}},
+            {'id': 'p2', 'group': 'bus-ports', 'args': {'x': 130, 'y': 8}},
         ]
     }
     cells.append(make_cell(
-        'bus-ups', 'sld.Busbar', 520, 828, 160, 8,
+        'bus-ups', 'sld.Busbar', 520, 828, 170, 8,
         {'type': 'BUSBAR', 'name': 'UPS 모선 (380V)', 'voltage': 0.38, 'voltageUnit': 'kV', 'color': '#16A34A'},
         ports_config=bus_ups_ports
     ))
 
-    # UPS Sub-loads (Columns: 568, 648)
-    cells.append(make_cell('mccb-ups1', 'sld.MCCB', 554, 860, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.38, 'color': '#16A34A'}))
-    cells.append(make_cell('load-ups1', 'sld.Load', 551, 925, 34, 36, {'type': 'LOAD', 'name': '중요 부하 1', 'color': '#16A34A'}))
-    cells.append(make_cell('mccb-ups2', 'sld.MCCB', 634, 860, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.38, 'color': '#16A34A'}))
-    cells.append(make_cell('load-ups2', 'sld.Load', 631, 925, 34, 36, {'type': 'LOAD', 'name': '중요 부하 2', 'color': '#16A34A'}))
+    # UPS Sub-loads (Columns: 570, 650)
+    cells.append(make_cell('mccb-ups1', 'sld.MCCB', 556, 860, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.38, 'color': '#16A34A'}))
+    cells.append(make_cell('load-ups1', 'sld.Load', 553, 925, 34, 36, {'type': 'LOAD', 'name': '중요 부하 1', 'color': '#16A34A'}))
+    cells.append(make_cell('mccb-ups2', 'sld.MCCB', 636, 860, 28, 40, {'type': 'CB_MCCB', 'name': 'MCCB', 'state': 'LIVE', 'voltage': 0.38, 'color': '#16A34A'}))
+    cells.append(make_cell('load-ups2', 'sld.Load', 633, 925, 34, 36, {'type': 'LOAD', 'name': '중요 부하 2', 'color': '#16A34A'}))
 
     # UPS Links (All straight lines)
     cells.append(make_link('link-acbups-ups', 'acb-ups-in', 'out', 'ups-1', 'ac_in', '#16A34A'))

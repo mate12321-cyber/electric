@@ -332,6 +332,19 @@ class SLDEditor {
       }
     });
 
+    // Snap to port grid on drag release
+    this.paper.on("element:pointerup", (elementView) => {
+      const el = elementView.model;
+      if (el && el.isElement && el.isElement()) {
+        this.snapElementToPortGrid(el);
+        this.topologyTracker.applyStyles(this.paper);
+        this.updateSelectionOverlay();
+        this.updateMinimap();
+        this.pushHistory();
+        this.scheduleAutoSave();
+      }
+    });
+
     this.paper.on("link:pointerdown", (linkView) => {
       this.selectCell(linkView.model);
     });
@@ -536,7 +549,7 @@ class SLDEditor {
           rect.left + rect.width / 2,
           rect.top + rect.height / 2,
         );
-        this.createElement(type, center.x - 20, center.y - 20);
+        this.createElement(type, center.x, center.y);
       });
     });
 
@@ -571,7 +584,7 @@ class SLDEditor {
       if (!type) return;
 
       const p = this.getPaperPoint(e.clientX, e.clientY);
-      this.createElement(type, p.x - 20, p.y - 20);
+      this.createElement(type, p.x, p.y);
       window.__draggedSymbolType = null;
     });
 
@@ -736,9 +749,19 @@ class SLDEditor {
         height = 40;
     }
 
-    // Snap to grid (10px)
-    const gridX = Math.round(x / 10) * 10;
-    const gridY = Math.round(y / 10) * 10;
+    // Snap connection point (primary port) to grid (10px)
+    const gridSize = this.options.gridSize || 10;
+    const snapOffset = this.getPrimaryPortOffset(
+      type,
+      width,
+      height,
+      shapeClass,
+    );
+    const targetPortX = Math.round(x / gridSize) * gridSize;
+    const targetPortY = Math.round(y / gridSize) * gridSize;
+
+    const gridX = targetPortX - snapOffset.x;
+    const gridY = targetPortY - snapOffset.y;
 
     const cell = new shapeClass({
       position: { x: gridX, y: gridY },
@@ -752,6 +775,137 @@ class SLDEditor {
     this.updateMinimap();
     this.scheduleAutoSave();
     return cell;
+  }
+
+  getPrimaryPortOffset(type, width, height, cellOrClass) {
+    // 1. Try to find from cell instance or shape definition
+    if (cellOrClass) {
+      if (typeof cellOrClass.getPorts === "function") {
+        const ports = cellOrClass.getPorts();
+        if (ports && ports.length > 0) {
+          const priority = [
+            "in",
+            "pri",
+            "p1",
+            "p_in",
+            "p_f1",
+            "ac_in",
+            "out",
+            "sec",
+          ];
+          let targetPort =
+            ports.find((p) => priority.includes(p.id)) || ports[0];
+          const args = cellOrClass.portProp(targetPort.id, "args");
+          if (
+            args &&
+            typeof args.x === "number" &&
+            typeof args.y === "number"
+          ) {
+            return { x: args.x, y: args.y };
+          }
+        }
+      } else if (
+        cellOrClass.prototype &&
+        cellOrClass.prototype.defaults &&
+        cellOrClass.prototype.defaults.ports &&
+        Array.isArray(cellOrClass.prototype.defaults.ports.items)
+      ) {
+        const items = cellOrClass.prototype.defaults.ports.items;
+        if (items.length > 0) {
+          const priority = [
+            "in",
+            "pri",
+            "p1",
+            "p_in",
+            "p_f1",
+            "ac_in",
+            "out",
+            "sec",
+          ];
+          let targetItem =
+            items.find((p) => priority.includes(p.id)) || items[0];
+          if (
+            targetItem &&
+            targetItem.args &&
+            typeof targetItem.args.x === "number" &&
+            typeof targetItem.args.y === "number"
+          ) {
+            return { x: targetItem.args.x, y: targetItem.args.y };
+          }
+        }
+      }
+    }
+
+    // 2. Exact offsets based on equipment type
+    switch (type) {
+      case "BUSBAR":
+        return { x: 0, y: 0 };
+      case "TR_2W":
+        return { x: 22, y: 0 };
+      case "TR_3W":
+        return { x: 30, y: 0 };
+      case "CB_ACB":
+      case "CB_VCB":
+      case "CB_MCCB":
+      case "CB_GCB":
+      case "DS":
+        return { x: 14, y: 0 };
+      case "LA":
+      case "FUSE":
+      case "GROUND_SWITCH":
+        return { x: 16, y: 0 };
+      case "RELAY":
+        return { x: 19, y: 0 };
+      case "CT":
+      case "PT":
+        return { x: 17, y: 0 };
+      case "LOAD":
+        return { x: 17, y: 0 };
+      case "GENERATOR":
+        return { x: 22, y: 0 };
+      case "TRANSMISSION_TOWER":
+        return { x: 28, y: 0 };
+      case "UPS":
+        return { x: 0, y: 24 };
+      case "BATTERY":
+        return { x: 26, y: 0 };
+      case "RECTIFIER":
+      case "INVERTER":
+        return { x: 0, y: 24 };
+      case "SWITCHGEAR":
+        return { x: 22, y: 0 };
+      case "PANELBOARD":
+        return { x: 20, y: 0 };
+      default:
+        return { x: Math.round(width / 2), y: 0 };
+    }
+  }
+
+  snapElementToPortGrid(el) {
+    if (!el || !el.isElement || !el.isElement()) return;
+    const pos = el.position();
+    const size = el.size();
+    const sldData = el.get("sldData") || {};
+    const snapOffset = this.getPrimaryPortOffset(
+      sldData.type,
+      size.width,
+      size.height,
+      el,
+    );
+
+    const currentPortX = pos.x + snapOffset.x;
+    const currentPortY = pos.y + snapOffset.y;
+
+    const gridSize = this.options.gridSize || 10;
+    const targetPortX = Math.round(currentPortX / gridSize) * gridSize;
+    const targetPortY = Math.round(currentPortY / gridSize) * gridSize;
+
+    const newX = targetPortX - snapOffset.x;
+    const newY = targetPortY - snapOffset.y;
+
+    if (pos.x !== newX || pos.y !== newY) {
+      el.position(newX, newY);
+    }
   }
 
   setupPropertiesPanel() {
