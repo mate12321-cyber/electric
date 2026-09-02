@@ -116,7 +116,7 @@
           height: 40,
           rx: 3,
           ry: 3,
-          fill: "#fee2e2",
+          fill: "#000000",
           stroke: "#377DFF",
           strokeWidth: 2,
         },
@@ -128,7 +128,7 @@
           textVerticalAnchor: "middle",
           fontSize: 14,
           fontWeight: "bold",
-          fill: "#16a34a",
+          fill: "#ffffff",
           display: "none",
           pointerEvents: "none",
         },
@@ -195,19 +195,19 @@
         const isLive = state === "LIVE" || state === "CLOSED";
         const isGrounded = state === "GROUNDED" || state === "EARTH";
 
-        let boxFill = "#fee2e2"; // Live Red Tint
+        let boxFill = "#000000"; // 활선: 검정색 (Live Black)
         let boxStroke = color;
         let badgeColor = "#ef4444";
         let showGround = "none";
 
         if (isGrounded) {
-          boxFill = "#dcfce7"; // Ground Green Tint
+          boxFill = "#16a34a"; // 접지: 초록색 (Ground Green)
           boxStroke = "#16a34a";
           badgeColor = "#16a34a";
           showGround = "block";
         } else if (!isLive) {
           // DEAD (사선)
-          boxFill = "#ffffff"; // Dead White
+          boxFill = "#94a3b8"; // 사선: 회색 (Dead Gray)
           boxStroke = "#94a3b8";
           badgeColor = "#94a3b8";
         }
@@ -219,7 +219,7 @@
             width: sz.width,
             height: sz.height,
           },
-          groundSymbol: { display: showGround },
+          groundSymbol: { display: showGround, fill: "#ffffff" },
           nameLabel: { text: data.name || "CB" },
           specLabel: { text: data.current ? data.current + "A" : "" },
           stateBadge: { fill: badgeColor },
@@ -250,7 +250,7 @@
           height: 40,
           rx: 3,
           ry: 3,
-          fill: "#fee2e2",
+          fill: "#000000",
           stroke: "#7A3E9D",
           strokeWidth: 1.5,
         },
@@ -272,7 +272,7 @@
           textAnchor: "middle",
           textVerticalAnchor: "middle",
           fontSize: 10,
-          fill: "#16a34a",
+          fill: "#ffffff",
           display: "none",
         },
         stateBadge: {
@@ -329,7 +329,7 @@
         const isLive = state === "LIVE" || state === "CLOSED";
         const isGrounded = state === "GROUNDED" || state === "EARTH";
 
-        let boxFill = "#fee2e2";
+        let boxFill = "#000000"; // 활선: 검정색 (Live Black)
         let boxStroke = color;
         let nodeColor = color;
         let bladeColor = color;
@@ -338,17 +338,18 @@
         let bladeD = "M 15 12 L 15 28";
 
         if (isGrounded) {
-          boxFill = "#dcfce7";
+          boxFill = "#16a34a"; // 접지: 초록색 (Ground Green)
           boxStroke = "#16a34a";
-          nodeColor = "#16a34a";
-          bladeColor = "#16a34a";
+          nodeColor = "#ffffff";
+          bladeColor = "#ffffff";
           badgeColor = "#16a34a";
           showGround = "block";
         } else if (!isLive) {
-          boxFill = "#ffffff";
+          // DEAD (사선)
+          boxFill = "#94a3b8"; // 사선: 회색 (Dead Gray)
           boxStroke = "#94a3b8";
-          nodeColor = "#94a3b8";
-          bladeColor = "#94a3b8";
+          nodeColor = "#475569";
+          bladeColor = "#475569";
           badgeColor = "#94a3b8";
           bladeD = "M 15 12 L 23 24";
         }
@@ -360,7 +361,7 @@
           topNode: { fill: nodeColor },
           botNode: { fill: nodeColor },
           blade: { d: bladeD, stroke: bladeColor },
-          groundSymbol: { display: showGround },
+          groundSymbol: { display: showGround, fill: "#ffffff" },
           stateBadge: { fill: badgeColor },
           nameLabel: { text: data.name || "DS" },
         });
