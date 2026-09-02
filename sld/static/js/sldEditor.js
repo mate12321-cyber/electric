@@ -1136,8 +1136,7 @@ class SLDEditor {
             let maxPortLocalX = -Infinity;
 
             ports.forEach((p) => {
-              const currentX =
-                p.args && p.args.x !== undefined ? p.args.x : 0;
+              const currentX = p.args && p.args.x !== undefined ? p.args.x : 0;
               initialPortOffsets[p.id] = currentX;
               if (currentX < minPortLocalX) minPortLocalX = currentX;
               if (currentX > maxPortLocalX) maxPortLocalX = currentX;
@@ -1168,10 +1167,7 @@ class SLDEditor {
                 // Left Handle: Anchor all ports to world coordinates and guard left edge before ports
                 const maxAllowedX =
                   minPortLocalX !== Infinity
-                    ? Math.min(
-                        rightEdge - 40,
-                        startPos.x + minPortLocalX - pad,
-                      )
+                    ? Math.min(rightEdge - 40, startPos.x + minPortLocalX - pad)
                     : rightEdge - 40;
 
                 let newX = Math.round(paperPt.x / gridSize) * gridSize;
@@ -1246,10 +1242,12 @@ class SLDEditor {
   }
 
   removeSelectionOverlay() {
-    const existing = document.getElementById("sld-selection-overlay");
-    if (existing && existing.parentNode) {
-      existing.parentNode.removeChild(existing);
-    }
+    const overlays = document.querySelectorAll(
+      "#sld-selection-overlay, .sld-selection-overlay",
+    );
+    overlays.forEach((el) => {
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+    });
   }
 
   deselectAll() {
@@ -2354,21 +2352,65 @@ class SLDEditor {
 
   undo() {
     if (this.historyIndex > 0) {
+      const selectedIds = (this.selectedCells || [])
+        .map((c) => c && c.id)
+        .filter(Boolean);
+
       this.historyIndex--;
       this.isHistoryTracking = false;
+      this.removeSelectionOverlay();
       this.graph.fromJSON(JSON.parse(this.history[this.historyIndex]));
       this.topologyTracker.applyStyles(this.paper);
+
+      if (selectedIds.length > 0) {
+        const newCells = selectedIds
+          .map((id) => this.graph.getCell(id))
+          .filter(Boolean);
+        if (newCells.length > 0) {
+          this.selectCells(newCells);
+        } else {
+          this.deselectAll();
+        }
+      } else {
+        this.deselectAll();
+      }
+
+      this.updateMinimap();
+      this.scheduleAutoSave();
       this.isHistoryTracking = true;
+      this.showToast("실행취소 (Undo)");
     }
   }
 
   redo() {
     if (this.historyIndex < this.history.length - 1) {
+      const selectedIds = (this.selectedCells || [])
+        .map((c) => c && c.id)
+        .filter(Boolean);
+
       this.historyIndex++;
       this.isHistoryTracking = false;
+      this.removeSelectionOverlay();
       this.graph.fromJSON(JSON.parse(this.history[this.historyIndex]));
       this.topologyTracker.applyStyles(this.paper);
+
+      if (selectedIds.length > 0) {
+        const newCells = selectedIds
+          .map((id) => this.graph.getCell(id))
+          .filter(Boolean);
+        if (newCells.length > 0) {
+          this.selectCells(newCells);
+        } else {
+          this.deselectAll();
+        }
+      } else {
+        this.deselectAll();
+      }
+
+      this.updateMinimap();
+      this.scheduleAutoSave();
       this.isHistoryTracking = true;
+      this.showToast("다시실행 (Redo)");
     }
   }
 
