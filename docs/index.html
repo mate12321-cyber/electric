@@ -23,7 +23,7 @@ window.DEFAULT_SLD_SCHEMA = {"cells": [{"type": "sld.TransmissionTower", "id": "
 
 </head>
   <body>
-    <input type="hidden" name="csrfmiddlewaretoken" value="J2YeCojNn4o6KYXEs7HnTYDTd6PsAihNdERe20IdpgANUvZKvQdxTuIEV3jofw8i"> 
+    <input type="hidden" name="csrfmiddlewaretoken" value="HdLvXv7l4HuwnTbkDPdCfeGv16sQeGNC4mXXQjbcpHRQMg9FJ5QtU0QWWdxib4nP"> 
 <div class="sld-app-container">
   <!-- Top Header -->
   <header class="sld-header">
@@ -37,7 +37,7 @@ window.DEFAULT_SLD_SCHEMA = {"cells": [{"type": "sld.TransmissionTower", "id": "
       <span style="font-size: 10px">▾</span>
     </div>
     <div class="sld-autosave-badge" id="auto-save-status">
-      ☁️ 자동 저장 <span id="save-time">23:55:11</span>
+      ☁️ 자동 저장 <span id="save-time">23:57:56</span>
       <span style="color: #52c41a">✓</span>
     </div>
   </div>
@@ -917,7 +917,7 @@ window.DEFAULT_SLD_SCHEMA = {"cells": [{"type": "sld.TransmissionTower", "id": "
         </select>
       </div>
 
-      <div class="sld-form-group">
+      <div class="sld-form-group" id="group-prop-voltage">
         <label class="sld-form-label">정격 전압</label>
         <div class="sld-input-row">
           <input
@@ -927,10 +927,68 @@ window.DEFAULT_SLD_SCHEMA = {"cells": [{"type": "sld.TransmissionTower", "id": "
             id="prop-voltage"
             placeholder="0.4"
           />
-          <select class="sld-select" style="width: 70px">
-            <option>kV</option>
-            <option>V</option>
+          <select class="sld-select" style="width: 70px" id="prop-voltage-unit">
+            <option value="kV">kV</option>
+            <option value="V">V</option>
           </select>
+        </div>
+      </div>
+
+      <!-- Transformer Multi-Winding Voltage Fields -->
+      <div class="sld-form-group" id="group-prop-tr-voltages" style="display: none;">
+        <label class="sld-form-label" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>변압기 권선별 전압 설정</span>
+          <span style="font-size:10px; color:#64748b;">(1차/2차 개별)</span>
+        </label>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div>
+            <div style="font-size:11px; font-weight:600; color:#475569; margin-bottom:3px;">1차 전압 (Primary)</div>
+            <div class="sld-input-row">
+              <input
+                type="number"
+                step="any"
+                class="sld-input"
+                id="prop-pri-voltage"
+                placeholder="154"
+              />
+              <select class="sld-select" style="width: 60px">
+                <option>kV</option>
+                <option>V</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px; font-weight:600; color:#475569; margin-bottom:3px;">2차 전압 (Secondary)</div>
+            <div class="sld-input-row">
+              <input
+                type="number"
+                step="any"
+                class="sld-input"
+                id="prop-sec-voltage"
+                placeholder="22.9"
+              />
+              <select class="sld-select" style="width: 60px">
+                <option>kV</option>
+                <option>V</option>
+              </select>
+            </div>
+          </div>
+          <div id="group-prop-tert-voltage" style="display: none;">
+            <div style="font-size:11px; font-weight:600; color:#475569; margin-bottom:3px;">3차 전압 (Tertiary)</div>
+            <div class="sld-input-row">
+              <input
+                type="number"
+                step="any"
+                class="sld-input"
+                id="prop-tert-voltage"
+                placeholder="6.6"
+              />
+              <select class="sld-select" style="width: 60px">
+                <option>kV</option>
+                <option>V</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1301,7 +1359,7 @@ window.DEFAULT_SLD_SCHEMA = {"cells": [{"type": "sld.TransmissionTower", "id": "
           >
             <span style="font-weight: 600">프로젝트 01 - 154kV 수전 단선도</span>
             <span style="color: #94a3b8"
-              >2026-09-02 23:55</span
+              >2026-09-02 23:57</span
             >
           </a>
           

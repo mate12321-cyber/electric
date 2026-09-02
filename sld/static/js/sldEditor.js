@@ -696,6 +696,9 @@ class SLDEditor {
     bindInput("prop-desc", "desc");
     bindInput("prop-state", "state");
     bindInput("prop-voltage", "voltage", true);
+    bindInput("prop-pri-voltage", "priVoltage", true);
+    bindInput("prop-sec-voltage", "secVoltage", true);
+    bindInput("prop-tert-voltage", "tertVoltage", true);
     bindInput("prop-connection", "connection");
     bindInput("prop-capacity", "capacity");
     bindInput("prop-current", "current", true);
@@ -768,8 +771,22 @@ class SLDEditor {
     const isTransformer = sldData.type === "TR_2W" || sldData.type === "TR_3W";
     const groupConn = document.getElementById("group-prop-connection");
     const groupCap = document.getElementById("group-prop-capacity");
+    const groupVolt = document.getElementById("group-prop-voltage");
+    const groupTrVolt = document.getElementById("group-prop-tr-voltages");
+    const groupTertVolt = document.getElementById("group-prop-tert-voltage");
+
     if (groupConn) groupConn.style.display = isTransformer ? "block" : "none";
     if (groupCap) groupCap.style.display = isTransformer ? "block" : "none";
+    if (groupVolt) groupVolt.style.display = isTransformer ? "none" : "block";
+    if (groupTrVolt)
+      groupTrVolt.style.display = isTransformer ? "block" : "none";
+    if (groupTertVolt) {
+      groupTertVolt.style.display =
+        sldData.type === "TR_3W" ||
+        (sldData.connection && sldData.connection.includes("3권선"))
+          ? "block"
+          : "none";
+    }
 
     let defConn = "Δ-Y";
     if (sldData.type === "TR_3W") defConn = "Y-Y-Δ";
@@ -790,6 +807,20 @@ class SLDEditor {
     setValue("prop-desc", sldData.desc || catalog.descKo || "");
     setValue("prop-state", mappedState);
     setValue("prop-voltage", sldData.voltage || sldData.priVoltage || "");
+    setValue(
+      "prop-pri-voltage",
+      sldData.priVoltage !== undefined
+        ? sldData.priVoltage
+        : sldData.voltage || 154,
+    );
+    setValue(
+      "prop-sec-voltage",
+      sldData.secVoltage !== undefined ? sldData.secVoltage : 22.9,
+    );
+    setValue(
+      "prop-tert-voltage",
+      sldData.tertVoltage !== undefined ? sldData.tertVoltage : 6.6,
+    );
     setValue("prop-connection", sldData.connection || defConn);
     setValue("prop-capacity", sldData.capacity || "");
     setValue("prop-current", sldData.current || "");

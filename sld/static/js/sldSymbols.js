@@ -505,7 +505,26 @@
       },
       updateVisual: function () {
         const data = this.get("sldData") || {};
-        const color = data.color || "#2E7D32";
+        const vUnit = data.voltageUnit || "kV";
+        const getVColor =
+          typeof window.getVoltageColor === "function"
+            ? window.getVoltageColor
+            : (v) => data.color || "#2E7D32";
+
+        const priV =
+          data.priVoltage !== undefined
+            ? data.priVoltage
+            : data.voltage !== undefined
+            ? data.voltage
+            : 154;
+        const secV =
+          data.secVoltage !== undefined ? data.secVoltage : 22.9;
+        const tertV =
+          data.tertVoltage !== undefined ? data.tertVoltage : 6.6;
+
+        const priColor = getVColor(priV, vUnit);
+        const secColor = getVColor(secV, vUnit);
+        const tertColor = getVColor(tertV, vUnit);
 
         let parts = [];
         if (data.connection) {
@@ -528,7 +547,8 @@
               cx: 22,
               cy: 22,
               r: 16,
-              stroke: color,
+              stroke: priColor,
+              strokeWidth: 2,
               fill: "#ffffff",
               display: "block",
             },
@@ -536,7 +556,8 @@
               cx: 22,
               cy: 42,
               r: 16,
-              stroke: color,
+              stroke: secColor,
+              strokeWidth: 2,
               fill: "#ffffff",
               display: "block",
             },
@@ -544,25 +565,26 @@
               cx: 38,
               cy: 32,
               r: 16,
-              stroke: color,
+              stroke: tertColor,
+              strokeWidth: 2,
               fill: "#ffffff",
               display: "block",
             },
             topLead: {
               d: "M 22 0 L 22 6",
-              stroke: color,
+              stroke: priColor,
               strokeWidth: 2,
               display: "block",
             },
             botLead: {
               d: "M 22 58 L 22 64",
-              stroke: color,
+              stroke: secColor,
               strokeWidth: 2,
               display: "block",
             },
             tertLead: {
               d: "M 54 32 L 60 32",
-              stroke: color,
+              stroke: tertColor,
               strokeWidth: 2,
               display: "block",
             },
@@ -570,24 +592,27 @@
               text: v1,
               x: 22,
               y: 22,
-              fill: color,
+              fill: priColor,
               fontSize: 12,
+              fontWeight: "bold",
               display: "block",
             },
             botVectorLabel: {
               text: v2,
               x: 22,
               y: 42,
-              fill: color,
+              fill: secColor,
               fontSize: 12,
+              fontWeight: "bold",
               display: "block",
             },
             tertVectorLabel: {
               text: v3,
               x: 38,
               y: 32,
-              fill: color,
+              fill: tertColor,
               fontSize: 12,
+              fontWeight: "bold",
               display: "block",
             },
             nameLabel: { text: data.name || "TR-3W", refX: 64, refY: "35%" },
@@ -609,9 +634,9 @@
           let secVector = data.secVector || parts[1] || "";
           if (!priVector && !secVector) {
             priVector =
-              data.priVoltage === 154 || data.voltage === 154 ? "Y" : "Δ";
+              priV >= 100 || priV === 154 ? "Y" : "Δ";
             secVector =
-              data.priVoltage === 154 || data.voltage === 154 ? "Δ" : "Y";
+              priV >= 100 || priV === 154 ? "Δ" : "Y";
           }
 
           this.attr({
@@ -619,7 +644,8 @@
               cx: 22,
               cy: 22,
               r: 16,
-              stroke: color,
+              stroke: priColor,
+              strokeWidth: 2,
               fill: "#ffffff",
               display: "block",
             },
@@ -627,20 +653,21 @@
               cx: 22,
               cy: 42,
               r: 16,
-              stroke: color,
+              stroke: secColor,
+              strokeWidth: 2,
               fill: "#ffffff",
               display: "block",
             },
             tertCircle: { display: "none" },
             topLead: {
               d: "M 22 0 L 22 6",
-              stroke: color,
+              stroke: priColor,
               strokeWidth: 2,
               display: "block",
             },
             botLead: {
               d: "M 22 58 L 22 64",
-              stroke: color,
+              stroke: secColor,
               strokeWidth: 2,
               display: "block",
             },
@@ -649,16 +676,18 @@
               text: priVector,
               x: 22,
               y: 22,
-              fill: color,
+              fill: priColor,
               fontSize: 12,
+              fontWeight: "bold",
               display: "block",
             },
             botVectorLabel: {
               text: secVector,
               x: 22,
               y: 42,
-              fill: color,
+              fill: secColor,
               fontSize: 12,
+              fontWeight: "bold",
               display: "block",
             },
             tertVectorLabel: { display: "none" },
