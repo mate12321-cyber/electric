@@ -515,12 +515,10 @@
           data.priVoltage !== undefined
             ? data.priVoltage
             : data.voltage !== undefined
-            ? data.voltage
-            : 154;
-        const secV =
-          data.secVoltage !== undefined ? data.secVoltage : 22.9;
-        const tertV =
-          data.tertVoltage !== undefined ? data.tertVoltage : 6.6;
+              ? data.voltage
+              : 154;
+        const secV = data.secVoltage !== undefined ? data.secVoltage : 22.9;
+        const tertV = data.tertVoltage !== undefined ? data.tertVoltage : 6.6;
 
         const priColor = getVColor(priV, vUnit);
         const secColor = getVColor(secV, vUnit);
@@ -549,7 +547,7 @@
               r: 16,
               stroke: priColor,
               strokeWidth: 2,
-              fill: "#ffffff",
+              fill: priColor,
               display: "block",
             },
             botCircle: {
@@ -558,7 +556,7 @@
               r: 16,
               stroke: secColor,
               strokeWidth: 2,
-              fill: "#ffffff",
+              fill: secColor,
               display: "block",
             },
             tertCircle: {
@@ -567,7 +565,7 @@
               r: 16,
               stroke: tertColor,
               strokeWidth: 2,
-              fill: "#ffffff",
+              fill: tertColor,
               display: "block",
             },
             topLead: {
@@ -592,8 +590,8 @@
               text: v1,
               x: 22,
               y: 22,
-              fill: priColor,
-              fontSize: 12,
+              fill: "#ffffff",
+              fontSize: 13,
               fontWeight: "bold",
               display: "block",
             },
@@ -601,8 +599,8 @@
               text: v2,
               x: 22,
               y: 42,
-              fill: secColor,
-              fontSize: 12,
+              fill: "#ffffff",
+              fontSize: 13,
               fontWeight: "bold",
               display: "block",
             },
@@ -610,8 +608,8 @@
               text: v3,
               x: 38,
               y: 32,
-              fill: tertColor,
-              fontSize: 12,
+              fill: "#ffffff",
+              fontSize: 13,
               fontWeight: "bold",
               display: "block",
             },
@@ -633,10 +631,8 @@
           let priVector = data.priVector || parts[0] || "";
           let secVector = data.secVector || parts[1] || "";
           if (!priVector && !secVector) {
-            priVector =
-              priV >= 100 || priV === 154 ? "Y" : "Δ";
-            secVector =
-              priV >= 100 || priV === 154 ? "Δ" : "Y";
+            priVector = priV >= 100 || priV === 154 ? "Y" : "Δ";
+            secVector = priV >= 100 || priV === 154 ? "Δ" : "Y";
           }
 
           this.attr({
@@ -646,7 +642,7 @@
               r: 16,
               stroke: priColor,
               strokeWidth: 2,
-              fill: "#ffffff",
+              fill: priColor,
               display: "block",
             },
             botCircle: {
@@ -655,7 +651,7 @@
               r: 16,
               stroke: secColor,
               strokeWidth: 2,
-              fill: "#ffffff",
+              fill: secColor,
               display: "block",
             },
             tertCircle: { display: "none" },
@@ -676,8 +672,8 @@
               text: priVector,
               x: 22,
               y: 22,
-              fill: priColor,
-              fontSize: 12,
+              fill: "#ffffff",
+              fontSize: 13,
               fontWeight: "bold",
               display: "block",
             },
@@ -685,8 +681,8 @@
               text: secVector,
               x: 22,
               y: 42,
-              fill: secColor,
-              fontSize: 12,
+              fill: "#ffffff",
+              fontSize: 13,
               fontWeight: "bold",
               display: "block",
             },
