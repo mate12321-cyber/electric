@@ -349,9 +349,9 @@
           fill: "#ffffff",
         },
         tertCircle: {
-          cx: 39,
-          cy: 42,
-          r: 13,
+          cx: 38,
+          cy: 32,
+          r: 16,
           stroke: "#2E7D32",
           strokeWidth: 2,
           fill: "#ffffff",
@@ -360,7 +360,7 @@
         topLead: { d: "M 22 0 L 22 6", stroke: "#2E7D32", strokeWidth: 2 },
         botLead: { d: "M 22 58 L 22 64", stroke: "#2E7D32", strokeWidth: 2 },
         tertLead: {
-          d: "M 39 55 L 39 64",
+          d: "M 54 32 L 60 32",
           stroke: "#2E7D32",
           strokeWidth: 2,
           display: "none",
@@ -391,11 +391,11 @@
         },
         tertVectorLabel: {
           text: "Δ",
-          x: 39,
-          y: 42,
+          x: 38,
+          y: 32,
           textAnchor: "middle",
           textVerticalAnchor: "middle",
-          fontSize: 10,
+          fontSize: 12,
           fontWeight: "bold",
           fill: "#2E7D32",
           fontFamily: "Pretendard, -apple-system, sans-serif",
@@ -470,83 +470,83 @@
 
           this.attr({
             topCircle: {
-              cx: 28,
-              cy: 18,
-              r: 13,
+              cx: 22,
+              cy: 22,
+              r: 16,
               stroke: color,
               fill: "#ffffff",
               display: "block",
             },
             botCircle: {
-              cx: 17,
+              cx: 22,
               cy: 42,
-              r: 13,
+              r: 16,
               stroke: color,
               fill: "#ffffff",
               display: "block",
             },
             tertCircle: {
-              cx: 39,
-              cy: 42,
-              r: 13,
+              cx: 38,
+              cy: 32,
+              r: 16,
               stroke: color,
               fill: "#ffffff",
               display: "block",
             },
             topLead: {
-              d: "M 28 0 L 28 5",
+              d: "M 22 0 L 22 6",
               stroke: color,
               strokeWidth: 2,
               display: "block",
             },
             botLead: {
-              d: "M 17 55 L 17 64",
+              d: "M 22 58 L 22 64",
               stroke: color,
               strokeWidth: 2,
               display: "block",
             },
             tertLead: {
-              d: "M 39 55 L 39 64",
+              d: "M 54 32 L 60 32",
               stroke: color,
               strokeWidth: 2,
               display: "block",
             },
             topVectorLabel: {
               text: v1,
-              x: 28,
-              y: 18,
+              x: 22,
+              y: 22,
               fill: color,
-              fontSize: 10,
+              fontSize: 12,
               display: "block",
             },
             botVectorLabel: {
               text: v2,
-              x: 17,
+              x: 22,
               y: 42,
               fill: color,
-              fontSize: 10,
+              fontSize: 12,
               display: "block",
             },
             tertVectorLabel: {
               text: v3,
-              x: 39,
-              y: 42,
+              x: 38,
+              y: 32,
               fill: color,
-              fontSize: 10,
+              fontSize: 12,
               display: "block",
             },
-            nameLabel: { text: data.name || "TR-3W", refX: 58, refY: "35%" },
-            specLabel: { text: data.capacity || "", refX: 58, refY: "60%" },
+            nameLabel: { text: data.name || "TR-3W", refX: 64, refY: "35%" },
+            specLabel: { text: data.capacity || "", refX: 64, refY: "60%" },
           });
 
           const curSize = this.get("size") || {};
-          if (curSize.width !== 56) {
-            this.resize(56, 64);
+          if (curSize.width !== 60) {
+            this.resize(60, 64);
           }
           this.prop("ports/items", [
-            { id: "pri", group: "ports", args: { x: 28, y: 0 } },
-            { id: "sec", group: "ports", args: { x: 17, y: 64 } },
-            { id: "tert", group: "ports", args: { x: 39, y: 64 } },
+            { id: "pri", group: "ports", args: { x: 22, y: 0 } },
+            { id: "sec", group: "ports", args: { x: 22, y: 64 } },
+            { id: "tert", group: "ports", args: { x: 60, y: 32 } },
           ]);
         } else {
           // 2-Winding mode
