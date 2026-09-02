@@ -353,6 +353,144 @@
     },
   );
 
+  // 2-3. Molded Case Circuit Breaker (MCCB - 배선용차단기: ACB와 동일한 28x40 반달 접점 디자인 적용)
+  joint.shapes.sld.MCCB = joint.dia.Element.define(
+    "sld.MCCB",
+    {
+      size: { width: 28, height: 40 },
+      markup: [
+        { tagName: "path", selector: "crescent" },
+        { tagName: "circle", selector: "topNode" },
+        { tagName: "circle", selector: "botNode" },
+        { tagName: "text", selector: "groundSymbol" },
+        { tagName: "text", selector: "nameLabel" },
+        { tagName: "text", selector: "specLabel" },
+      ],
+      attrs: {
+        crescent: {
+          d: "M 17 6 C 22 12, 22 28, 17 34 C 33 30, 33 10, 17 6 Z",
+          stroke: "#377DFF",
+          strokeWidth: 1.5,
+          strokeLinejoin: "round",
+          fill: "#000000",
+        },
+        topNode: {
+          cx: 14,
+          cy: 6,
+          r: 4.5,
+          stroke: "#377DFF",
+          strokeWidth: 2,
+          fill: "#ffffff",
+        },
+        botNode: {
+          cx: 14,
+          cy: 34,
+          r: 4.5,
+          stroke: "#377DFF",
+          strokeWidth: 2,
+          fill: "#ffffff",
+        },
+        groundSymbol: {
+          text: "⏚",
+          x: 14,
+          y: 20,
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          fontSize: 13,
+          fontWeight: "bold",
+          fill: "#16a34a",
+          display: "none",
+          pointerEvents: "none",
+        },
+        nameLabel: {
+          text: "MCCB",
+          refX: 34,
+          refY: "25%",
+          textAnchor: "start",
+          textVerticalAnchor: "middle",
+          fontSize: 9.5,
+          fontWeight: "600",
+          fill: "#1e293b",
+        },
+        specLabel: {
+          text: "225A",
+          refX: 34,
+          refY: "65%",
+          textAnchor: "start",
+          textVerticalAnchor: "middle",
+          fontSize: 8.5,
+          fill: "#64748b",
+        },
+      },
+      ports: {
+        groups: {
+          ports: {
+            position: { name: "absolute" },
+            attrs: {
+              circle: {
+                r: 3.5,
+                magnet: true,
+                fill: "#fff",
+                stroke: "#377DFF",
+                strokeWidth: 1.5,
+              },
+            },
+          },
+        },
+        items: [
+          { id: "in", group: "ports", args: { x: 14, y: 0 } },
+          { id: "out", group: "ports", args: { x: 14, y: 40 } },
+        ],
+      },
+    },
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateContactVisual();
+        this.on("change:sldData", this.updateContactVisual, this);
+        this.on("change:size", this.updateContactVisual, this);
+      },
+      updateContactVisual: function () {
+        const data = this.get("sldData") || {};
+        const state = (data.state || "LIVE").toUpperCase();
+        const color = data.color || "#377DFF";
+
+        const isLive = state === "LIVE" || state === "CLOSED";
+        const isGrounded = state === "GROUNDED" || state === "EARTH";
+
+        let strokeColor = color;
+        let crescentFill = "#000000"; // 활선: 검정색 (Live Black)
+        let crescentStroke = color; // 활선: 전압별 테두리 색상
+        let showGround = "none";
+
+        if (isGrounded) {
+          strokeColor = "#16a34a";
+          crescentFill = "#16a34a"; // 접지: 초록색 (Ground Green)
+          crescentStroke = "#16a34a";
+          showGround = "block";
+        } else if (!isLive) {
+          // DEAD (사선)
+          strokeColor = "#94a3b8";
+          crescentFill = "#94a3b8"; // 사선: 회색 (Dead Gray)
+          crescentStroke = "#94a3b8";
+        }
+
+        this.attr({
+          topNode: { stroke: strokeColor, fill: "#ffffff" },
+          botNode: { stroke: strokeColor, fill: "#ffffff" },
+          crescent: {
+            stroke: crescentStroke,
+            fill: crescentFill,
+            strokeWidth: 1.5,
+          },
+          groundSymbol: { display: showGround, fill: "#16a34a" },
+          nameLabel: { text: data.name || "MCCB" },
+          specLabel: { text: data.current ? data.current + "A" : "" },
+        });
+      },
+    },
+  );
+
   // 3. Disconnector (DS - 단로기: 활선/사선/접지 내부 색상 지원)
   joint.shapes.sld.Disconnector = joint.dia.Element.define(
     "sld.Disconnector",

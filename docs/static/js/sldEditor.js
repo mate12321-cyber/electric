@@ -1095,8 +1095,10 @@ class SLDEditor {
       } else {
         // Safety check: ensure shape type exists
         if (
-          cell.type === "sld.ACB" &&
-          (!joint.shapes.sld || !joint.shapes.sld.ACB)
+          (cell.type === "sld.ACB" &&
+            (!joint.shapes.sld || !joint.shapes.sld.ACB)) ||
+          (cell.type === "sld.MCCB" &&
+            (!joint.shapes.sld || !joint.shapes.sld.MCCB))
         ) {
           cell.type = "sld.Breaker";
         }

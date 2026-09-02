@@ -331,7 +331,7 @@ const EQUIPMENT_CATALOG = {
   },
   CB_MCCB: {
     type: "CB_MCCB",
-    jointType: "sld.Breaker",
+    jointType: "sld.MCCB",
     category: "PROTECTION",
     subCategory: "SWITCH",
     nameKo: "배선용차단기 (MCCB)",
@@ -347,7 +347,7 @@ const EQUIPMENT_CATALOG = {
     },
     ports: ["in", "out"],
     iconSvg:
-      '<rect x="6" y="4" width="12" height="16" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M9 8h6M9 16h6M12 8v8" stroke="currentColor" stroke-width="1.2"/>',
+      '<circle cx="12" cy="5" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="12" cy="19" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M14 5 C 17 8, 17 16, 14 19 C 23 17, 23 7, 14 5 Z" stroke="currentColor" stroke-width="1" stroke-linejoin="round" fill="currentColor"/>',
   },
   FUSE: {
     type: "FUSE",

@@ -586,7 +586,7 @@
       }
     },
     {
-      "type": "sld.Breaker",
+      "type": "sld.MCCB",
       "id": "mccb-a2",
       "position": {
         "x": 264,
@@ -683,7 +683,7 @@
       }
     },
     {
-      "type": "sld.Breaker",
+      "type": "sld.MCCB",
       "id": "mccb-a3",
       "position": {
         "x": 326,
@@ -982,7 +982,7 @@
       }
     },
     {
-      "type": "sld.Breaker",
+      "type": "sld.MCCB",
       "id": "mccb-b1",
       "position": {
         "x": 412,
@@ -1078,7 +1078,7 @@
       }
     },
     {
-      "type": "sld.Breaker",
+      "type": "sld.MCCB",
       "id": "mccb-b2",
       "position": {
         "x": 474,
@@ -1174,7 +1174,7 @@
       }
     },
     {
-      "type": "sld.Breaker",
+      "type": "sld.MCCB",
       "id": "mccb-b3",
       "position": {
         "x": 536,
@@ -1472,7 +1472,7 @@
       }
     },
     {
-      "type": "sld.Breaker",
+      "type": "sld.MCCB",
       "id": "mccb-c1",
       "position": {
         "x": 622,
@@ -1568,7 +1568,7 @@
       }
     },
     {
-      "type": "sld.Breaker",
+      "type": "sld.MCCB",
       "id": "mccb-c2",
       "position": {
         "x": 684,
@@ -1664,7 +1664,7 @@
       }
     },
     {
-      "type": "sld.Breaker",
+      "type": "sld.MCCB",
       "id": "mccb-c3",
       "position": {
         "x": 746,
@@ -2035,7 +2035,7 @@
       }
     },
     {
-      "type": "sld.Breaker",
+      "type": "sld.MCCB",
       "id": "mccb-ups1",
       "position": {
         "x": 554,
@@ -2073,7 +2073,7 @@
       "attrs": {}
     },
     {
-      "type": "sld.Breaker",
+      "type": "sld.MCCB",
       "id": "mccb-ups2",
       "position": {
         "x": 634,
