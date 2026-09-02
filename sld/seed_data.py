@@ -224,13 +224,13 @@ def get_default_sld_schema():
     # 6. Emergency Generator (Column X = 830)
     cells.append(make_cell(
         'gen-1', 'sld.Generator', 808, 520, 44, 44,
-        {'type': 'GENERATOR', 'name': '비상 발전기', 'capacity': '500kVA', 'voltage': 22.9, 'color': '#E65100'}
+        {'type': 'GENERATOR', 'name': '비상 발전기', 'state': 'DEAD', 'capacity': '500kVA', 'voltage': 22.9, 'color': '#E65100'}
     ))
     cells.append(make_cell(
         'acb-gen', 'sld.ACB', 816, 430, 28, 40,
-        {'type': 'CB_ACB', 'name': 'ACB', 'state': 'LIVE', 'voltage': 22.9, 'current': 800, 'color': '#9C27B0'}
+        {'type': 'CB_ACB', 'name': 'ACB', 'state': 'OPEN', 'voltage': 22.9, 'current': 800, 'color': '#9C27B0'}
     ))
-    cells.append(make_link('link-gen-acb', 'gen-1', 'out', 'acb-gen', 'out', '#E65100'))
+    cells.append(make_link('link-gen-acb', 'gen-1', 'out', 'acb-gen', 'out', '#595959'))
     cells.append(make_link('link-acbgen-bus22', 'acb-gen', 'in', 'bus-22-9', 'p_gen', '#9C27B0'))
 
     # 7. Important Load (Uninterruptible Power Supply Group Box)

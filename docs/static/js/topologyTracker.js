@@ -122,7 +122,8 @@ class PowerSystemTopologyTracker {
 
       const sldData = el.get("sldData") || {};
       const catalog = window.EQUIPMENT_CATALOG[sldData.type] || {};
-      const st = (sldData.state || "LIVE").toUpperCase();
+      const defaultState = catalog.type === "GENERATOR" ? "DEAD" : "LIVE";
+      const st = (sldData.state || defaultState).toUpperCase();
 
       if (catalog.isEnergizedSource && st !== "DEAD" && st !== "OPEN") {
         // If it is generator/UPS, check if switched on (default on)
@@ -359,6 +360,13 @@ class PowerSystemTopologyTracker {
         (sldData.type === "BUSBAR" || el.get("type") === "sld.Busbar")
       ) {
         el.updateFromSldData(status.state, status.voltageColor);
+      }
+      // If it is a generator, update visual based on its state
+      if (
+        typeof el.updateVisual === "function" &&
+        (sldData.type === "GENERATOR" || el.get("type") === "sld.Generator")
+      ) {
+        el.updateVisual(sldData.state || "DEAD");
       }
     });
 

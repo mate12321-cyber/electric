@@ -899,8 +899,7 @@ class SLDEditor {
             let maxPortLocalX = -Infinity;
 
             ports.forEach((p) => {
-              const currentX =
-                p.args && p.args.x !== undefined ? p.args.x : 0;
+              const currentX = p.args && p.args.x !== undefined ? p.args.x : 0;
               initialPortOffsets[p.id] = currentX;
               if (currentX < minPortLocalX) minPortLocalX = currentX;
               if (currentX > maxPortLocalX) maxPortLocalX = currentX;
@@ -931,10 +930,7 @@ class SLDEditor {
                 // Left Handle: Anchor all ports to world coordinates and guard left edge before ports
                 const maxAllowedX =
                   minPortLocalX !== Infinity
-                    ? Math.min(
-                        rightEdge - 40,
-                        startPos.x + minPortLocalX - pad,
-                      )
+                    ? Math.min(rightEdge - 40, startPos.x + minPortLocalX - pad)
                     : rightEdge - 40;
 
                 let newX = Math.round(paperPt.x / gridSize) * gridSize;

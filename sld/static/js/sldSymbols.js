@@ -1704,71 +1704,128 @@
     },
   );
 
-  // 13. Generator (발전기)
-  joint.shapes.sld.Generator = joint.dia.Element.define("sld.Generator", {
-    size: { width: 44, height: 44 },
-    markup: [
-      { tagName: "circle", selector: "circle" },
-      { tagName: "path", selector: "lead" },
-      { tagName: "text", selector: "text" },
-      { tagName: "text", selector: "nameLabel" },
-      { tagName: "text", selector: "specLabel" },
-    ],
-    attrs: {
-      circle: {
-        cx: 22,
-        cy: 22,
-        r: 18,
-        stroke: "#E65100",
-        strokeWidth: 2,
-        fill: "#ffffff",
+  // 13. Generator (발전기 - 기본 사선 상태, 활선 시 내부 채움)
+  joint.shapes.sld.Generator = joint.dia.Element.define(
+    "sld.Generator",
+    {
+      size: { width: 44, height: 44 },
+      markup: [
+        { tagName: "circle", selector: "circle" },
+        { tagName: "path", selector: "lead" },
+        { tagName: "text", selector: "text" },
+        { tagName: "text", selector: "nameLabel" },
+        { tagName: "text", selector: "specLabel" },
+      ],
+      attrs: {
+        circle: {
+          cx: 22,
+          cy: 22,
+          r: 18,
+          stroke: "#94a3b8",
+          strokeWidth: 2,
+          fill: "#f8fafc",
+        },
+        lead: { d: "M 22 0 L 22 4", stroke: "#94a3b8", strokeWidth: 2 },
+        text: {
+          text: "G",
+          x: 22,
+          y: 26,
+          textAnchor: "middle",
+          fontSize: 14,
+          fontWeight: "bold",
+          fill: "#94a3b8",
+        },
+        nameLabel: {
+          text: "비상 발전기",
+          refX: "50%",
+          refY: 48,
+          textAnchor: "middle",
+          fontSize: 10,
+          fontWeight: "600",
+          fill: "#1e293b",
+        },
+        specLabel: {
+          text: "500kVA",
+          refX: "50%",
+          refY: 60,
+          textAnchor: "middle",
+          fontSize: 9,
+          fill: "#64748b",
+        },
       },
-      lead: { d: "M 22 0 L 22 4", stroke: "#E65100", strokeWidth: 2 },
-      text: {
-        text: "G",
-        x: 22,
-        y: 26,
-        textAnchor: "middle",
-        fontSize: 14,
-        fontWeight: "bold",
-        fill: "#E65100",
-      },
-      nameLabel: {
-        text: "비상 발전기",
-        refX: "50%",
-        refY: 48,
-        textAnchor: "middle",
-        fontSize: 10,
-        fontWeight: "600",
-        fill: "#1e293b",
-      },
-      specLabel: {
-        text: "500kVA",
-        refX: "50%",
-        refY: 60,
-        textAnchor: "middle",
-        fontSize: 9,
-        fill: "#64748b",
-      },
-    },
-    ports: {
-      groups: {
-        ports: {
-          position: { name: "absolute" },
-          attrs: {
-            circle: {
-              r: 3.5,
-              magnet: true,
-              fill: "#fff",
-              stroke: "#E65100",
-              strokeWidth: 1.5,
+      ports: {
+        groups: {
+          ports: {
+            position: { name: "absolute" },
+            attrs: {
+              circle: {
+                r: 3.5,
+                magnet: true,
+                fill: "#fff",
+                stroke: "#94a3b8",
+                strokeWidth: 1.5,
+              },
             },
           },
         },
+        items: [{ id: "out", group: "ports", args: { x: 22, y: 0 } }],
       },
-      items: [{ id: "out", group: "ports", args: { x: 22, y: 0 } }],
     },
-  });
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateVisual();
+        this.on("change:sldData", this.updateVisual, this);
+        this.on("change:size", this.updateVisual, this);
+      },
+      updateVisual: function (effectiveState) {
+        const data = this.get("sldData") || {};
+        const baseState = (data.state || "DEAD").toUpperCase();
+        const state = (effectiveState || baseState).toUpperCase();
+        const isLive = state === "LIVE" || state === "CLOSED";
+        const isGrounded =
+          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
+
+        let circleStroke, circleFill, textFill, leadStroke;
+        const mainColor = data.color || "#E65100";
+
+        if (isGrounded) {
+          circleStroke = "#84CC16";
+          circleFill = "#84CC16";
+          textFill = "#ffffff";
+          leadStroke = "#84CC16";
+        } else if (isLive) {
+          // 활선 시 내부 채움 (Solid filled color when LIVE)
+          circleStroke = mainColor;
+          circleFill = mainColor;
+          textFill = "#ffffff";
+          leadStroke = mainColor;
+        } else {
+          // 사선 (DEAD) 기본 상태: 회색 외곽선 및 회색 텍스트
+          circleStroke = "#94a3b8";
+          circleFill = "#f8fafc";
+          textFill = "#94a3b8";
+          leadStroke = "#94a3b8";
+        }
+
+        this.attr({
+          circle: {
+            stroke: circleStroke,
+            fill: circleFill,
+          },
+          lead: { stroke: leadStroke },
+          text: { fill: textFill },
+          nameLabel: { text: data.name || "비상 발전기" },
+          specLabel: { text: data.capacity || "" },
+        });
+
+        const ports = this.getPorts() || [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", circleStroke);
+        });
+      },
+    },
+  );
 
   // 14. Motor (전동기)
   joint.shapes.sld.Motor = joint.dia.Element.define("sld.Motor", {

@@ -631,6 +631,7 @@ const EQUIPMENT_CATALOG = {
     isEnergizedSource: true,
     defaultProps: {
       name: "비상 발전기",
+      state: "DEAD",
       capacity: "500kVA",
       voltage: 0.4,
       voltageUnit: "kV",

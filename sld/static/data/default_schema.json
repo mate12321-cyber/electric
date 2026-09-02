@@ -1773,6 +1773,7 @@
       "sldData": {
         "type": "GENERATOR",
         "name": "비상 발전기",
+        "state": "DEAD",
         "capacity": "500kVA",
         "voltage": 22.9,
         "color": "#E65100"
@@ -1793,7 +1794,7 @@
       "sldData": {
         "type": "CB_ACB",
         "name": "ACB",
-        "state": "LIVE",
+        "state": "OPEN",
         "voltage": 22.9,
         "current": 800,
         "color": "#9C27B0"
@@ -1819,7 +1820,7 @@
       },
       "attrs": {
         "line": {
-          "stroke": "#E65100",
+          "stroke": "#595959",
           "strokeWidth": 2.5,
           "strokeDasharray": "none",
           "class": "link-live",
