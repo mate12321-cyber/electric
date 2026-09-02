@@ -534,52 +534,50 @@ html {
   font-weight: 600;
 }
 
-/* Link State Solid Styles (점선 및 애니메이션, 화살표 비활성화) */
+/* Link State Solid Styles (점선 및 애니메이션, 화살표 비활성화 & 동일 굵기 유지) */
 marker,
 .joint-link marker,
 .joint-link defs marker {
   display: none !important;
 }
 
-g[data-type*="Link"] path,
+.joint-link path.wrapper,
+.joint-link path.connection-wrap,
+g[data-type*="Link"] path.wrapper {
+  stroke: transparent !important;
+  fill: none !important;
+  opacity: 0 !important;
+}
+
 .joint-link path.connection,
-.joint-link path {
+g[data-type*="Link"] path.connection {
   marker-start: none !important;
   marker-end: none !important;
   marker: none !important;
-}
-
-.link-live path,
-.link-live .connection,
-g[data-type*="Link"].link-live path {
   stroke-dasharray: none !important;
   animation: none !important;
-  marker-start: none !important;
-  marker-end: none !important;
-  marker: none !important;
 }
 
-.link-grounded path,
-.link-grounded .connection,
-g[data-type*="Link"].link-grounded path {
+.link-live path.connection,
+g[data-type*="Link"].link-live path.connection {
+  stroke-dasharray: none !important;
+  animation: none !important;
+}
+
+.link-grounded path.connection,
+g[data-type*="Link"].link-grounded path.connection {
   stroke: var(--ground-color) !important;
   stroke-dasharray: none !important;
   animation: none !important;
-  marker-start: none !important;
-  marker-end: none !important;
-  marker: none !important;
+  opacity: 1 !important;
 }
 
-.link-dead path,
-.link-dead .connection,
-g[data-type*="Link"].link-dead path {
+.link-dead path.connection,
+g[data-type*="Link"].link-dead path.connection {
   stroke: var(--dead-color) !important;
   stroke-dasharray: none !important;
   animation: none !important;
-  opacity: 0.5 !important;
-  marker-start: none !important;
-  marker-end: none !important;
-  marker: none !important;
+  opacity: 0.7 !important;
 }
 
 /* State Segmented Toggle (활선, 사선, 접지) */

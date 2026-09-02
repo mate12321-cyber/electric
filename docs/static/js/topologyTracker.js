@@ -294,7 +294,7 @@ class PowerSystemTopologyTracker {
         link.attr({
           line: {
             stroke: "#595959",
-            strokeWidth: 2,
+            strokeWidth: 2.5,
             strokeDasharray: "none",
             class: "link-dead",
           },
