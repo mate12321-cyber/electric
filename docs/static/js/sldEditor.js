@@ -379,15 +379,22 @@ class SLDEditor {
 
       // If clicked on contact blade or with shiftKey on a switch/breaker, toggle OPEN/CLOSED state
       const isBreakerOrSwitch =
-        catalog.subCategory === "SWITCH" || sldData.type === "GROUND_SWITCH";
+        catalog.subCategory === "SWITCH" ||
+        sldData.type === "GROUND_SWITCH" ||
+        sldData.isTie ||
+        catalog.isTieBreaker;
 
       const targetSel = evt.target
-        ? evt.target.getAttribute("data-selector")
+        ? evt.target.getAttribute("data-selector") ||
+          evt.target.getAttribute("class") ||
+          ""
         : "";
       const isClickOnBlade =
         targetSel === "blade" ||
         targetSel === "contactPath" ||
         targetSel === "stateBadge" ||
+        targetSel === "crescent" ||
+        targetSel === "box" ||
         evt.shiftKey;
 
       if (isBreakerOrSwitch && isClickOnBlade) {
@@ -1103,6 +1110,11 @@ class SLDEditor {
         width = 28;
         height = 40;
         break;
+      case "CB_TIE_HV":
+      case "CB_TIE_LV":
+        width = 40;
+        height = 28;
+        break;
       case "LA":
       case "FUSE":
         width = 32;
@@ -1282,6 +1294,9 @@ class SLDEditor {
       case "CB_GCB":
       case "DS":
         return { x: 14, y: 0 };
+      case "CB_TIE_HV":
+      case "CB_TIE_LV":
+        return { x: 0, y: 14 };
       case "LA":
       case "FUSE":
       case "GROUND_SWITCH":
@@ -1406,6 +1421,38 @@ class SLDEditor {
     bindInput("prop-symbol-color", "color");
     bindInput("prop-line-color", "lineColor");
 
+    // ATO Property bindings (TIE Breakers)
+    const atoEnabledCb = document.getElementById("prop-ato-enabled");
+    if (atoEnabledCb) {
+      atoEnabledCb.addEventListener("change", () => {
+        if (!this.selectedCell) return;
+        const sldData = this.selectedCell.get("sldData") || {};
+        sldData.atoEnabled = atoEnabledCb.checked;
+        this.selectedCell.set("sldData", Object.assign({}, sldData));
+        this.populateProperties(this.selectedCell);
+        this.scheduleAutoSave();
+      });
+    }
+
+    const bindAtoSelect = (id, propKey) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("change", () => {
+          if (!this.selectedCell) return;
+          const sldData = this.selectedCell.get("sldData") || {};
+          sldData[propKey] = el.value;
+          this.selectedCell.set("sldData", Object.assign({}, sldData));
+          this.populateProperties(this.selectedCell);
+          this.scheduleAutoSave();
+        });
+      }
+    };
+
+    bindAtoSelect("prop-ato-cb1", "interlockCb1");
+    bindAtoSelect("prop-ato-cb2", "interlockCb2");
+    bindAtoSelect("prop-ato-relay51", "relay51");
+    bindAtoSelect("prop-ato-mode", "interlockMode");
+
     const stateBtns = document.querySelectorAll(".state-toggle-btn");
     stateBtns.forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -1484,6 +1531,107 @@ class SLDEditor {
         (sldData.connection && sldData.connection.includes("3권선"))
           ? "block"
           : "none";
+    }
+
+    // ATO (TIE Breakers)
+    const isTie =
+      sldData.type === "CB_TIE_HV" ||
+      sldData.type === "CB_TIE_LV" ||
+      sldData.isTie ||
+      catalog.isTieBreaker;
+
+    const groupAto = document.getElementById("group-prop-ato");
+    if (groupAto) {
+      groupAto.style.display = isTie ? "block" : "none";
+      if (isTie) {
+        const cb1Select = document.getElementById("prop-ato-cb1");
+        const cb2Select = document.getElementById("prop-ato-cb2");
+        const relaySelect = document.getElementById("prop-ato-relay51");
+        const atoEnabledCb = document.getElementById("prop-ato-enabled");
+        const atoModeSelect = document.getElementById("prop-ato-mode");
+        const atoBadge = document.getElementById("prop-ato-status-badge");
+
+        if (atoEnabledCb) atoEnabledCb.checked = sldData.atoEnabled !== false;
+
+        const allElements = this.graph.getElements();
+        const breakerElements = allElements.filter((el) => {
+          if (el.id === cell.id) return false;
+          const t = el.get("sldData")?.type || el.get("type") || "";
+          return (
+            t.includes("Breaker") ||
+            t.includes("ACB") ||
+            t.includes("VCB") ||
+            t.includes("MCCB") ||
+            t.includes("GCB") ||
+            t.includes("Disconnector") ||
+            t.startsWith("CB_") ||
+            t === "DS"
+          );
+        });
+
+        const relayElements = allElements.filter((el) => {
+          const t = el.get("sldData")?.type || el.get("type") || "";
+          return t.includes("Relay") || t === "RELAY" || t.includes("RELAY");
+        });
+
+        const buildOptions = (items, currentVal, defaultLabel) => {
+          let html = `<option value="">${defaultLabel}</option>`;
+          items.forEach((el) => {
+            const d = el.get("sldData") || {};
+            const label = d.name
+              ? `${d.name} (${d.voltage ? d.voltage + "kV" : el.id})`
+              : el.id;
+            const selected = el.id === currentVal ? "selected" : "";
+            html += `<option value="${el.id}" ${selected}>[${el.id}] ${label}</option>`;
+          });
+          return html;
+        };
+
+        if (cb1Select) {
+          cb1Select.innerHTML = buildOptions(
+            breakerElements,
+            sldData.interlockCb1 || "",
+            "(연계 주 차단기 1 선택)",
+          );
+        }
+        if (cb2Select) {
+          cb2Select.innerHTML = buildOptions(
+            breakerElements,
+            sldData.interlockCb2 || "",
+            "(연계 주 차단기 2 선택)",
+          );
+        }
+        if (relaySelect) {
+          relaySelect.innerHTML = buildOptions(
+            relayElements,
+            sldData.relay51 || "",
+            "(연동 51 계전기 선택 - 선택 사항)",
+          );
+        }
+        if (atoModeSelect) {
+          atoModeSelect.value = sldData.interlockMode || "UV_ATO";
+        }
+
+        if (atoBadge) {
+          if (sldData.atoEnabled === false) {
+            atoBadge.style.background = "#f1f5f9";
+            atoBadge.style.color = "#64748b";
+            atoBadge.innerText = "⏸️ ATO 기능 미사용 (Disabled)";
+          } else if (sldData.interlockCb1 && sldData.interlockCb2) {
+            atoBadge.style.background = "#dcfce7";
+            atoBadge.style.color = "#15803d";
+            atoBadge.innerText = `⚡ ATO / SOP 연계 구성 완료 (CB1 & CB2 연동)`;
+          } else if (sldData.interlockCb1 || sldData.interlockCb2) {
+            atoBadge.style.background = "#fef3c7";
+            atoBadge.style.color = "#b45309";
+            atoBadge.innerText = `⚠️ 1개 차단기만 지정됨 (양측 지정 권장)`;
+          } else {
+            atoBadge.style.background = "#e0f2fe";
+            atoBadge.style.color = "#0369a1";
+            atoBadge.innerText = `⚡ ATO 연계 대기 중 (연계 차단기 지정 필요)`;
+          }
+        }
+      }
     }
 
     let defConn = "Δ-Y";
@@ -1571,11 +1719,17 @@ class SLDEditor {
       "prop-voltage",
       "prop-current",
       "prop-memo",
+      "prop-ato-cb1",
+      "prop-ato-cb2",
+      "prop-ato-relay51",
     ];
     ids.forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.value = "";
     });
+
+    const groupAto = document.getElementById("group-prop-ato");
+    if (groupAto) groupAto.style.display = "none";
   }
 
   setupToolbar() {

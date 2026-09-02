@@ -247,6 +247,166 @@
         </select>
       </div>
 
+      <!-- ATO (자동절체) 및 연계 차단기 설정 (TIE 차단기 전용) -->
+      <div class="sld-form-group" id="group-prop-ato" style="display: none">
+        <div
+          style="
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 4px;
+          "
+        >
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 10px;
+            "
+          >
+            <label
+              class="sld-form-label"
+              style="
+                margin: 0;
+                font-weight: 700;
+                color: #1e293b;
+                font-size: 12px;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+              "
+            >
+              <span>⚡</span>
+              <span>ATO / SOP 연계 차단기 설정</span>
+            </label>
+            <label
+              style="
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 11px;
+                font-weight: 600;
+                cursor: pointer;
+                color: #1e293b;
+              "
+            >
+              <input
+                type="checkbox"
+                id="prop-ato-enabled"
+                checked
+                style="accent-color: #2563eb; cursor: pointer"
+              />
+              <span>ATO 사용</span>
+            </label>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div>
+              <div
+                style="
+                  font-size: 11px;
+                  font-weight: 600;
+                  color: #475569;
+                  margin-bottom: 3px;
+                "
+              >
+                연계 주 차단기 1 (Main CB 1)
+              </div>
+              <select
+                class="sld-select"
+                id="prop-ato-cb1"
+                style="width: 100%; font-size: 11px; height: 30px"
+              >
+                <option value="">(연계 주 차단기 1 선택)</option>
+              </select>
+            </div>
+
+            <div>
+              <div
+                style="
+                  font-size: 11px;
+                  font-weight: 600;
+                  color: #475569;
+                  margin-bottom: 3px;
+                "
+              >
+                연계 주 차단기 2 (Main CB 2)
+              </div>
+              <select
+                class="sld-select"
+                id="prop-ato-cb2"
+                style="width: 100%; font-size: 11px; height: 30px"
+              >
+                <option value="">(연계 주 차단기 2 선택)</option>
+              </select>
+            </div>
+
+            <div>
+              <div
+                style="
+                  font-size: 11px;
+                  font-weight: 600;
+                  color: #475569;
+                  margin-bottom: 3px;
+                "
+              >
+                연동 51 과전류 계전기 (OCR)
+              </div>
+              <select
+                class="sld-select"
+                id="prop-ato-relay51"
+                style="width: 100%; font-size: 11px; height: 30px"
+              >
+                <option value="">(연동 51 계전기 선택 - 선택 사항)</option>
+              </select>
+            </div>
+
+            <div>
+              <div
+                style="
+                  font-size: 11px;
+                  font-weight: 600;
+                  color: #475569;
+                  margin-bottom: 3px;
+                "
+              >
+                절체 인터록 방식
+              </div>
+              <select
+                class="sld-select"
+                id="prop-ato-mode"
+                style="width: 100%; font-size: 11px; height: 30px"
+              >
+                <option value="UV_ATO" selected>
+                  UV 감지 무사고(No 51) 자동절체 (SOP)
+                </option>
+                <option value="2_OUT_OF_3">
+                  2-out-of-3 (3대 중 2대 투입 인터록)
+                </option>
+              </select>
+            </div>
+
+            <div
+              id="prop-ato-status-badge"
+              style="
+                margin-top: 4px;
+                padding: 6px 8px;
+                border-radius: 4px;
+                font-size: 11px;
+                font-weight: 600;
+                text-align: center;
+                background: #e0f2fe;
+                color: #0369a1;
+              "
+            >
+              ⚡ ATO 연계 준비 완료 (Ready)
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="sld-form-group">
         <label class="sld-form-label">메모</label>
         <textarea

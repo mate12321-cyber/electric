@@ -23,7 +23,7 @@ window.DEFAULT_SLD_SCHEMA = {"cells": [{"type": "sld.TransmissionTower", "id": "
 
 </head>
   <body>
-    <input type="hidden" name="csrfmiddlewaretoken" value="pLGyvyhs2ZmCuvQB0DZminnao56BgaaLYNF4Y3fCOZVL8U8c65Lze5SMXM6lOhKi"> 
+    <input type="hidden" name="csrfmiddlewaretoken" value="3eSWW7MNYJw9fZDaY6MmSPksQCUmIiDl0P8lfsKis01jbIeyzvsPOtJHp4iQucCs"> 
 <div class="sld-app-container">
   <!-- Top Header -->
   <header class="sld-header">
@@ -37,7 +37,7 @@ window.DEFAULT_SLD_SCHEMA = {"cells": [{"type": "sld.TransmissionTower", "id": "
       <span style="font-size: 10px">▾</span>
     </div>
     <div class="sld-autosave-badge" id="auto-save-status">
-      ☁️ 자동 저장 <span id="save-time">02:13:15</span>
+      ☁️ 자동 저장 <span id="save-time">06:08:22</span>
       <span style="color: #52c41a">✓</span>
     </div>
   </div>
@@ -466,6 +466,53 @@ window.DEFAULT_SLD_SCHEMA = {"cells": [{"type": "sld.TransmissionTower", "id": "
             <path d="M9 8h6M9 16h6M12 8v8" />
           </svg>
           <span>MCCB</span>
+        </div>
+        <div
+          class="palette-item"
+          data-symbol-type="CB_TIE_HV"
+          title="고압 TIE 차단기 (가로형 / ATO)"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#9C27B0"
+            stroke-width="1.5"
+          >
+            <rect x="4" y="6" width="16" height="12" rx="2" />
+            <path d="M1 12h3M20 12h3" />
+            <text
+              x="12"
+              y="14.5"
+              text-anchor="middle"
+              font-size="5.5"
+              font-weight="bold"
+              fill="#9C27B0"
+            >
+              TIE
+            </text>
+          </svg>
+          <span>고압 TIE</span>
+        </div>
+        <div
+          class="palette-item"
+          data-symbol-type="CB_TIE_LV"
+          title="저압 TIE 차단기 (가로형 / ATO)"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#377DFF"
+            stroke-width="1.5"
+          >
+            <circle cx="5" cy="12" r="2.5" />
+            <circle cx="19" cy="12" r="2.5" />
+            <path d="M1 12h1.5M21.5 12h1.5" />
+            <path
+              d="M8 8 C 10 10, 14 10, 16 8 C 15 15, 9 15, 8 8 Z"
+              fill="#377DFF"
+            />
+          </svg>
+          <span>저압 TIE</span>
         </div>
         <div
           class="palette-item"
@@ -1101,6 +1148,166 @@ window.DEFAULT_SLD_SCHEMA = {"cells": [{"type": "sld.TransmissionTower", "id": "
         </select>
       </div>
 
+      <!-- ATO (자동절체) 및 연계 차단기 설정 (TIE 차단기 전용) -->
+      <div class="sld-form-group" id="group-prop-ato" style="display: none">
+        <div
+          style="
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 4px;
+          "
+        >
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 10px;
+            "
+          >
+            <label
+              class="sld-form-label"
+              style="
+                margin: 0;
+                font-weight: 700;
+                color: #1e293b;
+                font-size: 12px;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+              "
+            >
+              <span>⚡</span>
+              <span>ATO / SOP 연계 차단기 설정</span>
+            </label>
+            <label
+              style="
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 11px;
+                font-weight: 600;
+                cursor: pointer;
+                color: #1e293b;
+              "
+            >
+              <input
+                type="checkbox"
+                id="prop-ato-enabled"
+                checked
+                style="accent-color: #2563eb; cursor: pointer"
+              />
+              <span>ATO 사용</span>
+            </label>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div>
+              <div
+                style="
+                  font-size: 11px;
+                  font-weight: 600;
+                  color: #475569;
+                  margin-bottom: 3px;
+                "
+              >
+                연계 주 차단기 1 (Main CB 1)
+              </div>
+              <select
+                class="sld-select"
+                id="prop-ato-cb1"
+                style="width: 100%; font-size: 11px; height: 30px"
+              >
+                <option value="">(연계 주 차단기 1 선택)</option>
+              </select>
+            </div>
+
+            <div>
+              <div
+                style="
+                  font-size: 11px;
+                  font-weight: 600;
+                  color: #475569;
+                  margin-bottom: 3px;
+                "
+              >
+                연계 주 차단기 2 (Main CB 2)
+              </div>
+              <select
+                class="sld-select"
+                id="prop-ato-cb2"
+                style="width: 100%; font-size: 11px; height: 30px"
+              >
+                <option value="">(연계 주 차단기 2 선택)</option>
+              </select>
+            </div>
+
+            <div>
+              <div
+                style="
+                  font-size: 11px;
+                  font-weight: 600;
+                  color: #475569;
+                  margin-bottom: 3px;
+                "
+              >
+                연동 51 과전류 계전기 (OCR)
+              </div>
+              <select
+                class="sld-select"
+                id="prop-ato-relay51"
+                style="width: 100%; font-size: 11px; height: 30px"
+              >
+                <option value="">(연동 51 계전기 선택 - 선택 사항)</option>
+              </select>
+            </div>
+
+            <div>
+              <div
+                style="
+                  font-size: 11px;
+                  font-weight: 600;
+                  color: #475569;
+                  margin-bottom: 3px;
+                "
+              >
+                절체 인터록 방식
+              </div>
+              <select
+                class="sld-select"
+                id="prop-ato-mode"
+                style="width: 100%; font-size: 11px; height: 30px"
+              >
+                <option value="UV_ATO" selected>
+                  UV 감지 무사고(No 51) 자동절체 (SOP)
+                </option>
+                <option value="2_OUT_OF_3">
+                  2-out-of-3 (3대 중 2대 투입 인터록)
+                </option>
+              </select>
+            </div>
+
+            <div
+              id="prop-ato-status-badge"
+              style="
+                margin-top: 4px;
+                padding: 6px 8px;
+                border-radius: 4px;
+                font-size: 11px;
+                font-weight: 600;
+                text-align: center;
+                background: #e0f2fe;
+                color: #0369a1;
+              "
+            >
+              ⚡ ATO 연계 준비 완료 (Ready)
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="sld-form-group">
         <label class="sld-form-label">메모</label>
         <textarea
@@ -1397,7 +1604,7 @@ window.DEFAULT_SLD_SCHEMA = {"cells": [{"type": "sld.TransmissionTower", "id": "
           >
             <span style="font-weight: 600">프로젝트 01 - 154kV 수전 단선도</span>
             <span style="color: #94a3b8"
-              >2026-09-03 02:13</span
+              >2026-09-03 06:08</span
             >
           </a>
           
