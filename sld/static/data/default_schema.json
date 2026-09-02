@@ -510,24 +510,6 @@
       "attrs": {}
     },
     {
-      "type": "sld.Load",
-      "id": "load-a1",
-      "position": {
-        "x": 199,
-        "y": 680
-      },
-      "size": {
-        "width": 34,
-        "height": 36
-      },
-      "sldData": {
-        "type": "LOAD",
-        "name": "부하",
-        "color": "#16A34A"
-      },
-      "attrs": {}
-    },
-    {
       "type": "standard.Link",
       "id": "link-busa-acba1",
       "source": {
