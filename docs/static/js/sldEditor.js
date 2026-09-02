@@ -847,24 +847,110 @@ class SLDEditor {
       rect.setAttribute("rx", "4");
       overlay.appendChild(rect);
 
-      // Corner handle positions
-      const corners = [
-        { x: boxX - handleOffset, y: boxY - handleOffset }, // Top-Left
-        { x: boxX + boxW - handleOffset, y: boxY - handleOffset }, // Top-Right
-        { x: boxX - handleOffset, y: boxY + boxH - handleOffset }, // Bottom-Left
-        { x: boxX + boxW - handleOffset, y: boxY + boxH - handleOffset }, // Bottom-Right
-      ];
+      const sldData = this.selectedCell.get("sldData") || {};
+      const isBusbar =
+        sldData.type === "BUSBAR" ||
+        this.selectedCell.get("type") === "sld.Busbar";
 
-      corners.forEach((c) => {
-        const handle = document.createElementNS(svgNS, "rect");
-        handle.setAttribute("class", "sld-selection-handle");
-        handle.setAttribute("x", c.x);
-        handle.setAttribute("y", c.y);
-        handle.setAttribute("width", handleSize);
-        handle.setAttribute("height", handleSize);
-        handle.setAttribute("rx", "1.5");
-        overlay.appendChild(handle);
-      });
+      if (isBusbar) {
+        // Special West / East interactive drag handles for Busbars
+        const handleW = document.createElementNS(svgNS, "rect");
+        handleW.setAttribute(
+          "class",
+          "sld-selection-handle sld-bus-resize-handle sld-handle-w",
+        );
+        handleW.setAttribute("x", boxX - 4);
+        handleW.setAttribute("y", boxY + boxH / 2 - 8);
+        handleW.setAttribute("width", "8");
+        handleW.setAttribute("height", "16");
+        handleW.setAttribute("rx", "3");
+        overlay.appendChild(handleW);
+
+        const handleE = document.createElementNS(svgNS, "rect");
+        handleE.setAttribute(
+          "class",
+          "sld-selection-handle sld-bus-resize-handle sld-handle-e",
+        );
+        handleE.setAttribute("x", boxX + boxW - 4);
+        handleE.setAttribute("y", boxY + boxH / 2 - 8);
+        handleE.setAttribute("width", "8");
+        handleE.setAttribute("height", "16");
+        handleE.setAttribute("rx", "3");
+        overlay.appendChild(handleE);
+
+        const setupBusbarResizeHandle = (handleEl, direction) => {
+          handleEl.style.cursor = "ew-resize";
+          handleEl.style.pointerEvents = "all";
+
+          handleEl.addEventListener("mousedown", (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+
+            const startPos = this.selectedCell.position();
+            const startSize = this.selectedCell.size();
+            const rightEdge = startPos.x + startSize.width;
+            const gridSize = this.options.gridSize || 10;
+            const busLengthInput = document.getElementById("prop-bus-length");
+
+            const onMouseMove = (moveEvent) => {
+              const paperPt = this.paper.clientToLocalPoint({
+                x: moveEvent.clientX,
+                y: moveEvent.clientY,
+              });
+
+              if (direction === "e") {
+                let newW =
+                  Math.round((paperPt.x - startPos.x) / gridSize) * gridSize;
+                newW = Math.max(40, Math.min(3000, newW));
+                this.selectedCell.resize(newW, startSize.height);
+                this.updateSelectionOverlay();
+                if (busLengthInput) busLengthInput.value = newW;
+              } else if (direction === "w") {
+                let newX = Math.round(paperPt.x / gridSize) * gridSize;
+                let newW = rightEdge - newX;
+                if (newW >= 40 && newW <= 3000) {
+                  this.selectedCell.position(newX, startPos.y);
+                  this.selectedCell.resize(newW, startSize.height);
+                  this.updateSelectionOverlay();
+                  if (busLengthInput) busLengthInput.value = newW;
+                }
+              }
+            };
+
+            const onMouseUp = () => {
+              window.removeEventListener("mousemove", onMouseMove);
+              window.removeEventListener("mouseup", onMouseUp);
+              this.updateMinimap();
+              this.scheduleAutoSave();
+            };
+
+            window.addEventListener("mousemove", onMouseMove);
+            window.addEventListener("mouseup", onMouseUp);
+          });
+        };
+
+        setupBusbarResizeHandle(handleW, "w");
+        setupBusbarResizeHandle(handleE, "e");
+      } else {
+        // Corner handle positions
+        const corners = [
+          { x: boxX - handleOffset, y: boxY - handleOffset }, // Top-Left
+          { x: boxX + boxW - handleOffset, y: boxY - handleOffset }, // Top-Right
+          { x: boxX - handleOffset, y: boxY + boxH - handleOffset }, // Bottom-Left
+          { x: boxX + boxW - handleOffset, y: boxY + boxH - handleOffset }, // Bottom-Right
+        ];
+
+        corners.forEach((c) => {
+          const handle = document.createElementNS(svgNS, "rect");
+          handle.setAttribute("class", "sld-selection-handle");
+          handle.setAttribute("x", c.x);
+          handle.setAttribute("y", c.y);
+          handle.setAttribute("width", handleSize);
+          handle.setAttribute("height", handleSize);
+          handle.setAttribute("rx", "1.5");
+          overlay.appendChild(handle);
+        });
+      }
 
       const viewport =
         this.paper.viewport ||
@@ -1421,6 +1507,30 @@ class SLDEditor {
     bindInput("prop-symbol-color", "color");
     bindInput("prop-line-color", "lineColor");
 
+    // Busbar Length Binding
+    const busLengthInput = document.getElementById("prop-bus-length");
+    if (busLengthInput) {
+      const handleBusLength = (e) => {
+        if (!this.selectedCell) return;
+        const sldData = this.selectedCell.get("sldData") || {};
+        if (
+          sldData.type !== "BUSBAR" &&
+          this.selectedCell.get("type") !== "sld.Busbar"
+        )
+          return;
+
+        let val = parseFloat(e.target.value) || 200;
+        val = Math.max(40, Math.min(3000, val));
+        const curSize = this.selectedCell.size();
+        this.selectedCell.resize(val, curSize.height);
+        this.updateSelectionOverlay();
+        this.updateMinimap();
+        this.scheduleAutoSave();
+      };
+      busLengthInput.addEventListener("input", handleBusLength);
+      busLengthInput.addEventListener("change", handleBusLength);
+    }
+
     // ATO Property bindings (TIE Breakers)
     const atoEnabledCb = document.getElementById("prop-ato-enabled");
     if (atoEnabledCb) {
@@ -1512,6 +1622,14 @@ class SLDEditor {
       const el = document.getElementById(id);
       if (el) el.value = val !== undefined && val !== null ? val : "";
     };
+
+    const isBusbar =
+      sldData.type === "BUSBAR" || cell.get("type") === "sld.Busbar";
+    const groupBusLen = document.getElementById("group-prop-bus-length");
+    if (groupBusLen) groupBusLen.style.display = isBusbar ? "block" : "none";
+    if (isBusbar) {
+      setValue("prop-bus-length", Math.round(cell.size().width));
+    }
 
     const isTransformer = sldData.type === "TR_2W" || sldData.type === "TR_3W";
     const groupConn = document.getElementById("group-prop-connection");

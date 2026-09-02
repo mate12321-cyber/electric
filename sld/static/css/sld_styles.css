@@ -697,6 +697,20 @@ g[data-type*="Link"].link-dead path.connection {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
+.sld-bus-resize-handle {
+  pointer-events: all !important;
+  cursor: ew-resize !important;
+  fill: #ffffff;
+  stroke: #2563eb;
+  stroke-width: 2px;
+  transition: transform 0.1s ease, fill 0.1s ease;
+}
+
+.sld-bus-resize-handle:hover {
+  fill: #2563eb;
+  stroke: #ffffff;
+}
+
 /* Link Selection Highlight */
 .sld-selected.joint-link path.connection {
   stroke: #2563eb !important;
