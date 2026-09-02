@@ -1,46 +1,108 @@
 <header class="sld-header">
-    <div class="sld-header-left">
-        <div class="sld-logo">
-            <div class="sld-logo-icon">⚡</div>
-            <span>전력 계통도 편집기</span>
-        </div>
-        <div class="sld-project-selector" id="project-dropdown-btn">
-            <span>{{ active_diagram.title }}</span>
-            <span style="font-size: 10px;">▾</span>
-        </div>
-        <div class="sld-autosave-badge" id="auto-save-status">
-            ☁️ 자동 저장 <span id="save-time">{% now "H:i:s" %}</span> <span style="color:#52c41a">✓</span>
-        </div>
+  <div class="sld-header-left">
+    <div class="sld-logo">
+      <div class="sld-logo-icon">⚡</div>
+      <span>전력 계통도 편집기</span>
     </div>
+    <div class="sld-project-selector" id="project-dropdown-btn">
+      <span>{{ active_diagram.title }}</span>
+      <span style="font-size: 10px">▾</span>
+    </div>
+    <div class="sld-autosave-badge" id="auto-save-status">
+      ☁️ 자동 저장 <span id="save-time">{% now "H:i:s" %}</span>
+      <span style="color: #52c41a">✓</span>
+    </div>
+  </div>
 
-    <div class="sld-header-right">
-        <button class="sld-btn sld-btn-dark" id="btn-voltage-colors-modal" title="전압 레벨별 색상 설정">
-            <span>🎨</span>
-            <span>전압 색상</span>
-        </button>
-        <button class="sld-btn sld-btn-dark" id="btn-save-project">
-            <span>💾</span>
-            <span>저장</span>
-        </button>
-        <div class="sld-dropdown-wrapper" style="position:relative; display:inline-block;">
-            <button class="sld-btn sld-btn-dark" id="btn-export-dropdown">
-                <span>📤</span>
-                <span>내보내기</span>
-                <span style="font-size: 9px;">▾</span>
-            </button>
-            <div class="sld-dropdown-menu" id="export-menu" style="display:none; position:absolute; right:0; top:100%; margin-top:4px; background:#fff; border:1px solid #e2e8f0; border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:100; min-width:140px; padding:4px 0;">
-                <a href="javascript:void(0)" id="btn-export-png" style="display:block; padding:8px 14px; font-size:12px; color:#1e293b; text-decoration:none;">🖼️ PNG 이미지</a>
-                <a href="javascript:void(0)" id="btn-export-svg" style="display:block; padding:8px 14px; font-size:12px; color:#1e293b; text-decoration:none;">📐 SVG 벡터</a>
-                <a href="javascript:void(0)" id="btn-export-json" style="display:block; padding:8px 14px; font-size:12px; color:#1e293b; text-decoration:none;">📄 JSON 스키마</a>
-            </div>
-        </div>
-        <button class="sld-btn sld-btn-dark" id="btn-share-modal">
-            <span>🔗</span>
-            <span>공유</span>
-        </button>
-        <button class="sld-btn sld-btn-dark" id="btn-help-modal" title="단축키 및 도움말">
-            <span>❓</span>
-        </button>
-        <div class="sld-avatar" title="사용자 관리자">AD</div>
+  <div class="sld-header-right">
+    <button
+      class="sld-btn sld-btn-dark"
+      id="btn-voltage-colors-modal"
+      title="전압 레벨별 색상 설정"
+    >
+      <span>🎨</span>
+      <span>전압 색상</span>
+    </button>
+    <button class="sld-btn sld-btn-dark" id="btn-save-project">
+      <span>💾</span>
+      <span>저장</span>
+    </button>
+    <div
+      class="sld-dropdown-wrapper"
+      style="position: relative; display: inline-block"
+    >
+      <button class="sld-btn sld-btn-dark" id="btn-export-dropdown">
+        <span>📤</span>
+        <span>내보내기</span>
+        <span style="font-size: 9px">▾</span>
+      </button>
+      <div
+        class="sld-dropdown-menu"
+        id="export-menu"
+        style="
+          display: none;
+          position: absolute;
+          right: 0;
+          top: 100%;
+          margin-top: 4px;
+          background: #fff;
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          z-index: 100;
+          min-width: 140px;
+          padding: 4px 0;
+        "
+      >
+        <a
+          href="javascript:void(0)"
+          id="btn-export-png"
+          style="
+            display: block;
+            padding: 8px 14px;
+            font-size: 12px;
+            color: #1e293b;
+            text-decoration: none;
+          "
+          >🖼️ PNG 이미지</a
+        >
+        <a
+          href="javascript:void(0)"
+          id="btn-export-svg"
+          style="
+            display: block;
+            padding: 8px 14px;
+            font-size: 12px;
+            color: #1e293b;
+            text-decoration: none;
+          "
+          >📐 SVG 벡터</a
+        >
+        <a
+          href="javascript:void(0)"
+          id="btn-export-json"
+          style="
+            display: block;
+            padding: 8px 14px;
+            font-size: 12px;
+            color: #1e293b;
+            text-decoration: none;
+          "
+          >📄 JSON 스키마</a
+        >
+      </div>
     </div>
+    <button class="sld-btn sld-btn-dark" id="btn-share-modal">
+      <span>🔗</span>
+      <span>공유</span>
+    </button>
+    <button
+      class="sld-btn sld-btn-dark"
+      id="btn-help-modal"
+      title="단축키 및 도움말"
+    >
+      <span>❓</span>
+    </button>
+    <div class="sld-avatar" title="사용자 관리자">AD</div>
+  </div>
 </header>

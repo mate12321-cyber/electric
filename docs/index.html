@@ -18,59 +18,121 @@
     />
   
 <script>
-window.DEFAULT_SLD_SCHEMA = {"cells": [{"type": "sld.TransmissionTower", "id": "tower-154", "position": {"x": 490, "y": 40}, "size": {"width": 56, "height": 56}, "sldData": {"type": "TRANSMISSION_TOWER", "name": "154kV 수전", "voltage": 154, "voltageUnit": "kV", "color": "#7A3E9D"}, "attrs": {}}, {"type": "sld.Breaker", "id": "cb-154", "position": {"x": 504, "y": 130}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_GCB", "name": "154kV CB", "state": "LIVE", "voltage": 154, "current": 2000, "poles": "3P", "color": "#7A3E9D", "memo": "154kV 수전 주 차단기"}, "attrs": {}}, {"type": "sld.Disconnector", "id": "ds-154", "position": {"x": 503, "y": 205}, "size": {"width": 30, "height": 40}, "sldData": {"type": "DS", "name": "154kV DS", "state": "LIVE", "voltage": 154, "current": 2000, "color": "#7A3E9D", "memo": "154kV 수전 단로기"}, "attrs": {}}, {"type": "sld.Transformer2W", "id": "tr-1", "position": {"x": 496, "y": 275}, "size": {"width": 44, "height": 64}, "sldData": {"type": "TR_2W", "name": "154/22.9kV TR#1", "priVoltage": 154, "secVoltage": 22.9, "connection": "Y-Δ", "capacity": "20MVA", "color": "#2E7D32", "memo": "154kV / 22.9kV 20MVA 변압기"}, "attrs": {}}, {"type": "standard.Link", "id": "link-tower-cb", "source": {"id": "tower-154", "port": "out"}, "target": {"id": "cb-154", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#7A3E9D", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-cb-ds", "source": {"id": "cb-154", "port": "out"}, "target": {"id": "ds-154", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#7A3E9D", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-ds-tr1", "source": {"id": "ds-154", "port": "out"}, "target": {"id": "tr-1", "port": "pri"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#7A3E9D", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Busbar", "id": "bus-22-9", "position": {"x": 200, "y": 370}, "size": {"width": 700, "height": 12}, "sldData": {"type": "BUSBAR", "name": "22.9kV 모선", "voltage": 22.9, "voltageUnit": "kV", "color": "#9C27B0"}, "attrs": {}, "ports": {"groups": {"bus-ports": {"position": {"name": "absolute"}, "attrs": {"circle": {"r": 3.5, "magnet": true, "fill": "#ffffff", "stroke": "#9C27B0", "strokeWidth": 1.5}}}}, "items": [{"id": "p_f1", "group": "bus-ports", "args": {"x": 78, "y": 6}}, {"id": "p_f2", "group": "bus-ports", "args": {"x": 288, "y": 6}}, {"id": "p_in", "group": "bus-ports", "args": {"x": 318, "y": 6}}, {"id": "p_f3", "group": "bus-ports", "args": {"x": 498, "y": 6}}, {"id": "p_gen", "group": "bus-ports", "args": {"x": 628, "y": 6}}]}}, {"type": "standard.Link", "id": "link-tr1-bus22", "source": {"id": "tr-1", "port": "sec"}, "target": {"id": "bus-22-9", "port": "p_in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "vcb-a", "position": {"x": 264, "y": 410}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_VCB", "name": "VCB", "state": "LIVE", "voltage": 22.9, "current": 630, "color": "#9C27B0", "location": "22.9kV 모선"}, "attrs": {}}, {"type": "sld.Transformer2W", "id": "tr-2", "position": {"x": 256, "y": 480}, "size": {"width": 44, "height": 64}, "sldData": {"type": "TR_2W", "name": "22.9/0.4kV TR#2", "priVoltage": 22.9, "secVoltage": 0.4, "connection": "Δ-Y", "capacity": "1000kVA", "color": "#2E7D32"}, "attrs": {}}, {"type": "sld.Busbar", "id": "bus-04-a", "position": {"x": 180, "y": 575}, "size": {"width": 196, "height": 10}, "sldData": {"type": "BUSBAR", "name": "0.4kV 모선 (A)", "voltage": 0.4, "voltageUnit": "kV", "color": "#2E7D32"}, "attrs": {}, "ports": {"groups": {"bus-ports": {"position": {"name": "absolute"}, "attrs": {"circle": {"r": 3.5, "magnet": true, "fill": "#fff", "stroke": "#2E7D32", "strokeWidth": 1.5}}}}, "items": [{"id": "p1", "group": "bus-ports", "args": {"x": 36, "y": 5}}, {"id": "p_tr", "group": "bus-ports", "args": {"x": 98, "y": 5}}, {"id": "p2", "group": "bus-ports", "args": {"x": 98, "y": 5}}, {"id": "p3", "group": "bus-ports", "args": {"x": 160, "y": 5}}]}}, {"type": "standard.Link", "id": "link-bus22-vcba", "source": {"id": "bus-22-9", "port": "p_f1"}, "target": {"id": "vcb-a", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-vcba-tr2", "source": {"id": "vcb-a", "port": "out"}, "target": {"id": "tr-2", "port": "pri"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-tr2-bus04a", "source": {"id": "tr-2", "port": "sec"}, "target": {"id": "bus-04-a", "port": "p_tr"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#2E7D32", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "acb-a1", "position": {"x": 202, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_ACB", "name": "ACB", "state": "LIVE", "voltage": 0.4, "current": 1600, "color": "#377DFF", "location": "0.4kV 모선 (A)"}, "attrs": {}}, {"type": "sld.Load", "id": "load-a1", "position": {"x": 199, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busa-acba1", "source": {"id": "bus-04-a", "port": "p1"}, "target": {"id": "acb-a1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#2E7D32", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-acba1-loada1", "source": {"id": "acb-a1", "port": "out"}, "target": {"id": "load-a1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#377DFF", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-a2", "position": {"x": 264, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "current": 225, "color": "#377DFF"}, "attrs": {}}, {"type": "sld.Load", "id": "load-a2", "position": {"x": 261, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busa-mccba2", "source": {"id": "bus-04-a", "port": "p2"}, "target": {"id": "mccb-a2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#2E7D32", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccba2-loada2", "source": {"id": "mccb-a2", "port": "out"}, "target": {"id": "load-a2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#377DFF", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-a3", "position": {"x": 326, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "current": 225, "color": "#377DFF"}, "attrs": {}}, {"type": "sld.Load", "id": "load-a3", "position": {"x": 323, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busa-mccba3", "source": {"id": "bus-04-a", "port": "p3"}, "target": {"id": "mccb-a3", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#2E7D32", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccba3-loada3", "source": {"id": "mccb-a3", "port": "out"}, "target": {"id": "load-a3", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#377DFF", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "vcb-b", "position": {"x": 474, "y": 410}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_VCB", "name": "VCB", "state": "LIVE", "voltage": 22.9, "current": 630, "color": "#9C27B0"}, "attrs": {}}, {"type": "sld.Transformer2W", "id": "tr-3", "position": {"x": 466, "y": 480}, "size": {"width": 44, "height": 64}, "sldData": {"type": "TR_2W", "name": "22.9/0.4kV TR#3", "priVoltage": 22.9, "secVoltage": 0.4, "connection": "Δ-Y", "capacity": "1000kVA", "color": "#2E7D32"}, "attrs": {}}, {"type": "sld.Busbar", "id": "bus-04-b", "position": {"x": 390, "y": 575}, "size": {"width": 196, "height": 10}, "sldData": {"type": "BUSBAR", "name": "0.4kV 모선 (B)", "voltage": 0.4, "voltageUnit": "kV", "color": "#2B6CB0"}, "attrs": {}, "ports": {"groups": {"bus-ports": {"position": {"name": "absolute"}, "attrs": {"circle": {"r": 3.5, "magnet": true, "fill": "#fff", "stroke": "#2B6CB0", "strokeWidth": 1.5}}}}, "items": [{"id": "p1", "group": "bus-ports", "args": {"x": 36, "y": 5}}, {"id": "p_tr", "group": "bus-ports", "args": {"x": 98, "y": 5}}, {"id": "p2", "group": "bus-ports", "args": {"x": 98, "y": 5}}, {"id": "p3", "group": "bus-ports", "args": {"x": 160, "y": 5}}]}}, {"type": "standard.Link", "id": "link-bus22-vcbb", "source": {"id": "bus-22-9", "port": "p_f2"}, "target": {"id": "vcb-b", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-vcbb-tr3", "source": {"id": "vcb-b", "port": "out"}, "target": {"id": "tr-3", "port": "pri"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-tr3-bus04b", "source": {"id": "tr-3", "port": "sec"}, "target": {"id": "bus-04-b", "port": "p_tr"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#2B6CB0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-b1", "position": {"x": 412, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "color": "#2B6CB0"}, "attrs": {}}, {"type": "sld.Load", "id": "load-b1", "position": {"x": 409, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busb-mccbb1", "source": {"id": "bus-04-b", "port": "p1"}, "target": {"id": "mccb-b1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#2B6CB0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccbb1-loadb1", "source": {"id": "mccb-b1", "port": "out"}, "target": {"id": "load-b1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#2B6CB0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-b2", "position": {"x": 474, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "color": "#2B6CB0"}, "attrs": {}}, {"type": "sld.Load", "id": "load-b2", "position": {"x": 471, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busb-mccbb2", "source": {"id": "bus-04-b", "port": "p2"}, "target": {"id": "mccb-b2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#2B6CB0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccbb2-loadb2", "source": {"id": "mccb-b2", "port": "out"}, "target": {"id": "load-b2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#2B6CB0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-b3", "position": {"x": 536, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "color": "#2B6CB0"}, "attrs": {}}, {"type": "sld.Load", "id": "load-b3", "position": {"x": 533, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busb-mccbb3", "source": {"id": "bus-04-b", "port": "p3"}, "target": {"id": "mccb-b3", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#2B6CB0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccbb3-loadb3", "source": {"id": "mccb-b3", "port": "out"}, "target": {"id": "load-b3", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#2B6CB0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "vcb-c", "position": {"x": 684, "y": 410}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_VCB", "name": "VCB", "state": "LIVE", "voltage": 22.9, "current": 630, "color": "#9C27B0"}, "attrs": {}}, {"type": "sld.Transformer2W", "id": "tr-4", "position": {"x": 676, "y": 480}, "size": {"width": 44, "height": 64}, "sldData": {"type": "TR_2W", "name": "22.9/0.4kV TR#4", "priVoltage": 22.9, "secVoltage": 0.4, "connection": "Δ-Y", "capacity": "1000kVA", "color": "#2E7D32"}, "attrs": {}}, {"type": "sld.Busbar", "id": "bus-04-c", "position": {"x": 600, "y": 575}, "size": {"width": 196, "height": 10}, "sldData": {"type": "BUSBAR", "name": "0.4kV 모선 (C)", "voltage": 0.4, "voltageUnit": "kV", "color": "#E65100"}, "attrs": {}, "ports": {"groups": {"bus-ports": {"position": {"name": "absolute"}, "attrs": {"circle": {"r": 3.5, "magnet": true, "fill": "#fff", "stroke": "#E65100", "strokeWidth": 1.5}}}}, "items": [{"id": "p1", "group": "bus-ports", "args": {"x": 36, "y": 5}}, {"id": "p_tr", "group": "bus-ports", "args": {"x": 98, "y": 5}}, {"id": "p2", "group": "bus-ports", "args": {"x": 98, "y": 5}}, {"id": "p3", "group": "bus-ports", "args": {"x": 160, "y": 5}}]}}, {"type": "standard.Link", "id": "link-bus22-vcbc", "source": {"id": "bus-22-9", "port": "p_f3"}, "target": {"id": "vcb-c", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-vcbc-tr4", "source": {"id": "vcb-c", "port": "out"}, "target": {"id": "tr-4", "port": "pri"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-tr4-bus04c", "source": {"id": "tr-4", "port": "sec"}, "target": {"id": "bus-04-c", "port": "p_tr"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#E65100", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-c1", "position": {"x": 622, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "color": "#E65100"}, "attrs": {}}, {"type": "sld.Load", "id": "load-c1", "position": {"x": 619, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busc-mccbc1", "source": {"id": "bus-04-c", "port": "p1"}, "target": {"id": "mccb-c1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#E65100", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccbc1-loadc1", "source": {"id": "mccb-c1", "port": "out"}, "target": {"id": "load-c1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#E65100", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-c2", "position": {"x": 684, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "color": "#E65100"}, "attrs": {}}, {"type": "sld.Load", "id": "load-c2", "position": {"x": 681, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busc-mccbc2", "source": {"id": "bus-04-c", "port": "p2"}, "target": {"id": "mccb-c2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#E65100", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccbc2-loadc2", "source": {"id": "mccb-c2", "port": "out"}, "target": {"id": "load-c2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#E65100", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-c3", "position": {"x": 746, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "color": "#E65100"}, "attrs": {}}, {"type": "sld.Load", "id": "load-c3", "position": {"x": 743, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busc-mccbc3", "source": {"id": "bus-04-c", "port": "p3"}, "target": {"id": "mccb-c3", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#E65100", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccbc3-loadc3", "source": {"id": "mccb-c3", "port": "out"}, "target": {"id": "load-c3", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#E65100", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Generator", "id": "gen-1", "position": {"x": 806, "y": 520}, "size": {"width": 44, "height": 44}, "sldData": {"type": "GENERATOR", "name": "비상 발전기", "capacity": "500kVA", "voltage": 22.9, "color": "#E65100"}, "attrs": {}}, {"type": "sld.Breaker", "id": "acb-gen", "position": {"x": 814, "y": 430}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_ACB", "name": "ACB", "state": "LIVE", "voltage": 22.9, "current": 800, "color": "#9C27B0"}, "attrs": {}}, {"type": "standard.Link", "id": "link-gen-acb", "source": {"id": "gen-1", "port": "out"}, "target": {"id": "acb-gen", "port": "out"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#E65100", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-acbgen-bus22", "source": {"id": "acb-gen", "port": "in"}, "target": {"id": "bus-22-9", "port": "p_gen"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.GroupBox", "id": "group-ups", "position": {"x": 180, "y": 750}, "size": {"width": 680, "height": 240}, "sldData": {"type": "GROUP_BOX", "title": "중요 부하 (무정전 전원 계통)"}, "attrs": {}}, {"type": "sld.TextLabel", "id": "text-comm-power", "position": {"x": 200, "y": 775}, "size": {"width": 140, "height": 26}, "sldData": {"type": "TEXT_LABEL", "text": "상용 전원 AC 3Φ 380V", "color": "#1e293b"}, "attrs": {}}, {"type": "sld.Breaker", "id": "acb-ups-in", "position": {"x": 220, "y": 810}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_ACB", "name": "ACB", "state": "LIVE", "voltage": 0.38, "color": "#377DFF"}, "attrs": {}}, {"type": "sld.UPS", "id": "ups-1", "position": {"x": 310, "y": 808}, "size": {"width": 56, "height": 48}, "sldData": {"type": "UPS", "name": "UPS", "capacity": "100kVA", "color": "#00838F"}, "attrs": {}}, {"type": "sld.Battery", "id": "battery-1", "position": {"x": 312, "y": 905}, "size": {"width": 52, "height": 34}, "sldData": {"type": "BATTERY", "name": "배터리 뱅크", "voltage": 384, "voltageUnit": "V DC", "color": "#00838F"}, "attrs": {}}, {"type": "sld.Switchgear", "id": "swg-ups", "position": {"x": 430, "y": 802}, "size": {"width": 44, "height": 60}, "sldData": {"type": "SWITCHGEAR", "name": "UPS 배전반", "color": "#377DFF"}, "attrs": {}}, {"type": "sld.Busbar", "id": "bus-ups", "position": {"x": 520, "y": 828}, "size": {"width": 160, "height": 8}, "sldData": {"type": "BUSBAR", "name": "UPS 모선 (380V)", "voltage": 0.38, "voltageUnit": "kV", "color": "#377DFF"}, "attrs": {}, "ports": {"groups": {"bus-ports": {"position": {"name": "absolute"}, "attrs": {"circle": {"r": 3.5, "magnet": true, "fill": "#fff", "stroke": "#377DFF", "strokeWidth": 1.5}}}}, "items": [{"id": "p_in", "group": "bus-ports", "args": {"x": 0, "y": 4}}, {"id": "p1", "group": "bus-ports", "args": {"x": 48, "y": 8}}, {"id": "p2", "group": "bus-ports", "args": {"x": 128, "y": 8}}]}}, {"type": "sld.Breaker", "id": "mccb-ups1", "position": {"x": 554, "y": 860}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.38, "color": "#377DFF"}, "attrs": {}}, {"type": "sld.Load", "id": "load-ups1", "position": {"x": 551, "y": 925}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "중요 부하 1"}, "attrs": {}}, {"type": "sld.Breaker", "id": "mccb-ups2", "position": {"x": 634, "y": 860}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.38, "color": "#377DFF"}, "attrs": {}}, {"type": "sld.Load", "id": "load-ups2", "position": {"x": 631, "y": 925}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "중요 부하 2"}, "attrs": {}}, {"type": "standard.Link", "id": "link-acbups-ups", "source": {"id": "acb-ups-in", "port": "out"}, "target": {"id": "ups-1", "port": "ac_in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#377DFF", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-bat-ups", "source": {"id": "battery-1", "port": "out"}, "target": {"id": "ups-1", "port": "dc_bat"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#00838F", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-ups-swg", "source": {"id": "ups-1", "port": "ac_out"}, "target": {"id": "swg-ups", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#377DFF", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-swg-busups", "source": {"id": "swg-ups", "port": "out"}, "target": {"id": "bus-ups", "port": "p_in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#377DFF", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-busups-mccb1", "source": {"id": "bus-ups", "port": "p1"}, "target": {"id": "mccb-ups1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#377DFF", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccb1-loadups1", "source": {"id": "mccb-ups1", "port": "out"}, "target": {"id": "load-ups1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#377DFF", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-busups-mccb2", "source": {"id": "bus-ups", "port": "p2"}, "target": {"id": "mccb-ups2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#377DFF", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccb2-loadups2", "source": {"id": "mccb-ups2", "port": "out"}, "target": {"id": "load-ups2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#377DFF", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.TextLabel", "id": "text-ac220", "position": {"x": 740, "y": 775}, "size": {"width": 90, "height": 20}, "sldData": {"type": "TEXT_LABEL", "text": "AC 220V", "color": "#D32F2F"}, "attrs": {}}, {"type": "sld.Rectifier", "id": "rect-1", "position": {"x": 745, "y": 810}, "size": {"width": 50, "height": 40}, "sldData": {"type": "RECTIFIER", "name": "정류기", "inputVoltage": "220V", "outputVoltage": "110V DC", "color": "#2E7D32"}, "attrs": {}}, {"type": "sld.Battery", "id": "battery-110", "position": {"x": 744, "y": 905}, "size": {"width": 52, "height": 34}, "sldData": {"type": "BATTERY", "name": "110V 축전지", "voltage": 110, "voltageUnit": "V DC", "color": "#2E7D32"}, "attrs": {}}, {"type": "standard.Link", "id": "link-rect-bat110", "source": {"id": "rect-1", "port": "dc_out"}, "target": {"id": "battery-110", "port": "out"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#2E7D32", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}]};
+window.DEFAULT_SLD_SCHEMA = {"cells": [{"type": "sld.TransmissionTower", "id": "tower-154", "position": {"x": 490, "y": 40}, "size": {"width": 56, "height": 56}, "sldData": {"type": "TRANSMISSION_TOWER", "name": "154kV 수전", "voltage": 154, "voltageUnit": "kV", "color": "#E53935"}, "attrs": {}}, {"type": "sld.Breaker", "id": "cb-154", "position": {"x": 504, "y": 130}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_GCB", "name": "154kV CB", "state": "LIVE", "voltage": 154, "current": 2000, "poles": "3P", "color": "#E53935", "memo": "154kV 수전 주 차단기"}, "attrs": {}}, {"type": "sld.Disconnector", "id": "ds-154", "position": {"x": 503, "y": 205}, "size": {"width": 30, "height": 40}, "sldData": {"type": "DS", "name": "154kV DS", "state": "LIVE", "voltage": 154, "current": 2000, "color": "#E53935", "memo": "154kV 수전 단로기"}, "attrs": {}}, {"type": "sld.Transformer2W", "id": "tr-1", "position": {"x": 496, "y": 275}, "size": {"width": 44, "height": 64}, "sldData": {"type": "TR_2W", "name": "154/22.9kV TR#1", "priVoltage": 154, "secVoltage": 22.9, "connection": "Y-Δ", "capacity": "20MVA", "color": "#E53935", "memo": "154kV / 22.9kV 20MVA 변압기"}, "attrs": {}}, {"type": "standard.Link", "id": "link-tower-cb", "source": {"id": "tower-154", "port": "out"}, "target": {"id": "cb-154", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#E53935", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-cb-ds", "source": {"id": "cb-154", "port": "out"}, "target": {"id": "ds-154", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#E53935", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-ds-tr1", "source": {"id": "ds-154", "port": "out"}, "target": {"id": "tr-1", "port": "pri"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#E53935", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Busbar", "id": "bus-22-9", "position": {"x": 200, "y": 370}, "size": {"width": 700, "height": 12}, "sldData": {"type": "BUSBAR", "name": "22.9kV 모선", "voltage": 22.9, "voltageUnit": "kV", "color": "#9C27B0"}, "attrs": {}, "ports": {"groups": {"bus-ports": {"position": {"name": "absolute"}, "attrs": {"circle": {"r": 3.5, "magnet": true, "fill": "#ffffff", "stroke": "#9C27B0", "strokeWidth": 1.5}}}}, "items": [{"id": "p_f1", "group": "bus-ports", "args": {"x": 78, "y": 6}}, {"id": "p_f2", "group": "bus-ports", "args": {"x": 288, "y": 6}}, {"id": "p_in", "group": "bus-ports", "args": {"x": 318, "y": 6}}, {"id": "p_f3", "group": "bus-ports", "args": {"x": 498, "y": 6}}, {"id": "p_gen", "group": "bus-ports", "args": {"x": 628, "y": 6}}]}}, {"type": "standard.Link", "id": "link-tr1-bus22", "source": {"id": "tr-1", "port": "sec"}, "target": {"id": "bus-22-9", "port": "p_in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "vcb-a", "position": {"x": 264, "y": 410}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_VCB", "name": "VCB", "state": "LIVE", "voltage": 22.9, "current": 630, "color": "#9C27B0", "location": "22.9kV 모선"}, "attrs": {}}, {"type": "sld.Transformer2W", "id": "tr-2", "position": {"x": 256, "y": 480}, "size": {"width": 44, "height": 64}, "sldData": {"type": "TR_2W", "name": "22.9/0.4kV TR#2", "priVoltage": 22.9, "secVoltage": 0.4, "connection": "Δ-Y", "capacity": "1000kVA", "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Busbar", "id": "bus-04-a", "position": {"x": 180, "y": 575}, "size": {"width": 196, "height": 10}, "sldData": {"type": "BUSBAR", "name": "0.4kV 모선 (A)", "voltage": 0.4, "voltageUnit": "kV", "color": "#16A34A"}, "attrs": {}, "ports": {"groups": {"bus-ports": {"position": {"name": "absolute"}, "attrs": {"circle": {"r": 3.5, "magnet": true, "fill": "#fff", "stroke": "#16A34A", "strokeWidth": 1.5}}}}, "items": [{"id": "p1", "group": "bus-ports", "args": {"x": 36, "y": 5}}, {"id": "p_tr", "group": "bus-ports", "args": {"x": 98, "y": 5}}, {"id": "p2", "group": "bus-ports", "args": {"x": 98, "y": 5}}, {"id": "p3", "group": "bus-ports", "args": {"x": 160, "y": 5}}]}}, {"type": "standard.Link", "id": "link-bus22-vcba", "source": {"id": "bus-22-9", "port": "p_f1"}, "target": {"id": "vcb-a", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-vcba-tr2", "source": {"id": "vcb-a", "port": "out"}, "target": {"id": "tr-2", "port": "pri"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-tr2-bus04a", "source": {"id": "tr-2", "port": "sec"}, "target": {"id": "bus-04-a", "port": "p_tr"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "acb-a1", "position": {"x": 202, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_ACB", "name": "ACB", "state": "LIVE", "voltage": 0.4, "current": 1600, "color": "#16A34A", "location": "0.4kV 모선 (A)"}, "attrs": {}}, {"type": "sld.Load", "id": "load-a1", "position": {"x": 199, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하", "color": "#16A34A"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busa-acba1", "source": {"id": "bus-04-a", "port": "p1"}, "target": {"id": "acb-a1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-acba1-loada1", "source": {"id": "acb-a1", "port": "out"}, "target": {"id": "load-a1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-a2", "position": {"x": 264, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "current": 225, "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Load", "id": "load-a2", "position": {"x": 261, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하", "color": "#16A34A"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busa-mccba2", "source": {"id": "bus-04-a", "port": "p2"}, "target": {"id": "mccb-a2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccba2-loada2", "source": {"id": "mccb-a2", "port": "out"}, "target": {"id": "load-a2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-a3", "position": {"x": 326, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "current": 225, "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Load", "id": "load-a3", "position": {"x": 323, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하", "color": "#16A34A"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busa-mccba3", "source": {"id": "bus-04-a", "port": "p3"}, "target": {"id": "mccb-a3", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccba3-loada3", "source": {"id": "mccb-a3", "port": "out"}, "target": {"id": "load-a3", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "vcb-b", "position": {"x": 474, "y": 410}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_VCB", "name": "VCB", "state": "LIVE", "voltage": 22.9, "current": 630, "color": "#9C27B0"}, "attrs": {}}, {"type": "sld.Transformer2W", "id": "tr-3", "position": {"x": 466, "y": 480}, "size": {"width": 44, "height": 64}, "sldData": {"type": "TR_2W", "name": "22.9/0.4kV TR#3", "priVoltage": 22.9, "secVoltage": 0.4, "connection": "Δ-Y", "capacity": "1000kVA", "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Busbar", "id": "bus-04-b", "position": {"x": 390, "y": 575}, "size": {"width": 196, "height": 10}, "sldData": {"type": "BUSBAR", "name": "0.4kV 모선 (B)", "voltage": 0.4, "voltageUnit": "kV", "color": "#16A34A"}, "attrs": {}, "ports": {"groups": {"bus-ports": {"position": {"name": "absolute"}, "attrs": {"circle": {"r": 3.5, "magnet": true, "fill": "#fff", "stroke": "#16A34A", "strokeWidth": 1.5}}}}, "items": [{"id": "p1", "group": "bus-ports", "args": {"x": 36, "y": 5}}, {"id": "p_tr", "group": "bus-ports", "args": {"x": 98, "y": 5}}, {"id": "p2", "group": "bus-ports", "args": {"x": 98, "y": 5}}, {"id": "p3", "group": "bus-ports", "args": {"x": 160, "y": 5}}]}}, {"type": "standard.Link", "id": "link-bus22-vcbb", "source": {"id": "bus-22-9", "port": "p_f2"}, "target": {"id": "vcb-b", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-vcbb-tr3", "source": {"id": "vcb-b", "port": "out"}, "target": {"id": "tr-3", "port": "pri"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-tr3-bus04b", "source": {"id": "tr-3", "port": "sec"}, "target": {"id": "bus-04-b", "port": "p_tr"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-b1", "position": {"x": 412, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Load", "id": "load-b1", "position": {"x": 409, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하", "color": "#16A34A"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busb-mccbb1", "source": {"id": "bus-04-b", "port": "p1"}, "target": {"id": "mccb-b1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccbb1-loadb1", "source": {"id": "mccb-b1", "port": "out"}, "target": {"id": "load-b1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-b2", "position": {"x": 474, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Load", "id": "load-b2", "position": {"x": 471, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하", "color": "#16A34A"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busb-mccbb2", "source": {"id": "bus-04-b", "port": "p2"}, "target": {"id": "mccb-b2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccbb2-loadb2", "source": {"id": "mccb-b2", "port": "out"}, "target": {"id": "load-b2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-b3", "position": {"x": 536, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Load", "id": "load-b3", "position": {"x": 533, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하", "color": "#16A34A"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busb-mccbb3", "source": {"id": "bus-04-b", "port": "p3"}, "target": {"id": "mccb-b3", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccbb3-loadb3", "source": {"id": "mccb-b3", "port": "out"}, "target": {"id": "load-b3", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "vcb-c", "position": {"x": 684, "y": 410}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_VCB", "name": "VCB", "state": "LIVE", "voltage": 22.9, "current": 630, "color": "#9C27B0"}, "attrs": {}}, {"type": "sld.Transformer2W", "id": "tr-4", "position": {"x": 676, "y": 480}, "size": {"width": 44, "height": 64}, "sldData": {"type": "TR_2W", "name": "22.9/0.4kV TR#4", "priVoltage": 22.9, "secVoltage": 0.4, "connection": "Δ-Y", "capacity": "1000kVA", "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Busbar", "id": "bus-04-c", "position": {"x": 600, "y": 575}, "size": {"width": 196, "height": 10}, "sldData": {"type": "BUSBAR", "name": "0.4kV 모선 (C)", "voltage": 0.4, "voltageUnit": "kV", "color": "#16A34A"}, "attrs": {}, "ports": {"groups": {"bus-ports": {"position": {"name": "absolute"}, "attrs": {"circle": {"r": 3.5, "magnet": true, "fill": "#fff", "stroke": "#16A34A", "strokeWidth": 1.5}}}}, "items": [{"id": "p1", "group": "bus-ports", "args": {"x": 36, "y": 5}}, {"id": "p_tr", "group": "bus-ports", "args": {"x": 98, "y": 5}}, {"id": "p2", "group": "bus-ports", "args": {"x": 98, "y": 5}}, {"id": "p3", "group": "bus-ports", "args": {"x": 160, "y": 5}}]}}, {"type": "standard.Link", "id": "link-bus22-vcbc", "source": {"id": "bus-22-9", "port": "p_f3"}, "target": {"id": "vcb-c", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-vcbc-tr4", "source": {"id": "vcb-c", "port": "out"}, "target": {"id": "tr-4", "port": "pri"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-tr4-bus04c", "source": {"id": "tr-4", "port": "sec"}, "target": {"id": "bus-04-c", "port": "p_tr"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-c1", "position": {"x": 622, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Load", "id": "load-c1", "position": {"x": 619, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하", "color": "#16A34A"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busc-mccbc1", "source": {"id": "bus-04-c", "port": "p1"}, "target": {"id": "mccb-c1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccbc1-loadc1", "source": {"id": "mccb-c1", "port": "out"}, "target": {"id": "load-c1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-c2", "position": {"x": 684, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Load", "id": "load-c2", "position": {"x": 681, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하", "color": "#16A34A"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busc-mccbc2", "source": {"id": "bus-04-c", "port": "p2"}, "target": {"id": "mccb-c2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccbc2-loadc2", "source": {"id": "mccb-c2", "port": "out"}, "target": {"id": "load-c2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Breaker", "id": "mccb-c3", "position": {"x": 746, "y": 615}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.4, "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Load", "id": "load-c3", "position": {"x": 743, "y": 680}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "부하", "color": "#16A34A"}, "attrs": {}}, {"type": "standard.Link", "id": "link-busc-mccbc3", "source": {"id": "bus-04-c", "port": "p3"}, "target": {"id": "mccb-c3", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccbc3-loadc3", "source": {"id": "mccb-c3", "port": "out"}, "target": {"id": "load-c3", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.Generator", "id": "gen-1", "position": {"x": 806, "y": 520}, "size": {"width": 44, "height": 44}, "sldData": {"type": "GENERATOR", "name": "비상 발전기", "capacity": "500kVA", "voltage": 22.9, "color": "#E65100"}, "attrs": {}}, {"type": "sld.Breaker", "id": "acb-gen", "position": {"x": 814, "y": 430}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_ACB", "name": "ACB", "state": "LIVE", "voltage": 22.9, "current": 800, "color": "#9C27B0"}, "attrs": {}}, {"type": "standard.Link", "id": "link-gen-acb", "source": {"id": "gen-1", "port": "out"}, "target": {"id": "acb-gen", "port": "out"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#E65100", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-acbgen-bus22", "source": {"id": "acb-gen", "port": "in"}, "target": {"id": "bus-22-9", "port": "p_gen"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#9C27B0", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.GroupBox", "id": "group-ups", "position": {"x": 180, "y": 750}, "size": {"width": 680, "height": 240}, "sldData": {"type": "GROUP_BOX", "title": "중요 부하 (무정전 전원 계통)"}, "attrs": {}}, {"type": "sld.TextLabel", "id": "text-comm-power", "position": {"x": 200, "y": 775}, "size": {"width": 140, "height": 26}, "sldData": {"type": "TEXT_LABEL", "text": "상용 전원 AC 3Φ 380V", "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Breaker", "id": "acb-ups-in", "position": {"x": 220, "y": 810}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_ACB", "name": "ACB", "state": "LIVE", "voltage": 0.38, "color": "#16A34A"}, "attrs": {}}, {"type": "sld.UPS", "id": "ups-1", "position": {"x": 310, "y": 808}, "size": {"width": 56, "height": 48}, "sldData": {"type": "UPS", "name": "UPS", "capacity": "100kVA", "color": "#EA580C"}, "attrs": {}}, {"type": "sld.Battery", "id": "battery-1", "position": {"x": 312, "y": 905}, "size": {"width": 52, "height": 34}, "sldData": {"type": "BATTERY", "name": "배터리 뱅크", "voltage": 384, "voltageUnit": "V DC", "color": "#EA580C"}, "attrs": {}}, {"type": "sld.Switchgear", "id": "swg-ups", "position": {"x": 430, "y": 802}, "size": {"width": 44, "height": 60}, "sldData": {"type": "SWITCHGEAR", "name": "UPS 배전반", "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Busbar", "id": "bus-ups", "position": {"x": 520, "y": 828}, "size": {"width": 160, "height": 8}, "sldData": {"type": "BUSBAR", "name": "UPS 모선 (380V)", "voltage": 0.38, "voltageUnit": "kV", "color": "#16A34A"}, "attrs": {}, "ports": {"groups": {"bus-ports": {"position": {"name": "absolute"}, "attrs": {"circle": {"r": 3.5, "magnet": true, "fill": "#fff", "stroke": "#16A34A", "strokeWidth": 1.5}}}}, "items": [{"id": "p_in", "group": "bus-ports", "args": {"x": 0, "y": 4}}, {"id": "p1", "group": "bus-ports", "args": {"x": 48, "y": 8}}, {"id": "p2", "group": "bus-ports", "args": {"x": 128, "y": 8}}]}}, {"type": "sld.Breaker", "id": "mccb-ups1", "position": {"x": 554, "y": 860}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.38, "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Load", "id": "load-ups1", "position": {"x": 551, "y": 925}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "중요 부하 1", "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Breaker", "id": "mccb-ups2", "position": {"x": 634, "y": 860}, "size": {"width": 28, "height": 40}, "sldData": {"type": "CB_MCCB", "name": "MCCB", "state": "LIVE", "voltage": 0.38, "color": "#16A34A"}, "attrs": {}}, {"type": "sld.Load", "id": "load-ups2", "position": {"x": 631, "y": 925}, "size": {"width": 34, "height": 36}, "sldData": {"type": "LOAD", "name": "중요 부하 2", "color": "#16A34A"}, "attrs": {}}, {"type": "standard.Link", "id": "link-acbups-ups", "source": {"id": "acb-ups-in", "port": "out"}, "target": {"id": "ups-1", "port": "ac_in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-bat-ups", "source": {"id": "battery-1", "port": "out"}, "target": {"id": "ups-1", "port": "dc_bat"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#EA580C", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-ups-swg", "source": {"id": "ups-1", "port": "ac_out"}, "target": {"id": "swg-ups", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-swg-busups", "source": {"id": "swg-ups", "port": "out"}, "target": {"id": "bus-ups", "port": "p_in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-busups-mccb1", "source": {"id": "bus-ups", "port": "p1"}, "target": {"id": "mccb-ups1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccb1-loadups1", "source": {"id": "mccb-ups1", "port": "out"}, "target": {"id": "load-ups1", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-busups-mccb2", "source": {"id": "bus-ups", "port": "p2"}, "target": {"id": "mccb-ups2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "standard.Link", "id": "link-mccb2-loadups2", "source": {"id": "mccb-ups2", "port": "out"}, "target": {"id": "load-ups2", "port": "in"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#16A34A", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}, {"type": "sld.TextLabel", "id": "text-ac220", "position": {"x": 740, "y": 775}, "size": {"width": 90, "height": 20}, "sldData": {"type": "TEXT_LABEL", "text": "AC 220V", "color": "#EAB308"}, "attrs": {}}, {"type": "sld.Rectifier", "id": "rect-1", "position": {"x": 745, "y": 810}, "size": {"width": 50, "height": 40}, "sldData": {"type": "RECTIFIER", "name": "정류기", "inputVoltage": "220V", "outputVoltage": "110V DC", "color": "#F97316"}, "attrs": {}}, {"type": "sld.Battery", "id": "battery-110", "position": {"x": 744, "y": 905}, "size": {"width": 52, "height": 34}, "sldData": {"type": "BATTERY", "name": "110V 축전지", "voltage": 110, "voltageUnit": "V DC", "color": "#F97316"}, "attrs": {}}, {"type": "standard.Link", "id": "link-rect-bat110", "source": {"id": "rect-1", "port": "dc_out"}, "target": {"id": "battery-110", "port": "out"}, "router": {"name": "sldOrthogonal"}, "connector": {"name": "normal"}, "attrs": {"line": {"stroke": "#F97316", "strokeWidth": 2.5, "strokeDasharray": "8,4", "class": "link-live", "targetMarker": {"type": "none"}}}}]};
 </script>
 
 </head>
   <body>
-    <input type="hidden" name="csrfmiddlewaretoken" value="TZdi86oNctphlGBif2Egf7u21jcwO7hltiWSNghSXldi9uyah2PVRIfRGwU5tbdh"> 
+    <input type="hidden" name="csrfmiddlewaretoken" value="J2YeCojNn4o6KYXEs7HnTYDTd6PsAihNdERe20IdpgANUvZKvQdxTuIEV3jofw8i"> 
 <div class="sld-app-container">
   <!-- Top Header -->
   <header class="sld-header">
-    <div class="sld-header-left">
-        <div class="sld-logo">
-            <div class="sld-logo-icon">⚡</div>
-            <span>전력 계통도 편집기</span>
-        </div>
-        <div class="sld-project-selector" id="project-dropdown-btn">
-            <span>프로젝트 01 - 154kV 수전 단선도</span>
-            <span style="font-size: 10px;">▾</span>
-        </div>
-        <div class="sld-autosave-badge" id="auto-save-status">
-            ☁️ 자동 저장 <span id="save-time">23:46:05</span> <span style="color:#52c41a">✓</span>
-        </div>
+  <div class="sld-header-left">
+    <div class="sld-logo">
+      <div class="sld-logo-icon">⚡</div>
+      <span>전력 계통도 편집기</span>
     </div>
+    <div class="sld-project-selector" id="project-dropdown-btn">
+      <span>프로젝트 01 - 154kV 수전 단선도</span>
+      <span style="font-size: 10px">▾</span>
+    </div>
+    <div class="sld-autosave-badge" id="auto-save-status">
+      ☁️ 자동 저장 <span id="save-time">23:55:11</span>
+      <span style="color: #52c41a">✓</span>
+    </div>
+  </div>
 
-    <div class="sld-header-right">
-        <button class="sld-btn sld-btn-dark" id="btn-voltage-colors-modal" title="전압 레벨별 색상 설정">
-            <span>🎨</span>
-            <span>전압 색상</span>
-        </button>
-        <button class="sld-btn sld-btn-dark" id="btn-save-project">
-            <span>💾</span>
-            <span>저장</span>
-        </button>
-        <div class="sld-dropdown-wrapper" style="position:relative; display:inline-block;">
-            <button class="sld-btn sld-btn-dark" id="btn-export-dropdown">
-                <span>📤</span>
-                <span>내보내기</span>
-                <span style="font-size: 9px;">▾</span>
-            </button>
-            <div class="sld-dropdown-menu" id="export-menu" style="display:none; position:absolute; right:0; top:100%; margin-top:4px; background:#fff; border:1px solid #e2e8f0; border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:100; min-width:140px; padding:4px 0;">
-                <a href="javascript:void(0)" id="btn-export-png" style="display:block; padding:8px 14px; font-size:12px; color:#1e293b; text-decoration:none;">🖼️ PNG 이미지</a>
-                <a href="javascript:void(0)" id="btn-export-svg" style="display:block; padding:8px 14px; font-size:12px; color:#1e293b; text-decoration:none;">📐 SVG 벡터</a>
-                <a href="javascript:void(0)" id="btn-export-json" style="display:block; padding:8px 14px; font-size:12px; color:#1e293b; text-decoration:none;">📄 JSON 스키마</a>
-            </div>
-        </div>
-        <button class="sld-btn sld-btn-dark" id="btn-share-modal">
-            <span>🔗</span>
-            <span>공유</span>
-        </button>
-        <button class="sld-btn sld-btn-dark" id="btn-help-modal" title="단축키 및 도움말">
-            <span>❓</span>
-        </button>
-        <div class="sld-avatar" title="사용자 관리자">AD</div>
+  <div class="sld-header-right">
+    <button
+      class="sld-btn sld-btn-dark"
+      id="btn-voltage-colors-modal"
+      title="전압 레벨별 색상 설정"
+    >
+      <span>🎨</span>
+      <span>전압 색상</span>
+    </button>
+    <button class="sld-btn sld-btn-dark" id="btn-save-project">
+      <span>💾</span>
+      <span>저장</span>
+    </button>
+    <div
+      class="sld-dropdown-wrapper"
+      style="position: relative; display: inline-block"
+    >
+      <button class="sld-btn sld-btn-dark" id="btn-export-dropdown">
+        <span>📤</span>
+        <span>내보내기</span>
+        <span style="font-size: 9px">▾</span>
+      </button>
+      <div
+        class="sld-dropdown-menu"
+        id="export-menu"
+        style="
+          display: none;
+          position: absolute;
+          right: 0;
+          top: 100%;
+          margin-top: 4px;
+          background: #fff;
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          z-index: 100;
+          min-width: 140px;
+          padding: 4px 0;
+        "
+      >
+        <a
+          href="javascript:void(0)"
+          id="btn-export-png"
+          style="
+            display: block;
+            padding: 8px 14px;
+            font-size: 12px;
+            color: #1e293b;
+            text-decoration: none;
+          "
+          >🖼️ PNG 이미지</a
+        >
+        <a
+          href="javascript:void(0)"
+          id="btn-export-svg"
+          style="
+            display: block;
+            padding: 8px 14px;
+            font-size: 12px;
+            color: #1e293b;
+            text-decoration: none;
+          "
+          >📐 SVG 벡터</a
+        >
+        <a
+          href="javascript:void(0)"
+          id="btn-export-json"
+          style="
+            display: block;
+            padding: 8px 14px;
+            font-size: 12px;
+            color: #1e293b;
+            text-decoration: none;
+          "
+          >📄 JSON 스키마</a
+        >
+      </div>
     </div>
+    <button class="sld-btn sld-btn-dark" id="btn-share-modal">
+      <span>🔗</span>
+      <span>공유</span>
+    </button>
+    <button
+      class="sld-btn sld-btn-dark"
+      id="btn-help-modal"
+      title="단축키 및 도움말"
+    >
+      <span>❓</span>
+    </button>
+    <div class="sld-avatar" title="사용자 관리자">AD</div>
+  </div>
 </header>
 
 
@@ -175,33 +237,33 @@ window.DEFAULT_SLD_SCHEMA = {"cells": [{"type": "sld.TransmissionTower", "id": "
     <div style="display: flex; align-items: center; gap: 6px; margin-left: 4px">
       <div
         class="palette-color-dot"
-        style="background: #7a3e9d"
-        title="154kV 보라"
+        style="background: #e53935"
+        title="154kV 초고압 적색"
       ></div>
       <div
         class="palette-color-dot"
         style="background: #9c27b0"
-        title="22.9kV 자주"
+        title="22.9kV 특고압 자주"
       ></div>
       <div
         class="palette-color-dot"
-        style="background: #2b6cb0"
-        title="0.4kV 청색"
+        style="background: #1e88e5"
+        title="6.6kV 고압 청색"
       ></div>
       <div
         class="palette-color-dot"
-        style="background: #2e7d32"
-        title="녹색/접지"
+        style="background: #16a34a"
+        title="0.4kV 저압 녹색"
       ></div>
       <div
         class="palette-color-dot"
-        style="background: #e65100"
-        title="비상/발전 주황"
+        style="background: #eab308"
+        title="0.22kV 상용 황색"
       ></div>
       <div
         class="palette-color-dot"
-        style="background: #374151"
-        title="일반 흑색"
+        style="background: #ea580c"
+        title="DC 주황"
       ></div>
     </div>
   </div>
@@ -1139,100 +1201,196 @@ window.DEFAULT_SLD_SCHEMA = {"cells": [{"type": "sld.TransmissionTower", "id": "
   <!-- Modals -->
   <!-- Shortcuts & Help Modal -->
 <div class="sld-modal-overlay" id="modal-help">
-    <div class="sld-modal">
-        <div class="sld-modal-header">
-            <span>⚡ 단축키 및 조작 안내</span>
-            <button class="tool-btn" id="btn-close-help-modal" style="font-size:16px;">✕</button>
-        </div>
-        <div class="sld-modal-body" style="font-size:13px; line-height:1.7;">
-            <p><strong>🖱️ 캔버스 조작:</strong></p>
-            <ul style="padding-left:20px; margin-bottom:12px;">
-                <li><strong>패닝(화면 이동):</strong> 마우스 우클릭 드래그 / Space + 드래그</li>
-                <li><strong>확대 / 축소:</strong> 마우스 휠 스크롤 (또는 상단 +/- 버튼)</li>
-                <li><strong>심볼 추가:</strong> 좌측 팔레트에서 캔버스로 드래그 앤 드롭 또는 클릭</li>
-                <li><strong>선 연결:</strong> 심볼의 원형 포트(Port)를 드래그하여 다른 설비/모선에 연결</li>
-                <li><strong>차단기 개폐 토글:</strong> 차단기/단로기 클릭 시 즉시 <code>OPEN / CLOSED</code> 토글 및 실시간 전력 흐름(Live Flow) 시뮬레이션</li>
-            </ul>
-            <p><strong>⌨️ 키보드 단축키:</strong></p>
-            <ul style="padding-left:20px;">
-                <li><kbd>Del</kbd> / <kbd>Backspace</kbd>: 선택 설비/선 삭제</li>
-                <li><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd>: 실행 취소 / 다시 실행</li>
-                <li><kbd>Ctrl+S</kbd>: 프로젝트 저장</li>
-            </ul>
-        </div>
-        <div class="sld-modal-footer">
-            <button class="sld-btn sld-btn-primary" id="btn-confirm-help">확인</button>
-        </div>
+  <div class="sld-modal">
+    <div class="sld-modal-header">
+      <span>⚡ 단축키 및 조작 안내</span>
+      <button
+        class="tool-btn"
+        id="btn-close-help-modal"
+        style="font-size: 16px"
+      >
+        ✕
+      </button>
     </div>
+    <div class="sld-modal-body" style="font-size: 13px; line-height: 1.7">
+      <p><strong>🖱️ 캔버스 조작:</strong></p>
+      <ul style="padding-left: 20px; margin-bottom: 12px">
+        <li>
+          <strong>패닝(화면 이동):</strong> 마우스 우클릭 드래그 / Space +
+          드래그
+        </li>
+        <li>
+          <strong>확대 / 축소:</strong> 마우스 휠 스크롤 (또는 상단 +/- 버튼)
+        </li>
+        <li>
+          <strong>심볼 추가:</strong> 좌측 팔레트에서 캔버스로 드래그 앤 드롭
+          또는 클릭
+        </li>
+        <li>
+          <strong>선 연결:</strong> 심볼의 원형 포트(Port)를 드래그하여 다른
+          설비/모선에 연결
+        </li>
+        <li>
+          <strong>차단기 개폐 토글:</strong> 차단기/단로기 클릭 시 즉시
+          <code>OPEN / CLOSED</code> 토글 및 실시간 전력 흐름(Live Flow)
+          시뮬레이션
+        </li>
+      </ul>
+      <p><strong>⌨️ 키보드 단축키:</strong></p>
+      <ul style="padding-left: 20px">
+        <li><kbd>Del</kbd> / <kbd>Backspace</kbd>: 선택 설비/선 삭제</li>
+        <li><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd>: 실행 취소 / 다시 실행</li>
+        <li><kbd>Ctrl+S</kbd>: 프로젝트 저장</li>
+      </ul>
+    </div>
+    <div class="sld-modal-footer">
+      <button class="sld-btn sld-btn-primary" id="btn-confirm-help">
+        확인
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- Project Switcher / New Project Modal -->
 <div class="sld-modal-overlay" id="modal-projects">
-    <div class="sld-modal">
-        <div class="sld-modal-header">
-            <span>📁 프로젝트 선택 및 새로 만들기</span>
-            <button class="tool-btn" id="btn-close-project-modal" style="font-size:16px;">✕</button>
-        </div>
-        <div class="sld-modal-body">
-            <div style="margin-bottom:16px;">
-                <label class="sld-form-label">새 프로젝트 생성</label>
-                <form id="create-project-form" style="display:flex; gap:8px;">
-                    <input type="text" class="sld-input" id="new-project-title" placeholder="프로젝트 이름 입력..." required>
-                    <button type="submit" class="sld-btn sld-btn-primary" style="white-space:nowrap;">생성</button>
-                </form>
-            </div>
-            <div>
-                <label class="sld-form-label">기존 프로젝트 목록</label>
-                <div style="max-height:160px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:4px;">
-                    
-                    <a href="/?id=8fe9c15c-a974-4a14-802c-7d5cff411096" style="display:flex; justify-content:space-between; padding:10px 12px; font-size:12px; color:#1e293b; text-decoration:none; border-bottom:1px solid #f1f5f9; background:#ffffff;">
-                        <span style="font-weight:600;">aa</span>
-                        <span style="color:#94a3b8;">2026-09-02 23:34</span>
-                    </a>
-                    
-                    <a href="/?id=default-154kv-substation" style="display:flex; justify-content:space-between; padding:10px 12px; font-size:12px; color:#1e293b; text-decoration:none; border-bottom:1px solid #f1f5f9; background:#eff6ff;">
-                        <span style="font-weight:600;">프로젝트 01 - 154kV 수전 단선도</span>
-                        <span style="color:#94a3b8;">2026-09-02 11:59</span>
-                    </a>
-                    
-                    <a href="/?id=2d2b3043-87a7-46a3-adc0-e1c8ba94c71d" style="display:flex; justify-content:space-between; padding:10px 12px; font-size:12px; color:#1e293b; text-decoration:none; border-bottom:1px solid #f1f5f9; background:#ffffff;">
-                        <span style="font-weight:600;">test</span>
-                        <span style="color:#94a3b8;">2026-09-02 11:59</span>
-                    </a>
-                    
-                </div>
-            </div>
-        </div>
+  <div class="sld-modal">
+    <div class="sld-modal-header">
+      <span>📁 프로젝트 선택 및 새로 만들기</span>
+      <button
+        class="tool-btn"
+        id="btn-close-project-modal"
+        style="font-size: 16px"
+      >
+        ✕
+      </button>
     </div>
+    <div class="sld-modal-body">
+      <div style="margin-bottom: 16px">
+        <label class="sld-form-label">새 프로젝트 생성</label>
+        <form id="create-project-form" style="display: flex; gap: 8px">
+          <input
+            type="text"
+            class="sld-input"
+            id="new-project-title"
+            placeholder="프로젝트 이름 입력..."
+            required
+          />
+          <button
+            type="submit"
+            class="sld-btn sld-btn-primary"
+            style="white-space: nowrap"
+          >
+            생성
+          </button>
+        </form>
+      </div>
+      <div>
+        <label class="sld-form-label">기존 프로젝트 목록</label>
+        <div
+          style="
+            max-height: 160px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+          "
+        >
+          
+          <a
+            href="/?id=default-154kv-substation"
+            style="display:flex; justify-content:space-between; padding:10px 12px; font-size:12px; color:#1e293b; text-decoration:none; border-bottom:1px solid #f1f5f9; background:#eff6ff;"
+          >
+            <span style="font-weight: 600">프로젝트 01 - 154kV 수전 단선도</span>
+            <span style="color: #94a3b8"
+              >2026-09-02 23:55</span
+            >
+          </a>
+          
+          <a
+            href="/?id=8fe9c15c-a974-4a14-802c-7d5cff411096"
+            style="display:flex; justify-content:space-between; padding:10px 12px; font-size:12px; color:#1e293b; text-decoration:none; border-bottom:1px solid #f1f5f9; background:#ffffff;"
+          >
+            <span style="font-weight: 600">aa</span>
+            <span style="color: #94a3b8"
+              >2026-09-02 23:34</span
+            >
+          </a>
+          
+          <a
+            href="/?id=2d2b3043-87a7-46a3-adc0-e1c8ba94c71d"
+            style="display:flex; justify-content:space-between; padding:10px 12px; font-size:12px; color:#1e293b; text-decoration:none; border-bottom:1px solid #f1f5f9; background:#ffffff;"
+          >
+            <span style="font-weight: 600">test</span>
+            <span style="color: #94a3b8"
+              >2026-09-02 11:59</span
+            >
+          </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Voltage Colors Settings Modal -->
 <div class="sld-modal-overlay" id="modal-voltage-colors">
-    <div class="sld-modal" style="max-width: 580px;">
-        <div class="sld-modal-header">
-            <span>🎨 전압 레벨별 색상 설정 (Voltage Color Scheme)</span>
-            <button class="tool-btn" id="btn-close-voltage-modal" style="font-size:16px;">✕</button>
-        </div>
-        <div class="sld-modal-body" style="font-size:13px; max-height: 480px; overflow-y: auto;">
-            <p style="color: #64748b; margin-bottom: 16px; font-size: 12px; line-height: 1.5;">
-                각 계통 전압에 해당하는 기본 색상을 지정합니다. 심볼 배치 및 전압 입력 시 해당 전압의 색상이 <strong>자동으로 기본 설정</strong>됩니다.
-            </p>
-            <div id="voltage-color-list" style="display: flex; flex-direction: column; gap: 10px;">
-                <!-- Populated dynamically via JavaScript -->
-            </div>
-        </div>
-        <div class="sld-modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
-            <button class="sld-btn" id="btn-reset-voltage-colors" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;">
-                <span>🔄 기본값 복원</span>
-            </button>
-            <div style="display: flex; gap: 8px;">
-                <button class="sld-btn" id="btn-cancel-voltage-colors" style="background:#f1f5f9; color:#475569;">취소</button>
-                <button class="sld-btn sld-btn-primary" id="btn-save-voltage-colors">
-                    <span>적용 및 저장</span>
-                </button>
-            </div>
-        </div>
+  <div class="sld-modal" style="max-width: 580px">
+    <div class="sld-modal-header">
+      <span>🎨 전압 레벨별 색상 설정 (Voltage Color Scheme)</span>
+      <button
+        class="tool-btn"
+        id="btn-close-voltage-modal"
+        style="font-size: 16px"
+      >
+        ✕
+      </button>
     </div>
+    <div
+      class="sld-modal-body"
+      style="font-size: 13px; max-height: 480px; overflow-y: auto"
+    >
+      <p
+        style="
+          color: #64748b;
+          margin-bottom: 16px;
+          font-size: 12px;
+          line-height: 1.5;
+        "
+      >
+        각 계통 전압에 해당하는 기본 색상을 지정합니다. 심볼 배치 및 전압 입력
+        시 해당 전압의 색상이 <strong>자동으로 기본 설정</strong>됩니다.
+      </p>
+      <div
+        id="voltage-color-list"
+        style="display: flex; flex-direction: column; gap: 10px"
+      >
+        <!-- Populated dynamically via JavaScript -->
+      </div>
+    </div>
+    <div
+      class="sld-modal-footer"
+      style="display: flex; justify-content: space-between; align-items: center"
+    >
+      <button
+        class="sld-btn"
+        id="btn-reset-voltage-colors"
+        style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1"
+      >
+        <span>🔄 기본값 복원</span>
+      </button>
+      <div style="display: flex; gap: 8px">
+        <button
+          class="sld-btn"
+          id="btn-cancel-voltage-colors"
+          style="background: #f1f5f9; color: #475569"
+        >
+          취소
+        </button>
+        <button class="sld-btn sld-btn-primary" id="btn-save-voltage-colors">
+          <span>적용 및 저장</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 </div>
