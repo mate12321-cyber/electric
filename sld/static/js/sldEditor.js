@@ -536,8 +536,8 @@ class SLDEditor {
         height = 64;
         break;
       case "CB_ACB":
-        width = 32;
-        height = 48;
+        width = 30;
+        height = 44;
         break;
       case "CB_VCB":
       case "CB_MCCB":

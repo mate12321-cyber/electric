@@ -293,7 +293,7 @@ const EQUIPMENT_CATALOG = {
     category: "PROTECTION",
     subCategory: "SWITCH",
     nameKo: "기중차단기 (ACB)",
-    descKo: "저압 주 배전용 기중차단기 (인출형)",
+    descKo: "저압 주 배전용 기중차단기 (호/접점형)",
     defaultProps: {
       name: "ACB",
       state: "CLOSED",
@@ -302,11 +302,11 @@ const EQUIPMENT_CATALOG = {
       poles: "3P",
       location: "0.4kV 모선 (A)",
       color: "#377DFF",
-      memo: "주 배전 차단용 인출형 ACB",
+      memo: "주 배전 차단용 ACB",
     },
     ports: ["in", "out"],
     iconSvg:
-      '<path d="M12 2v2M8 4h8l-4 3M12 20v2M8 20h8l-4-3" stroke="currentColor" stroke-width="1.2" fill="currentColor"/><rect x="5" y="7" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>',
+      '<path d="M12 2v4M12 18v4" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="7.5" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="12" cy="16.5" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M13.5 8.5 C 19 9, 19 15, 13.5 15.5" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/>',
   },
   CB_VCB: {
     type: "CB_VCB",
