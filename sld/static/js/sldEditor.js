@@ -234,13 +234,12 @@ class SLDEditor {
   }
 
   zoomToFit() {
-    // 1. Get invariant model bounding box from graph
     let bbox = null;
     if (this.graph && typeof this.graph.getBBox === "function") {
       bbox = this.graph.getBBox();
     }
 
-    if (!bbox || bbox.width === 0 || bbox.height === 0) {
+    if (!bbox || !bbox.width || !bbox.height || bbox.width <= 0 || bbox.height <= 0) {
       let minX = Infinity,
         minY = Infinity,
         maxX = -Infinity,
@@ -253,16 +252,18 @@ class SLDEditor {
         if (pos.x + sz.width > maxX) maxX = pos.x + sz.width;
         if (pos.y + sz.height > maxY) maxY = pos.y + sz.height;
       });
-      if (minX !== Infinity) {
+      if (minX !== Infinity && maxX > minX && maxY > minY) {
         bbox = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
       }
     }
 
-    if (!bbox || bbox.width === 0 || bbox.height === 0) return;
+    if (!bbox || !bbox.width || !bbox.height || bbox.width <= 0 || bbox.height <= 0) return;
 
     const rect = this.container.getBoundingClientRect();
     const containerWidth = rect.width || this.container.clientWidth || 1000;
     const containerHeight = rect.height || this.container.clientHeight || 700;
+
+    if (containerWidth < 100 || containerHeight < 100) return;
 
     const padding = 50;
     const scaleX = (containerWidth - padding * 2) / bbox.width;
@@ -276,8 +277,8 @@ class SLDEditor {
     const modelCenterY = bbox.y + bbox.height / 2;
 
     this.origin = {
-      x: containerWidth / 2 - modelCenterX * this.scale,
-      y: containerHeight / 2 - modelCenterY * this.scale,
+      x: Math.round(containerWidth / 2 - modelCenterX * this.scale),
+      y: Math.round(containerHeight / 2 - modelCenterY * this.scale),
     };
     this.paper.setOrigin(this.origin.x, this.origin.y);
 
@@ -993,13 +994,14 @@ class SLDEditor {
 
   loadDiagram(diagramId) {
     try {
-      localStorage.removeItem("sld_diagram_" + diagramId);
-      localStorage.removeItem("sld_diagram_v1_" + diagramId);
-      localStorage.removeItem("sld_diagram_v2_" + diagramId);
-      localStorage.removeItem("sld_diagram_v3_" + diagramId);
+      Object.keys(localStorage).forEach((k) => {
+        if (k.startsWith("sld_diagram_") || k.startsWith("sld_current_")) {
+          localStorage.removeItem(k);
+        }
+      });
     } catch (e) {}
 
-    const cacheKey = "sld_diagram_v4_" + diagramId;
+    const cacheKey = "sld_diagram_v5_" + diagramId;
 
     fetch("/api/sld/" + diagramId + "/")
       .then((res) => {
@@ -1045,16 +1047,54 @@ class SLDEditor {
   }
 
   applyLoadedSchema(schema) {
-    if (schema && schema.cells) {
+    if (!schema || !schema.cells || schema.cells.length === 0) return;
+
+    // 1. Collect all non-link element IDs
+    const elementIds = new Set();
+    schema.cells.forEach((cell) => {
+      if (cell.type !== "standard.Link" && cell.type !== "link") {
+        if (cell.id) elementIds.add(cell.id);
+      }
+    });
+
+    // 2. Validate, filter, and sanitize cells
+    const validCells = [];
+    schema.cells.forEach((cell) => {
+      if (cell.type === "standard.Link" || cell.type === "link") {
+        const srcId = cell.source?.id;
+        const tgtId = cell.target?.id;
+        if (!srcId || !tgtId || !elementIds.has(srcId) || !elementIds.has(tgtId)) {
+          console.warn("Skipping invalid link with missing endpoint:", cell.id, srcId, tgtId);
+          return;
+        }
+        cell.router = { name: "sldOrthogonal" };
+        cell.connector = { name: "normal" };
+        if (cell.attrs?.line?.targetMarker?.type === "none") {
+          cell.attrs.line.targetMarker = { name: "none" };
+        }
+      } else {
+        // Safety check: ensure shape type exists
+        if (cell.type === "sld.ACB" && (!joint.shapes.sld || !joint.shapes.sld.ACB)) {
+          cell.type = "sld.Breaker";
+        }
+      }
+      validCells.push(cell);
+    });
+
+    schema.cells = validCells;
+
+    this.isHistoryTracking = false;
+    try {
+      this.graph.fromJSON(schema);
+    } catch (e) {
+      console.warn("Retrying graph loading with fallback types:", e);
       schema.cells.forEach((cell) => {
-        if (cell.type === "standard.Link" || cell.type === "link") {
-          cell.router = { name: "sldOrthogonal" };
-          cell.connector = { name: "normal" };
+        if (cell.type && cell.type.startsWith("sld.") && (!joint.shapes.sld || !joint.shapes.sld[cell.type.replace("sld.", "")])) {
+          cell.type = "sld.Breaker";
         }
       });
+      this.graph.fromJSON(schema);
     }
-    this.isHistoryTracking = false;
-    this.graph.fromJSON(schema);
     this.topologyTracker.applyStyles(this.paper);
     this.isHistoryTracking = true;
     this.pushHistory();

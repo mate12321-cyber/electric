@@ -9,30 +9,30 @@
     <!-- JointJS CSS -->
     <link
       rel="stylesheet"
-      href="{% static 'css/joint.min.css' %}?v=20260902_02"
+      href="{% static 'css/joint.min.css' %}?v=20260903_03"
     />
     <!-- SLD Pure CSS Theme -->
     <link
       rel="stylesheet"
-      href="{% static 'css/sld_styles.css' %}?v=20260902_02"
+      href="{% static 'css/sld_styles.css' %}?v=20260903_03"
     />
   </head>
   <body>
     {% csrf_token %} {% block content %}{% endblock %}
 
     <!-- Vendor Libraries -->
-    <script src="{% static 'js/vendor/jquery.min.js' %}?v=20260902_02"></script>
-    <script src="{% static 'js/vendor/lodash.min.js' %}?v=20260902_02"></script>
-    <script src="{% static 'js/vendor/backbone-min.js' %}?v=20260902_02"></script>
-    <script src="{% static 'js/vendor/joint.min.js' %}?v=20260902_02"></script>
-    <script src="{% static 'js/vendor/htmx.min.js' %}?v=20260902_02"></script>
+    <script src="{% static 'js/vendor/jquery.min.js' %}?v=20260903_03"></script>
+    <script src="{% static 'js/vendor/lodash.min.js' %}?v=20260903_03"></script>
+    <script src="{% static 'js/vendor/backbone-min.js' %}?v=20260903_03"></script>
+    <script src="{% static 'js/vendor/joint.min.js' %}?v=20260903_03"></script>
+    <script src="{% static 'js/vendor/htmx.min.js' %}?v=20260903_03"></script>
 
     <!-- SLD Core Modules -->
-    <script src="{% static 'js/equipmentRegistry.js' %}?v=20260902_02"></script>
-    <script src="{% static 'js/topologyTracker.js' %}?v=20260902_02"></script>
-    <script src="{% static 'js/sldSymbols.js' %}?v=20260902_02"></script>
-    <script src="{% static 'js/sldExport.js' %}?v=20260902_02"></script>
-    <script src="{% static 'js/sldEditor.js' %}?v=20260902_02"></script>
+    <script src="{% static 'js/equipmentRegistry.js' %}?v=20260903_03"></script>
+    <script src="{% static 'js/topologyTracker.js' %}?v=20260903_03"></script>
+    <script src="{% static 'js/sldSymbols.js' %}?v=20260903_03"></script>
+    <script src="{% static 'js/sldExport.js' %}?v=20260903_03"></script>
+    <script src="{% static 'js/sldEditor.js' %}?v=20260903_03"></script>
 
     {% block scripts %}{% endblock %}
   </body>

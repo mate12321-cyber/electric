@@ -32,7 +32,7 @@ def get_default_sld_schema():
                     'strokeWidth': stroke_width,
                     'strokeDasharray': '8,4',
                     'class': 'link-live',
-                    'targetMarker': {'type': 'none'}
+                    'targetMarker': {'name': 'none'}
                 }
             }
         }
@@ -117,6 +117,7 @@ def get_default_sld_schema():
 
     # Sub-loads on 0.4kV Bus A (Columns: 216, 278, 340)
     cells.append(make_cell('acb-a1', 'sld.ACB', 201, 613, 30, 44, {'type': 'CB_ACB', 'name': 'ACB', 'state': 'LIVE', 'voltage': 0.4, 'current': 1600, 'color': '#16A34A', 'location': '0.4kV 모선 (A)'}))
+    cells.append(make_cell('load-a1', 'sld.Load', 199, 680, 34, 36, {'type': 'LOAD', 'name': '부하', 'color': '#16A34A'}))
     cells.append(make_link('link-busa-acba1', 'bus-04-a', 'p1', 'acb-a1', 'in', '#16A34A'))
     cells.append(make_link('link-acba1-loada1', 'acb-a1', 'out', 'load-a1', 'in', '#16A34A'))
 
