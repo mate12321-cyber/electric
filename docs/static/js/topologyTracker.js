@@ -31,24 +31,20 @@ class PowerSystemTopologyTracker {
       const tgt = link.get("target");
       if (src && src.id && tgt && tgt.id) {
         if (adj.has(src.id)) {
-          adj
-            .get(src.id)
-            .push({
-              link,
-              neighborId: tgt.id,
-              portFrom: src.port,
-              portTo: tgt.port,
-            });
+          adj.get(src.id).push({
+            link,
+            neighborId: tgt.id,
+            portFrom: src.port,
+            portTo: tgt.port,
+          });
         }
         if (adj.has(tgt.id)) {
-          adj
-            .get(tgt.id)
-            .push({
-              link,
-              neighborId: src.id,
-              portFrom: tgt.port,
-              portTo: src.port,
-            });
+          adj.get(tgt.id).push({
+            link,
+            neighborId: src.id,
+            portFrom: tgt.port,
+            portTo: src.port,
+          });
         }
       }
     });
