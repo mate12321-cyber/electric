@@ -60,7 +60,7 @@ class PowerSystemTopologyTracker {
 
       const st = (sldData.state || "LIVE").toUpperCase();
       if (st === "DEAD" || st === "OPEN") return false;
-      if (st === "GROUNDED" || st === "EARTH") return true;
+      if (st === "GROUNDED" || st === "GROUND" || st === "EARTH") return true;
       if (catalog.subCategory === "SWITCH") {
         return st === "LIVE" || st === "CLOSED";
       }
@@ -82,6 +82,7 @@ class PowerSystemTopologyTracker {
         catalog.isGroundSource ||
         sldData.type === "GROUND" ||
         st === "GROUNDED" ||
+        st === "GROUND" ||
         st === "EARTH"
       ) {
         groundQueue.push(el.id);

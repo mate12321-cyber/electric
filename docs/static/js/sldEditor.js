@@ -1674,11 +1674,21 @@ class SLDEditor {
 
     const curState = (sldData.state || "LIVE").toUpperCase();
     const normState =
-      curState === "CLOSED" ? "LIVE" : curState === "OPEN" ? "DEAD" : curState;
+      curState === "CLOSED"
+        ? "LIVE"
+        : curState === "OPEN"
+          ? "DEAD"
+          : curState === "GROUND" || curState === "EARTH"
+            ? "GROUNDED"
+            : curState;
 
-    // Cycle: LIVE (활선) -> DEAD (사선) -> GROUND (접지) -> LIVE (활선)
+    // Cycle: LIVE (활선) -> DEAD (사선) -> GROUNDED (접지) -> LIVE (활선)
     const nextState =
-      normState === "LIVE" ? "DEAD" : normState === "DEAD" ? "GROUND" : "LIVE";
+      normState === "LIVE"
+        ? "DEAD"
+        : normState === "DEAD"
+          ? "GROUNDED"
+          : "LIVE";
 
     sldData.state = nextState;
     cell.set("sldData", Object.assign({}, sldData));
@@ -1708,6 +1718,7 @@ class SLDEditor {
     const stateNames = {
       LIVE: "🔴 활선 (Live)",
       DEAD: "⚪ 사선 (Dead)",
+      GROUNDED: "🟢 접지 (Ground)",
       GROUND: "🟢 접지 (Ground)",
     };
     this.showToast(`설비 상태: ${stateNames[nextState] || nextState}`);

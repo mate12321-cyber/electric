@@ -170,7 +170,8 @@
         const sz = this.get("size") || { width: 28, height: 40 };
 
         const isLive = state === "LIVE" || state === "CLOSED";
-        const isGrounded = state === "GROUNDED" || state === "EARTH";
+        const isGrounded =
+          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
 
         let boxFill = "#000000"; // 활선: 검정색 (Live Black)
         let boxStroke = color;
@@ -304,7 +305,8 @@
         const color = data.color || "#377DFF";
 
         const isLive = state === "LIVE" || state === "CLOSED";
-        const isGrounded = state === "GROUNDED" || state === "EARTH";
+        const isGrounded =
+          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
 
         let strokeColor = color;
         let crescentFill = "#000000"; // 활선: 검정색 (Live Black)
@@ -442,7 +444,8 @@
         const color = data.color || "#377DFF";
 
         const isLive = state === "LIVE" || state === "CLOSED";
-        const isGrounded = state === "GROUNDED" || state === "EARTH";
+        const isGrounded =
+          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
 
         let strokeColor = color;
         let crescentFill = "#000000"; // 활선: 검정색 (Live Black)
@@ -594,7 +597,8 @@
         const color = data.color || "#7A3E9D";
 
         const isLive = state === "LIVE" || state === "CLOSED";
-        const isGrounded = state === "GROUNDED" || state === "EARTH";
+        const isGrounded =
+          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
 
         let strokeColor = color;
         let bladeD = "M 18.5 6 L 18.5 34";
@@ -768,7 +772,8 @@
 
         const state = (data.state || "LIVE").toUpperCase();
         const isDead = state === "DEAD" || state === "OPEN";
-        const isGrounded = state === "GROUNDED";
+        const isGrounded =
+          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
 
         const priV =
           data.priVoltage !== undefined
