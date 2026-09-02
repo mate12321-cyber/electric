@@ -300,24 +300,44 @@ class SLDEditor {
         this.scheduleAutoSave();
       }
 
-      // Check if user was dragging a wire and dropped it over an existing wire line
-      if (this._activeDrawingLink) {
-        const link = this._activeDrawingLink;
-        this._activeDrawingLink = null;
-        const src = link.get("source");
-        const tgt = link.get("target");
+      // Check if user was dragging a wire and dropped it over an existing wire line (T-Junction)
+      const srcInfo =
+        (this._activeDrawingLink && this._activeDrawingLink.get("source")) ||
+        this._lastDrawingSource ||
+        (this._pendingLinkDrop &&
+        Date.now() - this._pendingLinkDrop.time < 500
+          ? this._pendingLinkDrop.source
+          : null);
 
-        if (src && src.id && (!tgt || !tgt.id)) {
-          const paperPt = this.paper.clientToLocalPoint({
-            x: e.clientX,
-            y: e.clientY,
-          });
-          const found = this.findLinkAtPoint(paperPt, 25, link.id);
-          if (found) {
-            link.remove();
-            this.splitLinkAtPoint(found.link, found.projection, src);
+      if (srcInfo && srcInfo.id) {
+        const linkToRemove = this._activeDrawingLink;
+        this._activeDrawingLink = null;
+        this._lastDrawingSource = null;
+        this._pendingLinkDrop = null;
+
+        const paperPt = this.paper.clientToLocalPoint({
+          x: e.clientX,
+          y: e.clientY,
+        });
+        const found = this.findLinkAtPoint(
+          paperPt,
+          35,
+          linkToRemove ? linkToRemove.id : null,
+        );
+        if (
+          found &&
+          found.link.get("source")?.id !== srcInfo.id &&
+          found.link.get("target")?.id !== srcInfo.id
+        ) {
+          if (linkToRemove) {
+            linkToRemove.remove();
           }
+          this.splitLinkAtPoint(found.link, found.projection, srcInfo);
+          this.showToast("연결선에 분기 접속점(T-분기)이 연결되었습니다.");
         }
+      } else {
+        this._activeDrawingLink = null;
+        this._lastDrawingSource = null;
       }
     });
 
@@ -743,6 +763,22 @@ class SLDEditor {
       this.scheduleAutoSave();
     });
 
+    // Blank Click in Wire Tool -> T-junction if near wire
+    this.paper.on("blank:pointerdown", (evt, x, y) => {
+      if (this.activeTool === "wire" && this._wireSource) {
+        const found = this.findLinkAtPoint({ x, y }, 35);
+        if (
+          found &&
+          found.link.get("source")?.id !== this._wireSource.id &&
+          found.link.get("target")?.id !== this._wireSource.id
+        ) {
+          this.splitLinkAtPoint(found.link, found.projection, this._wireSource);
+          this._wireSource = null;
+          this.showToast("연결선에 분기 접속점(T-분기)이 연결되었습니다.");
+        }
+      }
+    });
+
     this.paper.on("link:pointerdown", (linkView, evt) => {
       // Wire Tool Click on Existing Link
       if (this.activeTool === "wire") {
@@ -750,16 +786,25 @@ class SLDEditor {
           x: evt.clientX,
           y: evt.clientY,
         });
-        const found = this.findLinkAtPoint(paperPt, 25);
+        const found = this.findLinkAtPoint(paperPt, 35) || {
+          link: linkView.model,
+          projection: paperPt,
+        };
         if (found) {
           if (this._wireSource) {
-            this.splitLinkAtPoint(
-              found.link,
-              found.projection,
-              this._wireSource,
-            );
-            this._wireSource = null;
-            return;
+            if (
+              found.link.get("source")?.id !== this._wireSource.id &&
+              found.link.get("target")?.id !== this._wireSource.id
+            ) {
+              this.splitLinkAtPoint(
+                found.link,
+                found.projection,
+                this._wireSource,
+              );
+              this._wireSource = null;
+              this.showToast("연결선에 분기 접속점(T-분기)이 연결되었습니다.");
+              return;
+            }
           } else {
             const res = this.splitLinkAtPoint(found.link, found.projection);
             if (res && res.junction) {
@@ -864,9 +909,11 @@ class SLDEditor {
 
     this.graph.on("add", (cell) => {
       if (cell.isLink && cell.isLink()) {
+        const src = cell.get("source");
         const tgt = cell.get("target");
-        if (!tgt || !tgt.id) {
+        if (src && src.id && (!tgt || !tgt.id)) {
           this._activeDrawingLink = cell;
+          this._lastDrawingSource = Object.assign({}, src);
         }
         this.autoCreateBusbarPort(cell);
       }
@@ -875,6 +922,13 @@ class SLDEditor {
     this.graph.on("remove", (cell) => {
       if (cell.isLink && cell.isLink()) {
         if (this._activeDrawingLink === cell) {
+          const src = cell.get("source");
+          if (src && src.id) {
+            this._pendingLinkDrop = {
+              source: Object.assign({}, src),
+              time: Date.now(),
+            };
+          }
           this._activeDrawingLink = null;
         }
         this.cleanupUnusedBusbarPorts();
