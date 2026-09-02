@@ -781,4 +781,41 @@
         }
     });
 
+    // 25. Custom CAD SLD Orthogonal Router (Guarantees pure straight line on vertical/horizontal alignments)
+    if (joint.routers) {
+        joint.routers.sldOrthogonal = function(vertices, opt, linkView) {
+            const src = (linkView && (linkView.sourceAnchor || linkView.sourcePoint)) || (opt && opt.sourcePoint);
+            const tgt = (linkView && (linkView.targetAnchor || linkView.targetPoint)) || (opt && opt.targetPoint);
+
+            if (!src || !tgt) return vertices || [];
+
+            const sx = Math.round(src.x);
+            const sy = Math.round(src.y);
+            const tx = Math.round(tgt.x);
+            const ty = Math.round(tgt.y);
+
+            // If user has manually placed intermediate vertices, preserve them
+            if (vertices && vertices.length > 0) {
+                return vertices;
+            }
+
+            // 1. Vertical alignment (within 5px tolerance): 100% straight vertical line!
+            if (Math.abs(sx - tx) <= 5) {
+                return [];
+            }
+
+            // 2. Horizontal alignment (within 5px tolerance): 100% straight horizontal line!
+            if (Math.abs(sy - ty) <= 5) {
+                return [];
+            }
+
+            // 3. Different X and Y: Clean right-angle step at the midpoint Y
+            const midY = Math.round(((sy + ty) / 2) / 10) * 10;
+            return [
+                { x: sx, y: midY },
+                { x: tx, y: midY }
+            ];
+        };
+    }
+
 })();

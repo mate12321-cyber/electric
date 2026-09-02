@@ -47,7 +47,7 @@ class SLDEditor {
       linkPinning: false,
       markAvailable: true,
       defaultLink: new joint.shapes.standard.Link({
-        router: { name: "orthogonal", args: { padding: 0 } },
+        router: { name: "sldOrthogonal" },
         connector: { name: "normal" },
         attrs: {
           line: {

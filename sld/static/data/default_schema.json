@@ -99,10 +99,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -131,10 +128,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -163,10 +157,7 @@
         "port": "pri"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -215,10 +206,7 @@
         "port": "p5"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -310,10 +298,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -342,10 +327,7 @@
         "port": "pri"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -374,10 +356,7 @@
         "port": "p5"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -445,10 +424,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -477,10 +453,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -547,10 +520,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -579,10 +549,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -649,10 +616,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -681,10 +645,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -775,10 +736,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -807,10 +765,7 @@
         "port": "pri"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -839,10 +794,7 @@
         "port": "p5"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -908,10 +860,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -940,10 +889,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1009,10 +955,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1041,10 +984,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1110,10 +1050,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1142,10 +1079,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1236,10 +1170,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1268,10 +1199,7 @@
         "port": "pri"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1300,10 +1228,7 @@
         "port": "p5"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1369,10 +1294,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1401,10 +1323,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1470,10 +1389,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1502,10 +1418,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1571,10 +1484,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1603,10 +1513,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1676,10 +1583,7 @@
         "port": "out"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1708,10 +1612,7 @@
         "port": "p10"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1926,10 +1827,7 @@
         "port": "ac_in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1958,10 +1856,7 @@
         "port": "dc_bat"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -1990,10 +1885,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -2022,10 +1914,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -2054,10 +1943,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -2086,10 +1972,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -2118,10 +2001,7 @@
         "port": "in"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"
@@ -2208,10 +2088,7 @@
         "port": "out"
       },
       "router": {
-        "name": "orthogonal",
-        "args": {
-          "padding": 0
-        }
+        "name": "sldOrthogonal"
       },
       "connector": {
         "name": "normal"

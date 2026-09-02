@@ -22,7 +22,7 @@ def get_default_sld_schema():
             'id': lid,
             'source': {'id': src_id, 'port': src_port},
             'target': {'id': tgt_id, 'port': tgt_port},
-            'router': {'name': 'orthogonal', 'args': {'padding': 0}},
+            'router': {'name': 'sldOrthogonal'},
             'connector': {'name': 'normal'},
             'attrs': {
                 'line': {
