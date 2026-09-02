@@ -106,7 +106,6 @@
       markup: [
         { tagName: "rect", selector: "box" },
         { tagName: "text", selector: "groundSymbol" },
-        { tagName: "circle", selector: "stateBadge" },
         { tagName: "text", selector: "nameLabel" },
         { tagName: "text", selector: "specLabel" },
       ],
@@ -149,14 +148,6 @@
           fontSize: 8.5,
           fill: "#64748b",
         },
-        stateBadge: {
-          cx: 4,
-          cy: 4,
-          r: 3.5,
-          fill: "#ef4444",
-          stroke: "#ffffff",
-          strokeWidth: 1.2,
-        },
       },
       ports: {
         groups: {
@@ -197,19 +188,16 @@
 
         let boxFill = "#000000"; // 활선: 검정색 (Live Black)
         let boxStroke = color;
-        let badgeColor = "#ef4444";
         let showGround = "none";
 
         if (isGrounded) {
           boxFill = "#16a34a"; // 접지: 초록색 (Ground Green)
           boxStroke = "#16a34a";
-          badgeColor = "#16a34a";
           showGround = "block";
         } else if (!isLive) {
           // DEAD (사선)
           boxFill = "#94a3b8"; // 사선: 회색 (Dead Gray)
           boxStroke = "#94a3b8";
-          badgeColor = "#94a3b8";
         }
 
         this.attr({
@@ -222,7 +210,6 @@
           groundSymbol: { display: showGround, fill: "#ffffff" },
           nameLabel: { text: data.name || "CB" },
           specLabel: { text: data.current ? data.current + "A" : "" },
-          stateBadge: { fill: badgeColor },
         });
       },
     },
@@ -241,7 +228,6 @@
         { tagName: "circle", selector: "botNode" },
         { tagName: "path", selector: "blade" },
         { tagName: "text", selector: "groundSymbol" },
-        { tagName: "circle", selector: "stateBadge" },
         { tagName: "text", selector: "nameLabel" },
       ],
       attrs: {
@@ -274,14 +260,6 @@
           fontSize: 10,
           fill: "#ffffff",
           display: "none",
-        },
-        stateBadge: {
-          cx: 4,
-          cy: 4,
-          r: 3.5,
-          fill: "#ef4444",
-          stroke: "#ffffff",
-          strokeWidth: 1.2,
         },
         nameLabel: {
           text: "154kV DS",
@@ -333,7 +311,6 @@
         let boxStroke = color;
         let nodeColor = color;
         let bladeColor = color;
-        let badgeColor = "#ef4444";
         let showGround = "none";
         let bladeD = "M 15 12 L 15 28";
 
@@ -342,7 +319,6 @@
           boxStroke = "#16a34a";
           nodeColor = "#ffffff";
           bladeColor = "#ffffff";
-          badgeColor = "#16a34a";
           showGround = "block";
         } else if (!isLive) {
           // DEAD (사선)
@@ -350,7 +326,6 @@
           boxStroke = "#94a3b8";
           nodeColor = "#475569";
           bladeColor = "#475569";
-          badgeColor = "#94a3b8";
           bladeD = "M 15 12 L 23 24";
         }
 
@@ -362,7 +337,6 @@
           botNode: { fill: nodeColor },
           blade: { d: bladeD, stroke: bladeColor },
           groundSymbol: { display: showGround, fill: "#ffffff" },
-          stateBadge: { fill: badgeColor },
           nameLabel: { text: data.name || "DS" },
         });
       },
