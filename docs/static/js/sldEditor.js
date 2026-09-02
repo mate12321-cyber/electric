@@ -228,13 +228,12 @@ class SLDEditor {
       if (drawingSrc && drawingSrc.id) {
         const found = this.findLinkAtPoint(
           p,
-          35,
+          40,
           this._activeDrawingLink ? this._activeDrawingLink.id : null,
           drawingSrc.id,
         );
 
         if (found) {
-          const pts = this.getLinkPoints(found.link);
           let jx = Math.round(found.projection.x / 10) * 10;
           let jy = Math.round(found.projection.y / 10) * 10;
 
@@ -262,25 +261,28 @@ class SLDEditor {
               }
             }
 
-            if (pts && pts.length >= 2) {
-              const isHorizontal =
-                Math.abs(pts[0].y - pts[pts.length - 1].y) < 10;
-              const isVertical =
-                Math.abs(pts[0].x - pts[pts.length - 1].x) < 10;
+            const seg = found.segment;
+            if (seg) {
+              const isHorizontal = Math.abs(seg.p1.y - seg.p2.y) < 5;
+              const isVertical = Math.abs(seg.p1.x - seg.p2.x) < 5;
 
               if (isHorizontal) {
-                jy = pts[0].y;
-                const minX = Math.min(...pts.map((pt) => pt.x));
-                const maxX = Math.max(...pts.map((pt) => pt.x));
-                if (srcPortX >= minX && srcPortX <= maxX) {
+                jy = seg.p1.y;
+                const minX = Math.min(seg.p1.x, seg.p2.x);
+                const maxX = Math.max(seg.p1.x, seg.p2.x);
+                if (srcPortX >= minX - 10 && srcPortX <= maxX + 10) {
                   jx = srcPortX;
+                } else {
+                  jx = Math.max(minX, Math.min(maxX, found.projection.x));
                 }
               } else if (isVertical) {
-                jx = pts[0].x;
-                const minY = Math.min(...pts.map((pt) => pt.y));
-                const maxY = Math.max(...pts.map((pt) => pt.y));
-                if (srcPortY >= minY && srcPortY <= maxY) {
+                jx = seg.p1.x;
+                const minY = Math.min(seg.p1.y, seg.p2.y);
+                const maxY = Math.max(seg.p1.y, seg.p2.y);
+                if (srcPortY >= minY - 10 && srcPortY <= maxY + 10) {
                   jy = srcPortY;
+                } else {
+                  jy = Math.max(minY, Math.min(maxY, found.projection.y));
                 }
               }
             }
@@ -288,17 +290,27 @@ class SLDEditor {
 
           // Live snap the dragging wire target to the orthogonal intersection
           if (this._activeDrawingLink) {
-            this._activeDrawingLink.set("target", { x: jx, y: jy });
+            this._activeDrawingLink.set({
+              target: { x: jx, y: jy },
+              vertices: [],
+            });
           }
 
           const wireColor =
             this.topologyTracker.getElementVoltageColor(srcEl) || "#377DFF";
           this.showTBranchPreview({ x: jx, y: jy }, wireColor);
+          this._snappedTBranch = {
+            link: found.link,
+            projection: { x: jx, y: jy },
+            source: drawingSrc,
+          };
         } else {
           this.hideTBranchPreview();
+          this._snappedTBranch = null;
         }
       } else {
         this.hideTBranchPreview();
+        this._snappedTBranch = null;
       }
 
       // Pan drag handling
@@ -392,7 +404,22 @@ class SLDEditor {
         this.scheduleAutoSave();
       }
 
-      // Check if user was dragging a wire and dropped it over an existing wire line (T-Junction)
+      // 1. If snapped to a T-branch during live drag, finish T-branch connection
+      if (this._snappedTBranch) {
+        const snapped = this._snappedTBranch;
+        this._snappedTBranch = null;
+        if (this._activeDrawingLink) {
+          this._activeDrawingLink.remove();
+          this._activeDrawingLink = null;
+        }
+        this._lastDrawingSource = null;
+        this._pendingLinkDrop = null;
+        this.splitLinkAtPoint(snapped.link, snapped.projection, snapped.source);
+        this.showToast("연결선에 분기 접속점(T-분기)이 연결되었습니다.");
+        return;
+      }
+
+      // 2. Fallback check if user was dragging a wire and dropped it over an existing wire line
       const srcInfo =
         (this._activeDrawingLink && this._activeDrawingLink.get("source")) ||
         this._lastDrawingSource ||
@@ -412,8 +439,9 @@ class SLDEditor {
         });
         const found = this.findLinkAtPoint(
           paperPt,
-          35,
+          40,
           linkToRemove ? linkToRemove.id : null,
+          srcInfo.id,
         );
         if (
           found &&
@@ -1097,6 +1125,7 @@ class SLDEditor {
     let bestLink = null;
     let bestDist = maxDist;
     let bestProjection = null;
+    let bestSegment = null;
 
     links.forEach((link) => {
       if (excludeLinkId && link.id === excludeLinkId) return;
@@ -1144,6 +1173,7 @@ class SLDEditor {
           bestDist = dist;
           bestLink = link;
           bestProjection = proj;
+          bestSegment = { p1, p2 };
         }
       }
     });
@@ -1153,17 +1183,26 @@ class SLDEditor {
         link: bestLink,
         projection: bestProjection,
         dist: bestDist,
+        segment: bestSegment,
       };
     }
     return null;
   }
 
   showTBranchPreview(paperPoint, color = "#377DFF") {
-    if (!paperPoint || !this.paper || !this.paper.svg) return;
+    if (!paperPoint || !this.paper) return;
+
+    const viewport =
+      this.paper.viewport ||
+      (this.paper.el && this.paper.el.querySelector(".joint-viewport")) ||
+      this.paper.svg;
+    if (!viewport) return;
 
     let previewEl = document.getElementById("sld-tbranch-preview");
-    if (!previewEl) {
-      const svg = this.paper.svg;
+    if (!previewEl || previewEl.parentNode !== viewport) {
+      if (previewEl && previewEl.parentNode) {
+        previewEl.parentNode.removeChild(previewEl);
+      }
       const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
       g.id = "sld-tbranch-preview";
       g.setAttribute("class", "tbranch-preview-group");
@@ -1187,7 +1226,7 @@ class SLDEditor {
 
       g.appendChild(pulse);
       g.appendChild(dot);
-      svg.appendChild(g);
+      viewport.appendChild(g);
       previewEl = g;
     }
 
@@ -1283,22 +1322,43 @@ class SLDEditor {
 
         const pts = this.getLinkPoints(targetLink);
         if (pts && pts.length >= 2) {
-          const isHorizontal = Math.abs(pts[0].y - pts[pts.length - 1].y) < 10;
-          const isVertical = Math.abs(pts[0].x - pts[pts.length - 1].x) < 10;
-
-          if (isHorizontal) {
-            jy = pts[0].y;
-            const minX = Math.min(...pts.map((p) => p.x));
-            const maxX = Math.max(...pts.map((p) => p.x));
-            if (srcPortX >= minX && srcPortX <= maxX) {
-              jx = srcPortX;
+          let bestSeg = null;
+          let bestSegDist = Infinity;
+          for (let i = 0; i < pts.length - 1; i++) {
+            const p1 = pts[i];
+            const p2 = pts[i + 1];
+            const segDist = Math.hypot(
+              projPoint.x - (p1.x + p2.x) / 2,
+              projPoint.y - (p1.y + p2.y) / 2,
+            );
+            if (segDist < bestSegDist) {
+              bestSegDist = segDist;
+              bestSeg = { p1, p2 };
             }
-          } else if (isVertical) {
-            jx = pts[0].x;
-            const minY = Math.min(...pts.map((p) => p.y));
-            const maxY = Math.max(...pts.map((p) => p.y));
-            if (srcPortY >= minY && srcPortY <= maxY) {
-              jy = srcPortY;
+          }
+
+          if (bestSeg) {
+            const isHorizontal = Math.abs(bestSeg.p1.y - bestSeg.p2.y) < 5;
+            const isVertical = Math.abs(bestSeg.p1.x - bestSeg.p2.x) < 5;
+
+            if (isHorizontal) {
+              jy = bestSeg.p1.y;
+              const minX = Math.min(bestSeg.p1.x, bestSeg.p2.x);
+              const maxX = Math.max(bestSeg.p1.x, bestSeg.p2.x);
+              if (srcPortX >= minX - 10 && srcPortX <= maxX + 10) {
+                jx = srcPortX;
+              } else {
+                jx = Math.max(minX, Math.min(maxX, projPoint.x));
+              }
+            } else if (isVertical) {
+              jx = bestSeg.p1.x;
+              const minY = Math.min(bestSeg.p1.y, bestSeg.p2.y);
+              const maxY = Math.max(bestSeg.p1.y, bestSeg.p2.y);
+              if (srcPortY >= minY - 10 && srcPortY <= maxY + 10) {
+                jy = srcPortY;
+              } else {
+                jy = Math.max(minY, Math.min(maxY, projPoint.y));
+              }
             }
           }
         }
