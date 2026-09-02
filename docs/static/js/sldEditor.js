@@ -1,7 +1,71 @@
-/**
- * SLD Editor Main Engine (JointJS + Manhattan Router + Interactive Canvas)
- * Handles Pan/Zoom, Drag-and-Drop, Breaker Toggle, Properties Inspector, and Real-time Topology Evaluation.
- */
+// Install Port-Aware Real-time Drag Snapping on JointJS ElementView
+(function () {
+  if (typeof joint !== "undefined" && joint.dia && joint.dia.ElementView) {
+    joint.dia.ElementView.prototype.drag = function (evt, x, y) {
+      const paper = this.paper;
+      const gridSize = (paper && paper.options.gridSize) || 10;
+      const model = this.model;
+      const eventData = this.eventData(evt);
+      const pointerOffset = eventData.pointerOffset || { x: 0, y: 0 };
+      const restrictedArea = eventData.restrictedArea;
+      let embedding = eventData.embedding;
+
+      let snapOffset = { x: 0, y: 0 };
+      if (
+        window.sldEditor &&
+        typeof window.sldEditor.getPrimaryPortOffset === "function"
+      ) {
+        const sldData = model.get("sldData") || {};
+        const size = model.size();
+        snapOffset = window.sldEditor.getPrimaryPortOffset(
+          sldData.type,
+          size.width,
+          size.height,
+          model,
+        );
+      } else if (
+        typeof SLDEditor !== "undefined" &&
+        typeof SLDEditor.prototype.getPrimaryPortOffset === "function"
+      ) {
+        const sldData = model.get("sldData") || {};
+        const size = model.size();
+        snapOffset = SLDEditor.prototype.getPrimaryPortOffset(
+          sldData.type,
+          size.width,
+          size.height,
+          model,
+        );
+      }
+
+      const rawX = x + pointerOffset.x;
+      const rawY = y + pointerOffset.y;
+
+      const candidatePortX = rawX + snapOffset.x;
+      const candidatePortY = rawY + snapOffset.y;
+
+      const snappedPortX = Math.round(candidatePortX / gridSize) * gridSize;
+      const snappedPortY = Math.round(candidatePortY / gridSize) * gridSize;
+
+      const u = snappedPortX - snapOffset.x;
+      const h = snappedPortY - snapOffset.y;
+
+      model.position(u, h, {
+        restrictedArea: restrictedArea,
+        deep: true,
+        ui: true,
+      });
+
+      if (paper.options.embeddingMode) {
+        if (!embedding) {
+          this.prepareEmbedding(eventData);
+          embedding = true;
+        }
+        this.processEmbedding(eventData, evt, x, y);
+      }
+      this.eventData(evt, { embedding: embedding });
+    };
+  }
+})();
 
 class SLDEditor {
   constructor(containerId, options = {}) {
