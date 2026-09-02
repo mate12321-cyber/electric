@@ -49,7 +49,7 @@
             attrs: {
               circle: {
                 r: 3.5,
-                magnet: true,
+                magnet: false,
                 fill: "#ffffff",
                 stroke: "#9C27B0",
                 strokeWidth: 1.5,

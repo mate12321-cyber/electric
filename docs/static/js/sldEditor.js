@@ -464,6 +464,7 @@ class SLDEditor {
     if (!sourceCell || !targetCell) return;
 
     const gridSize = this.options.gridSize || 10;
+    const allLinks = this.graph.getLinks();
 
     // Case 1: Target is Busbar
     if (
@@ -474,21 +475,35 @@ class SLDEditor {
       const busPos = busbar.position();
       const busSize = busbar.size();
 
-      if (!target.port || !busbar.getPort(target.port)) {
-        const sourceSize = sourceCell.size();
-        const sourceData = sourceCell.get("sldData") || {};
-        const sourceOffset = this.getPrimaryPortOffset(
-          sourceData.type,
-          sourceSize.width,
-          sourceSize.height,
-          sourceCell,
+      const sourceSize = sourceCell.size();
+      const sourceData = sourceCell.get("sldData") || {};
+      const sourceOffset = this.getPrimaryPortOffset(
+        sourceData.type,
+        sourceSize.width,
+        sourceSize.height,
+        sourceCell,
+      );
+      const sourcePortAbsX = sourceCell.position().x + sourceOffset.x;
+      const rawLocalX = sourcePortAbsX - busPos.x;
+      let portX = Math.max(10, Math.min(busSize.width - 10, rawLocalX));
+      portX = Math.round(portX / gridSize) * gridSize;
+
+      let currentPortId = target.port;
+      let currentPort = currentPortId ? busbar.getPort(currentPortId) : null;
+
+      // Check if current port is already used by another link on this busbar
+      const isPortShared =
+        currentPortId &&
+        allLinks.some(
+          (l) =>
+            l.id !== link.id &&
+            ((l.get("source")?.id === busbar.id &&
+              l.get("source")?.port === currentPortId) ||
+              (l.get("target")?.id === busbar.id &&
+                l.get("target")?.port === currentPortId)),
         );
-        const sourcePortAbsX = sourceCell.position().x + sourceOffset.x;
 
-        const rawLocalX = sourcePortAbsX - busPos.x;
-        let portX = Math.max(10, Math.min(busSize.width - 10, rawLocalX));
-        portX = Math.round(portX / gridSize) * gridSize;
-
+      if (!currentPort || isPortShared) {
         const portId = "bus_p_" + Math.random().toString(36).substr(2, 9);
         const busColor = busbar.get("sldData")?.color || "#9C27B0";
 
@@ -499,7 +514,7 @@ class SLDEditor {
           attrs: {
             circle: {
               r: 3.5,
-              magnet: true,
+              magnet: false,
               fill: "#ffffff",
               stroke: busColor,
               strokeWidth: 1.5,
@@ -508,6 +523,8 @@ class SLDEditor {
         });
 
         link.prop("target", { id: busbar.id, port: portId });
+      } else {
+        busbar.portProp(currentPortId, "args/x", portX);
       }
     }
 
@@ -520,21 +537,34 @@ class SLDEditor {
       const busPos = busbar.position();
       const busSize = busbar.size();
 
-      if (!source.port || !busbar.getPort(source.port)) {
-        const targetSize = targetCell.size();
-        const targetData = targetCell.get("sldData") || {};
-        const targetOffset = this.getPrimaryPortOffset(
-          targetData.type,
-          targetSize.width,
-          targetSize.height,
-          targetCell,
+      const targetSize = targetCell.size();
+      const targetData = targetCell.get("sldData") || {};
+      const targetOffset = this.getPrimaryPortOffset(
+        targetData.type,
+        targetSize.width,
+        targetSize.height,
+        targetCell,
+      );
+      const targetPortAbsX = targetCell.position().x + targetOffset.x;
+      const rawLocalX = targetPortAbsX - busPos.x;
+      let portX = Math.max(10, Math.min(busSize.width - 10, rawLocalX));
+      portX = Math.round(portX / gridSize) * gridSize;
+
+      let currentPortId = source.port;
+      let currentPort = currentPortId ? busbar.getPort(currentPortId) : null;
+
+      const isPortShared =
+        currentPortId &&
+        allLinks.some(
+          (l) =>
+            l.id !== link.id &&
+            ((l.get("source")?.id === busbar.id &&
+              l.get("source")?.port === currentPortId) ||
+              (l.get("target")?.id === busbar.id &&
+                l.get("target")?.port === currentPortId)),
         );
-        const targetPortAbsX = targetCell.position().x + targetOffset.x;
 
-        const rawLocalX = targetPortAbsX - busPos.x;
-        let portX = Math.max(10, Math.min(busSize.width - 10, rawLocalX));
-        portX = Math.round(portX / gridSize) * gridSize;
-
+      if (!currentPort || isPortShared) {
         const portId = "bus_p_" + Math.random().toString(36).substr(2, 9);
         const busColor = busbar.get("sldData")?.color || "#9C27B0";
 
@@ -545,7 +575,7 @@ class SLDEditor {
           attrs: {
             circle: {
               r: 3.5,
-              magnet: true,
+              magnet: false,
               fill: "#ffffff",
               stroke: busColor,
               strokeWidth: 1.5,
@@ -554,6 +584,8 @@ class SLDEditor {
         });
 
         link.prop("source", { id: busbar.id, port: portId });
+      } else {
+        busbar.portProp(currentPortId, "args/x", portX);
       }
     }
   }
