@@ -621,8 +621,8 @@
             },
             topVectorLabel: {
               text: v1,
-              x: 15,
-              y: 22,
+              x: 18,
+              y: 19,
               textAnchor: "middle",
               textVerticalAnchor: "middle",
               fill: labelFill,
@@ -632,7 +632,7 @@
             },
             botVectorLabel: {
               text: v2,
-              x: 15,
+              x: 18,
               y: 42,
               textAnchor: "middle",
               textVerticalAnchor: "middle",
@@ -709,8 +709,8 @@
             tertLead: { display: "none" },
             topVectorLabel: {
               text: priVector,
-              x: 15,
-              y: 22,
+              x: 18,
+              y: 19,
               textAnchor: "middle",
               textVerticalAnchor: "middle",
               fill: labelFill,
@@ -720,7 +720,7 @@
             },
             botVectorLabel: {
               text: secVector,
-              x: 15,
+              x: 18,
               y: 42,
               textAnchor: "middle",
               textVerticalAnchor: "middle",
