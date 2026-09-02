@@ -304,8 +304,7 @@ class SLDEditor {
       const srcInfo =
         (this._activeDrawingLink && this._activeDrawingLink.get("source")) ||
         this._lastDrawingSource ||
-        (this._pendingLinkDrop &&
-        Date.now() - this._pendingLinkDrop.time < 500
+        (this._pendingLinkDrop && Date.now() - this._pendingLinkDrop.time < 500
           ? this._pendingLinkDrop.source
           : null);
 
@@ -994,7 +993,12 @@ class SLDEditor {
     return [srcPt, ...routePoints, tgtPt];
   }
 
-  findLinkAtPoint(paperPoint, maxDist = 25, excludeLinkId = null) {
+  findLinkAtPoint(
+    paperPoint,
+    maxDist = 25,
+    excludeLinkId = null,
+    excludeElementId = null,
+  ) {
     if (!paperPoint || !this.graph) return null;
 
     const links = this.graph.getLinks();
@@ -1004,9 +1008,19 @@ class SLDEditor {
 
     links.forEach((link) => {
       if (excludeLinkId && link.id === excludeLinkId) return;
+      if (
+        excludeElementId &&
+        (link.get("source")?.id === excludeElementId ||
+          link.get("target")?.id === excludeElementId)
+      ) {
+        return;
+      }
 
       const pts = this.getLinkPoints(link);
       if (!pts || pts.length < 2) return;
+
+      const srcPt = pts[0];
+      const tgtPt = pts[pts.length - 1];
 
       for (let i = 0; i < pts.length - 1; i++) {
         const p1 = pts[i];
@@ -1024,6 +1038,14 @@ class SLDEditor {
           x: p1.x + t * dx,
           y: p1.y + t * dy,
         };
+
+        // Do not split at the terminal endpoints (ports) of existing links!
+        if (
+          Math.hypot(proj.x - srcPt.x, proj.y - srcPt.y) < 22 ||
+          Math.hypot(proj.x - tgtPt.x, proj.y - tgtPt.y) < 22
+        ) {
+          continue;
+        }
 
         const dist = Math.hypot(paperPoint.x - proj.x, paperPoint.y - proj.y);
         if (dist < bestDist) {
@@ -1046,6 +1068,40 @@ class SLDEditor {
 
   splitLinkAtPoint(targetLink, projPoint, newSourceInfo = null) {
     if (!targetLink || !projPoint) return null;
+
+    // Do not split a link connected directly to the newSourceInfo itself
+    if (newSourceInfo && newSourceInfo.id) {
+      if (
+        targetLink.get("source")?.id === newSourceInfo.id ||
+        targetLink.get("target")?.id === newSourceInfo.id
+      ) {
+        return null;
+      }
+    }
+
+    const pts = this.getLinkPoints(targetLink);
+    if (pts && pts.length >= 2) {
+      const srcPt = pts[0];
+      const tgtPt = pts[pts.length - 1];
+      if (
+        Math.hypot(projPoint.x - srcPt.x, projPoint.y - srcPt.y) < 20 ||
+        Math.hypot(projPoint.x - tgtPt.x, projPoint.y - tgtPt.y) < 20
+      ) {
+        return null;
+      }
+    }
+
+    // Debounce duplicate rapid split calls
+    const now = Date.now();
+    if (
+      this._lastSplitTime &&
+      now - this._lastSplitTime < 250 &&
+      this._lastSplitLink === targetLink.id
+    ) {
+      return null;
+    }
+    this._lastSplitTime = now;
+    this._lastSplitLink = targetLink.id;
 
     const gridSize = this.options.gridSize || 10;
     let jx = Math.round(projPoint.x / gridSize) * gridSize;
