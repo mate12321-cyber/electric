@@ -258,6 +258,18 @@ class SLDEditor {
       if (this.isAreaSelecting) {
         this.finishAreaSelection(e.clientX, e.clientY, e.shiftKey);
       }
+      if (this._isDraggingElement) {
+        this._isDraggingElement = false;
+        if (this._cleanupPivotDrag) {
+          this._cleanupPivotDrag();
+          this._cleanupPivotDrag = null;
+        }
+        this.topologyTracker.applyStyles(this.paper);
+        this.updateSelectionOverlay();
+        this.updateMinimap();
+        this.pushHistory();
+        this.scheduleAutoSave();
+      }
     });
 
     paperEl.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -273,16 +285,19 @@ class SLDEditor {
       { passive: false },
     );
 
-    // Graph Change -> Run Topology Tracker & History Push
-    this.graph.on(
-      "change:position change:size add remove change:sldData",
-      () => {
-        this.topologyTracker.applyStyles(this.paper);
-        this.updateMinimap();
-        this.pushHistory();
-        this.scheduleAutoSave();
-      },
-    );
+    // Graph Real-time Transform -> Update Topology Tracker & Minimap (History pushed on drag completion)
+    this.graph.on("change:position change:size", () => {
+      this.topologyTracker.applyStyles(this.paper);
+      this.updateMinimap();
+      this.scheduleAutoSave();
+    });
+
+    this.graph.on("add remove change:sldData", () => {
+      this.topologyTracker.applyStyles(this.paper);
+      this.updateMinimap();
+      this.pushHistory();
+      this.scheduleAutoSave();
+    });
   }
 
   startAreaSelection(clientX, clientY) {
@@ -501,6 +516,8 @@ class SLDEditor {
       const sldData = el.get("sldData") || {};
       const catalog = window.EQUIPMENT_CATALOG[sldData.type] || {};
 
+      this._isDraggingElement = true;
+
       if (evt.shiftKey) {
         // Shift+Click toggle in/out of selection
         if (this.selectedCells.includes(el)) {
@@ -597,12 +614,14 @@ class SLDEditor {
           }
         });
       } else {
-        const el = elementView.model;
+        const el = elementView ? elementView.model : null;
         if (el && el.isElement && el.isElement()) {
           this.snapElementToPortGrid(el);
           this.syncConnectedBusbarPorts(el);
         }
       }
+
+      this._isDraggingElement = false;
 
       this.topologyTracker.applyStyles(this.paper);
       this.updateSelectionOverlay();
@@ -1102,6 +1121,8 @@ class SLDEditor {
             e.stopPropagation();
             e.preventDefault();
 
+            this._isResizingBusbar = true;
+
             const startPos = cell.position();
             const startSize = cell.size();
             const rightEdge = startPos.x + startSize.width;
@@ -1177,7 +1198,9 @@ class SLDEditor {
             const onMouseUp = () => {
               window.removeEventListener("mousemove", onMouseMove);
               window.removeEventListener("mouseup", onMouseUp);
+              this._isResizingBusbar = false;
               this.updateMinimap();
+              this.pushHistory();
               this.scheduleAutoSave();
             };
 
