@@ -158,6 +158,15 @@ class SLDEditor {
       },
       interactive: (cellView) => {
         if (this.activeTool === "pan") return false;
+        if (this.activeTool === "select") {
+          const type = cellView.model.get("type");
+          if (
+            type === "sld.Junction" ||
+            cellView.model.get("sldData")?.type === "JUNCTION"
+          ) {
+            return { elementMove: true, addLinkFromMagnet: false };
+          }
+        }
         return true;
       },
     });
@@ -202,13 +211,94 @@ class SLDEditor {
       }
     });
 
-    // Mouse Move -> Status Coordinates & Pan Drag & Area Selection Drag
+    // Mouse Move -> Status Coordinates & Pan Drag & Area Selection Drag & T-Branch Live Preview
     paperEl.addEventListener("mousemove", (e) => {
       const p = this.paper.clientToLocalPoint({ x: e.clientX, y: e.clientY });
 
       const coordEl = document.getElementById("status-coord");
       if (coordEl) {
         coordEl.innerText = "X: " + Math.round(p.x) + ", Y: " + Math.round(p.y);
+      }
+
+      // Live T-Branch Preview when dragging a wire or using Wire Tool
+      const drawingSrc =
+        (this._activeDrawingLink && this._activeDrawingLink.get("source")) ||
+        (this.activeTool === "wire" ? this._wireSource : null);
+
+      if (drawingSrc && drawingSrc.id) {
+        const found = this.findLinkAtPoint(
+          p,
+          35,
+          this._activeDrawingLink ? this._activeDrawingLink.id : null,
+          drawingSrc.id,
+        );
+
+        if (found) {
+          const pts = this.getLinkPoints(found.link);
+          let jx = Math.round(found.projection.x / 10) * 10;
+          let jy = Math.round(found.projection.y / 10) * 10;
+
+          const srcEl = this.graph.getCell(drawingSrc.id);
+          if (srcEl && srcEl.isElement && srcEl.isElement()) {
+            const srcPos = srcEl.position();
+            const srcSize = srcEl.size();
+            let srcPortX = srcPos.x + srcSize.width / 2;
+            let srcPortY = srcPos.y + srcSize.height / 2;
+
+            if (typeof srcEl.getPorts === "function") {
+              const ports = srcEl.getPorts() || [];
+              const portObj = ports.find((prt) => prt.id === drawingSrc.port);
+              if (portObj && portObj.args) {
+                srcPortX =
+                  srcPos.x +
+                  (portObj.args.x !== undefined
+                    ? portObj.args.x
+                    : srcSize.width / 2);
+                srcPortY =
+                  srcPos.y +
+                  (portObj.args.y !== undefined
+                    ? portObj.args.y
+                    : srcSize.height / 2);
+              }
+            }
+
+            if (pts && pts.length >= 2) {
+              const isHorizontal =
+                Math.abs(pts[0].y - pts[pts.length - 1].y) < 10;
+              const isVertical =
+                Math.abs(pts[0].x - pts[pts.length - 1].x) < 10;
+
+              if (isHorizontal) {
+                jy = pts[0].y;
+                const minX = Math.min(...pts.map((pt) => pt.x));
+                const maxX = Math.max(...pts.map((pt) => pt.x));
+                if (srcPortX >= minX && srcPortX <= maxX) {
+                  jx = srcPortX;
+                }
+              } else if (isVertical) {
+                jx = pts[0].x;
+                const minY = Math.min(...pts.map((pt) => pt.y));
+                const maxY = Math.max(...pts.map((pt) => pt.y));
+                if (srcPortY >= minY && srcPortY <= maxY) {
+                  jy = srcPortY;
+                }
+              }
+            }
+          }
+
+          // Live snap the dragging wire target to the orthogonal intersection
+          if (this._activeDrawingLink) {
+            this._activeDrawingLink.set("target", { x: jx, y: jy });
+          }
+
+          const wireColor =
+            this.topologyTracker.getElementVoltageColor(srcEl) || "#377DFF";
+          this.showTBranchPreview({ x: jx, y: jy }, wireColor);
+        } else {
+          this.hideTBranchPreview();
+        }
+      } else {
+        this.hideTBranchPreview();
       }
 
       // Pan drag handling
@@ -268,6 +358,8 @@ class SLDEditor {
     });
 
     window.addEventListener("mouseup", (e) => {
+      this.hideTBranchPreview();
+
       if (this.isPanning) {
         this.isPanning = false;
         paperEl.style.cursor = this.isSpacePressed ? "grab" : "default";
@@ -1066,6 +1158,62 @@ class SLDEditor {
     return null;
   }
 
+  showTBranchPreview(paperPoint, color = "#377DFF") {
+    if (!paperPoint || !this.paper || !this.paper.svg) return;
+
+    let previewEl = document.getElementById("sld-tbranch-preview");
+    if (!previewEl) {
+      const svg = this.paper.svg;
+      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      g.id = "sld-tbranch-preview";
+      g.setAttribute("class", "tbranch-preview-group");
+
+      const pulse = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle",
+      );
+      pulse.setAttribute("class", "tbranch-preview-pulse");
+      pulse.setAttribute("fill", "none");
+      pulse.setAttribute("stroke-width", "2.5");
+
+      const dot = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle",
+      );
+      dot.setAttribute("class", "tbranch-preview-dot");
+      dot.setAttribute("r", "5.5");
+      dot.setAttribute("stroke", "#ffffff");
+      dot.setAttribute("stroke-width", "1.5");
+
+      g.appendChild(pulse);
+      g.appendChild(dot);
+      svg.appendChild(g);
+      previewEl = g;
+    }
+
+    const pulse = previewEl.querySelector(".tbranch-preview-pulse");
+    const dot = previewEl.querySelector(".tbranch-preview-dot");
+
+    if (pulse) {
+      pulse.setAttribute("cx", paperPoint.x);
+      pulse.setAttribute("cy", paperPoint.y);
+      pulse.setAttribute("stroke", color);
+    }
+    if (dot) {
+      dot.setAttribute("cx", paperPoint.x);
+      dot.setAttribute("cy", paperPoint.y);
+      dot.setAttribute("fill", color);
+    }
+    previewEl.style.display = "block";
+  }
+
+  hideTBranchPreview() {
+    const previewEl = document.getElementById("sld-tbranch-preview");
+    if (previewEl) {
+      previewEl.style.display = "none";
+    }
+  }
+
   splitLinkAtPoint(targetLink, projPoint, newSourceInfo = null) {
     if (!targetLink || !projPoint) return null;
 
@@ -1159,8 +1307,8 @@ class SLDEditor {
 
     // 1. Create Junction Node at (jx, jy)
     const junction = new joint.shapes.sld.Junction({
-      position: { x: jx - 6, y: jy - 6 },
-      size: { width: 12, height: 12 },
+      position: { x: jx - 7, y: jy - 7 },
+      size: { width: 14, height: 14 },
       sldData: {
         type: "JUNCTION",
         name: "분기점",
