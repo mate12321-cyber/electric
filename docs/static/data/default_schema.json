@@ -491,12 +491,12 @@
       "type": "sld.ACB",
       "id": "acb-a1",
       "position": {
-        "x": 201,
-        "y": 619
+        "x": 202,
+        "y": 615
       },
       "size": {
-        "width": 30,
-        "height": 32
+        "width": 28,
+        "height": 40
       },
       "sldData": {
         "type": "CB_ACB",
@@ -1783,12 +1783,12 @@
       "type": "sld.ACB",
       "id": "acb-gen",
       "position": {
-        "x": 813,
-        "y": 434
+        "x": 814,
+        "y": 430
       },
       "size": {
-        "width": 30,
-        "height": 32
+        "width": 28,
+        "height": 40
       },
       "sldData": {
         "type": "CB_ACB",
@@ -1897,12 +1897,12 @@
       "type": "sld.ACB",
       "id": "acb-ups-in",
       "position": {
-        "x": 219,
-        "y": 814
+        "x": 220,
+        "y": 810
       },
       "size": {
-        "width": 30,
-        "height": 32
+        "width": 28,
+        "height": 40
       },
       "sldData": {
         "type": "CB_ACB",

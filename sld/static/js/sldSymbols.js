@@ -215,11 +215,11 @@
     },
   );
 
-  // 2-2. Air Circuit Breaker (ACB - 기중차단기 원형 노드 + 전압 테두리 적용 반달/초승달 접점 심볼)
+  // 2-2. Air Circuit Breaker (ACB - VCB와 동일한 28x40 규격, 원형 노드 + 전압 테두리 반달 접점 심볼)
   joint.shapes.sld.ACB = joint.dia.Element.define(
     "sld.ACB",
     {
-      size: { width: 30, height: 32 },
+      size: { width: 28, height: 40 },
       markup: [
         { tagName: "path", selector: "crescent" },
         { tagName: "circle", selector: "topNode" },
@@ -230,35 +230,35 @@
       ],
       attrs: {
         crescent: {
-          d: "M 14.5 5 C 18.5 9.5, 18.5 22.5, 14.5 27 C 27.5 24.5, 27.5 7.5, 14.5 5 Z",
+          d: "M 17 6 C 22 12, 22 28, 17 34 C 33 30, 33 10, 17 6 Z",
           stroke: "#377DFF",
-          strokeWidth: 1.4,
+          strokeWidth: 1.5,
           strokeLinejoin: "round",
           fill: "#000000",
         },
         topNode: {
-          cx: 12,
-          cy: 5,
-          r: 4,
+          cx: 14,
+          cy: 6,
+          r: 4.5,
           stroke: "#377DFF",
           strokeWidth: 2,
           fill: "#ffffff",
         },
         botNode: {
-          cx: 12,
-          cy: 27,
-          r: 4,
+          cx: 14,
+          cy: 34,
+          r: 4.5,
           stroke: "#377DFF",
           strokeWidth: 2,
           fill: "#ffffff",
         },
         groundSymbol: {
           text: "⏚",
-          x: 12,
-          y: 16,
+          x: 14,
+          y: 20,
           textAnchor: "middle",
           textVerticalAnchor: "middle",
-          fontSize: 11,
+          fontSize: 13,
           fontWeight: "bold",
           fill: "#16a34a",
           display: "none",
@@ -266,8 +266,8 @@
         },
         nameLabel: {
           text: "ACB",
-          refX: 30,
-          refY: "28%",
+          refX: 34,
+          refY: "25%",
           textAnchor: "start",
           textVerticalAnchor: "middle",
           fontSize: 9.5,
@@ -276,8 +276,8 @@
         },
         specLabel: {
           text: "3200A",
-          refX: 30,
-          refY: "72%",
+          refX: 34,
+          refY: "65%",
           textAnchor: "start",
           textVerticalAnchor: "middle",
           fontSize: 8.5,
@@ -300,8 +300,8 @@
           },
         },
         items: [
-          { id: "in", group: "ports", args: { x: 12, y: 1 } },
-          { id: "out", group: "ports", args: { x: 12, y: 31 } },
+          { id: "in", group: "ports", args: { x: 14, y: 0 } },
+          { id: "out", group: "ports", args: { x: 14, y: 40 } },
         ],
       },
     },
@@ -343,7 +343,7 @@
           crescent: {
             stroke: crescentStroke,
             fill: crescentFill,
-            strokeWidth: 1.4,
+            strokeWidth: 1.5,
           },
           groundSymbol: { display: showGround, fill: "#16a34a" },
           nameLabel: { text: data.name || "ACB" },
