@@ -41,7 +41,7 @@ const DEFAULT_VOLTAGE_PRESETS = {
     name: "0.4kV (380V)",
     value: 0.4,
     unit: "kV",
-    color: "#16A34A",
+    color: "#059669",
     label: "0.4kV / 380V (저압)",
   },
   "0.22kV": {
@@ -92,9 +92,9 @@ function loadVoltageColors() {
 let VOLTAGE_PRESETS = loadVoltageColors();
 
 function getVoltageColor(voltage, unit = "kV") {
-  if (voltage === undefined || voltage === null) return "#16A34A";
+  if (voltage === undefined || voltage === null) return "#059669";
   const num = parseFloat(voltage);
-  if (isNaN(num)) return "#16A34A";
+  if (isNaN(num)) return "#059669";
 
   const presets = window.VOLTAGE_PRESETS || VOLTAGE_PRESETS;
 
@@ -114,14 +114,14 @@ function getVoltageColor(voltage, unit = "kV") {
   if (num >= 3 && num < 6) {
     return presets["3.3kV"] ? presets["3.3kV"].color : "#0284C7";
   }
-  // Check 0.4kV / 380V (저압 - 초록 계열)
+  // Check 0.4kV / 380V (저압 - 에메랄드 청록 계열)
   if (
     num === 0.4 ||
     num === 0.38 ||
     num === 380 ||
     (num > 0.25 && num <= 0.6)
   ) {
-    return presets["0.4kV"] ? presets["0.4kV"].color : "#16A34A";
+    return presets["0.4kV"] ? presets["0.4kV"].color : "#059669";
   }
   // Check 0.22kV / 220V (상용 - 노란 계열)
   if (num === 0.22 || num === 220 || (num > 0.1 && num <= 0.25)) {
@@ -136,8 +136,8 @@ function getVoltageColor(voltage, unit = "kV") {
     return presets["DC110V"] ? presets["DC110V"].color : "#F97316";
   }
 
-  // Default fallback (저압 초록 계열)
-  return presets["0.4kV"] ? presets["0.4kV"].color : "#16A34A";
+  // Default fallback (저압 에메랄드 청록 계열)
+  return presets["0.4kV"] ? presets["0.4kV"].color : "#059669";
 }
 
 function saveVoltageColors(colorMap) {

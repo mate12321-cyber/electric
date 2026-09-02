@@ -15,7 +15,7 @@
   --text-secondary: #64748b;
   --text-muted: #94a3b8;
   --live-color: #ff4d4f;
-  --ground-color: #52c41a;
+  --ground-color: #84cc16;
   --dead-color: #595959;
 }
 
@@ -647,9 +647,9 @@ g[data-type*="Link"].link-dead path.connection {
 }
 
 .state-toggle-btn.active.btn-state-grounded {
-  background: #dcfce7;
-  color: #15803d;
-  box-shadow: 0 1px 3px rgba(34, 197, 94, 0.2);
+  background: #ecfccb;
+  color: #3f6212;
+  box-shadow: 0 1px 3px rgba(132, 204, 22, 0.3);
 }
 
 .state-dot {
@@ -668,7 +668,7 @@ g[data-type*="Link"].link-dead path.connection {
 }
 
 .dot-grounded {
-  background: #16a34a;
+  background: #84cc16;
 }
 
 /* Selection Box Overlay & Handles */

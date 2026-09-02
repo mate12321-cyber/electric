@@ -222,7 +222,7 @@ class PowerSystemTopologyTracker {
 
       if (groundedNodes.has(el.id)) {
         state = "GROUNDED";
-        color = "#52c41a";
+        color = "#84CC16";
       } else if (liveNodes.has(el.id)) {
         state = "LIVE";
         const vInfo = nodeVoltages.get(el.id);
@@ -235,7 +235,7 @@ class PowerSystemTopologyTracker {
 
     links.forEach((link) => {
       if (groundedLinks.has(link.id)) {
-        linkStatus.set(link.id, { state: "GROUNDED", voltageColor: "#52c41a" });
+        linkStatus.set(link.id, { state: "GROUNDED", voltageColor: "#84CC16" });
       } else if (liveLinks.has(link.id)) {
         const info = linkStatus.get(link.id) || {
           state: "LIVE",
@@ -287,7 +287,7 @@ class PowerSystemTopologyTracker {
       } else if (status.state === "GROUNDED") {
         link.attr({
           line: {
-            stroke: "#52c41a",
+            stroke: "#84CC16",
             strokeWidth: 2.5,
             strokeDasharray: "none",
             class: "link-grounded",

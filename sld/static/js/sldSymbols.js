@@ -84,13 +84,13 @@
         if (isDead) {
           color = "#94a3b8";
         } else if (isGrounded) {
-          color = "#16a34a";
+          color = "#84CC16";
         } else {
           color =
             effectiveColor ||
             getVColor(data.voltage, vUnit) ||
             data.color ||
-            "#9C27B0";
+            "#059669";
         }
 
         const name = data.name || "모선";
@@ -202,8 +202,8 @@
         let showGround = "none";
 
         if (isGrounded) {
-          boxFill = "#16a34a"; // 접지: 초록색 (Ground Green)
-          boxStroke = "#16a34a";
+          boxFill = "#84CC16"; // 접지: 초록색 (Ground Green)
+          boxStroke = "#84CC16";
           showGround = "block";
         } else if (!isLive) {
           // DEAD (사선)
@@ -271,7 +271,7 @@
           textVerticalAnchor: "middle",
           fontSize: 13,
           fontWeight: "bold",
-          fill: "#16a34a",
+          fill: "#84CC16",
           display: "none",
           pointerEvents: "none",
         },
@@ -338,9 +338,9 @@
         let showGround = "none";
 
         if (isGrounded) {
-          strokeColor = "#16a34a";
-          crescentFill = "#16a34a"; // 접지: 초록색 (Ground Green)
-          crescentStroke = "#16a34a";
+          strokeColor = "#84CC16";
+          crescentFill = "#84CC16"; // 접지: 초록색 (Ground Green)
+          crescentStroke = "#84CC16";
           showGround = "block";
         } else if (!isLive) {
           // DEAD (사선)
@@ -357,7 +357,7 @@
             fill: crescentFill,
             strokeWidth: 1.5,
           },
-          groundSymbol: { display: showGround, fill: "#16a34a" },
+          groundSymbol: { display: showGround, fill: "#84CC16" },
           nameLabel: { text: data.name || "ACB" },
           specLabel: { text: data.current ? data.current + "A" : "" },
         });
@@ -410,7 +410,7 @@
           textVerticalAnchor: "middle",
           fontSize: 13,
           fontWeight: "bold",
-          fill: "#16a34a",
+          fill: "#84CC16",
           display: "none",
           pointerEvents: "none",
         },
@@ -477,9 +477,9 @@
         let showGround = "none";
 
         if (isGrounded) {
-          strokeColor = "#16a34a";
-          crescentFill = "#16a34a"; // 접지: 초록색 (Ground Green)
-          crescentStroke = "#16a34a";
+          strokeColor = "#84CC16";
+          crescentFill = "#84CC16"; // 접지: 초록색 (Ground Green)
+          crescentStroke = "#84CC16";
           showGround = "block";
         } else if (!isLive) {
           // DEAD (사선)
@@ -496,7 +496,7 @@
             fill: crescentFill,
             strokeWidth: 1.5,
           },
-          groundSymbol: { display: showGround, fill: "#16a34a" },
+          groundSymbol: { display: showGround, fill: "#84CC16" },
           nameLabel: { text: data.name || "MCCB" },
           specLabel: { text: data.current ? data.current + "A" : "" },
         });
@@ -601,8 +601,8 @@
         let showGround = "none";
 
         if (isGrounded) {
-          boxFill = "#16a34a";
-          boxStroke = "#16a34a";
+          boxFill = "#84CC16";
+          boxStroke = "#84CC16";
           showGround = "block";
         } else if (!isLive) {
           boxFill = "#94a3b8";
@@ -670,7 +670,7 @@
           textVerticalAnchor: "middle",
           fontSize: 13,
           fontWeight: "bold",
-          fill: "#16a34a",
+          fill: "#84CC16",
           display: "none",
           pointerEvents: "none",
         },
@@ -737,9 +737,9 @@
         let showGround = "none";
 
         if (isGrounded) {
-          strokeColor = "#16a34a";
-          crescentFill = "#16a34a";
-          crescentStroke = "#16a34a";
+          strokeColor = "#84CC16";
+          crescentFill = "#84CC16";
+          crescentStroke = "#84CC16";
           showGround = "block";
         } else if (!isLive) {
           strokeColor = "#94a3b8";
@@ -755,7 +755,7 @@
             fill: crescentFill,
             strokeWidth: 1.5,
           },
-          groundSymbol: { display: showGround, fill: "#16a34a" },
+          groundSymbol: { display: showGround, fill: "#84CC16" },
           nameLabel: { text: data.name || "TIE ACB" },
           specLabel: { text: data.current ? data.current + "A" : "" },
         });
@@ -822,7 +822,7 @@
           textVerticalAnchor: "middle",
           fontSize: 13,
           fontWeight: "bold",
-          fill: "#16a34a",
+          fill: "#84CC16",
           display: "none",
           pointerEvents: "none",
         },
@@ -888,7 +888,7 @@
         let showGround = "none";
 
         if (isGrounded) {
-          strokeColor = "#16a34a";
+          strokeColor = "#84CC16";
           showGround = "block";
         } else if (!isLive) {
           // DEAD (사선)
@@ -902,7 +902,7 @@
           topNode: { stroke: strokeColor, fill: "#ffffff" },
           botNode: { stroke: strokeColor, fill: "#ffffff" },
           blade: { d: bladeD, stroke: strokeColor },
-          groundSymbol: { display: showGround, fill: "#16a34a" },
+          groundSymbol: { display: showGround, fill: "#84CC16" },
           nameLabel: { text: data.name || "DS" },
           specLabel: { text: data.current ? data.current + "A" : "" },
         });
@@ -1083,12 +1083,12 @@
           labelFill = "#ffffff";
         } else if (isGrounded) {
           // 접지 상태 (녹색 계열)
-          priColor = "#16a34a";
-          secColor = "#16a34a";
-          tertColor = "#16a34a";
-          priFill = "#16a34a";
-          secFill = "#16a34a";
-          tertFill = "#16a34a";
+          priColor = "#84CC16";
+          secColor = "#84CC16";
+          tertColor = "#84CC16";
+          priFill = "#84CC16";
+          secFill = "#84CC16";
+          tertFill = "#84CC16";
           labelFill = "#ffffff";
         } else {
           // 활선 상태 (각 권선별 전압 색상)
