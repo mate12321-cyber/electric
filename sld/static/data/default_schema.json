@@ -492,11 +492,11 @@
       "id": "acb-a1",
       "position": {
         "x": 201,
-        "y": 613
+        "y": 619
       },
       "size": {
         "width": 30,
-        "height": 44
+        "height": 32
       },
       "sldData": {
         "type": "CB_ACB",
@@ -1784,11 +1784,11 @@
       "id": "acb-gen",
       "position": {
         "x": 813,
-        "y": 428
+        "y": 434
       },
       "size": {
         "width": 30,
-        "height": 44
+        "height": 32
       },
       "sldData": {
         "type": "CB_ACB",
@@ -1898,11 +1898,11 @@
       "id": "acb-ups-in",
       "position": {
         "x": 219,
-        "y": 808
+        "y": 814
       },
       "size": {
         "width": 30,
-        "height": 44
+        "height": 32
       },
       "sldData": {
         "type": "CB_ACB",

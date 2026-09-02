@@ -306,7 +306,7 @@ const EQUIPMENT_CATALOG = {
     },
     ports: ["in", "out"],
     iconSvg:
-      '<path d="M6 2.5h12M12 0v6M6 21.5h12M12 18v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="12" cy="6" r="2.2" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="12" cy="18" r="2.2" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M13.5 6 C 16 8.5, 16 15.5, 13.5 18 C 21 16.5, 21 7.5, 13.5 6 Z" stroke="currentColor" stroke-width="1" stroke-linejoin="round" fill="currentColor"/>',
+      '<circle cx="12" cy="5" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="12" cy="19" r="3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M14 5 C 17 8, 17 16, 14 19 C 23 17, 23 7, 14 5 Z" stroke="currentColor" stroke-width="1" stroke-linejoin="round" fill="currentColor"/>',
   },
   CB_VCB: {
     type: "CB_VCB",
