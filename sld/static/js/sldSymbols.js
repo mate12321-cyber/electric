@@ -2404,7 +2404,7 @@
     },
   });
 
-  // 25. Custom CAD SLD Orthogonal Router (Guarantees pure straight line on vertical/horizontal alignments)
+  // 25. Custom CAD SLD Orthogonal Router (Guarantees 100% strict right-angled routing)
   if (joint.routers) {
     joint.routers.sldOrthogonal = function (vertices, opt, linkView) {
       const src =
@@ -2421,35 +2421,18 @@
       const tx = Math.round(tgt.x);
       const ty = Math.round(tgt.y);
 
-      const dx = Math.abs(sx - tx);
-      const dy = Math.abs(sy - ty);
-
       // If user has manually placed intermediate vertices, preserve them
       if (vertices && vertices.length > 0) {
         return vertices;
       }
 
-      // 1. Vertical column alignment (tolerance 30px / 3 grid units) or short vertical segment (dy <= 80px with dx <= 45px):
-      // Force 100% pure straight vertical line (0 bend points)!
-      if (dx <= 30 || (dy <= 80 && dx <= 45)) {
+      // If already perfectly aligned horizontally or vertically, return 0 bend points
+      if (sx === tx || sy === ty) {
         return [];
       }
 
-      // 2. Horizontal row alignment (tolerance 30px / 3 grid units) or short horizontal segment (dx <= 80px with dy <= 45px):
-      // Force 100% pure straight horizontal line (0 bend points)!
-      if (dy <= 30 || (dx <= 80 && dy <= 45)) {
-        return [];
-      }
-
-      // 3. Short angled gap (dy <= 60px or dx <= 60px): Single clean L-turn instead of double-turn zigzag
-      if (dy <= 60) {
-        return [{ x: sx, y: ty }];
-      }
-      if (dx <= 60) {
-        return [{ x: tx, y: sy }];
-      }
-
-      // 4. Normal long distance orthogonal step: Snap midpoint Y to 10px grid
+      // If not aligned, route with clean orthogonal steps:
+      // Vertical flow default: Step vertically halfway, step horizontally, step vertically to target
       const midY = Math.round((sy + ty) / 2 / 10) * 10;
       return [
         { x: sx, y: midY },

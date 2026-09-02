@@ -1139,18 +1139,18 @@ class SLDEditor {
           const isVertical = Math.abs(pts[0].x - pts[pts.length - 1].x) < 10;
 
           if (isHorizontal) {
+            jy = pts[0].y;
             const minX = Math.min(...pts.map((p) => p.x));
             const maxX = Math.max(...pts.map((p) => p.x));
-            if (srcPortX >= minX - 10 && srcPortX <= maxX + 10) {
+            if (srcPortX >= minX && srcPortX <= maxX) {
               jx = srcPortX;
-              jy = pts[0].y;
             }
           } else if (isVertical) {
+            jx = pts[0].x;
             const minY = Math.min(...pts.map((p) => p.y));
             const maxY = Math.max(...pts.map((p) => p.y));
-            if (srcPortY >= minY - 10 && srcPortY <= maxY + 10) {
+            if (srcPortY >= minY && srcPortY <= maxY) {
               jy = srcPortY;
-              jx = pts[0].x;
             }
           }
         }
@@ -1181,12 +1181,17 @@ class SLDEditor {
       "#377DFF";
 
     // 2. Re-route original link: origSource -> Junction
-    targetLink.set("target", { id: junction.id, port: "p1" });
+    targetLink.set({
+      target: { id: junction.id, port: "p1" },
+      vertices: [],
+      router: { name: "sldOrthogonal" },
+    });
 
     // 3. Create second link: Junction -> origTarget
     const link2 = new joint.shapes.standard.Link({
       source: { id: junction.id, port: "p1" },
       target: origTarget,
+      vertices: [],
       router: { name: "sldOrthogonal" },
       connector: { name: "normal" },
       attrs: {
@@ -1205,6 +1210,7 @@ class SLDEditor {
       branchLink = new joint.shapes.standard.Link({
         source: { id: newSourceInfo.id, port: newSourceInfo.port },
         target: { id: junction.id, port: "p1" },
+        vertices: [],
         router: { name: "sldOrthogonal" },
         connector: { name: "normal" },
         attrs: {
@@ -1216,6 +1222,25 @@ class SLDEditor {
         },
       });
       this.graph.addCell(branchLink);
+
+      // Clean up any stale direct links that previously linked newSourceInfo to origSource or origTarget
+      const duplicateLinks = this.graph.getLinks().filter((l) => {
+        if (
+          l.id === targetLink.id ||
+          l.id === link2.id ||
+          l.id === branchLink?.id
+        )
+          return false;
+        const s = l.get("source");
+        const t = l.get("target");
+        return (
+          (s?.id === newSourceInfo.id &&
+            (t?.id === origSource.id || t?.id === origTarget.id)) ||
+          (t?.id === newSourceInfo.id &&
+            (s?.id === origSource.id || s?.id === origTarget.id))
+        );
+      });
+      duplicateLinks.forEach((l) => l.remove());
     }
 
     this.topologyTracker.applyStyles(this.paper);
