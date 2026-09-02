@@ -3,15 +3,112 @@
  * Follows Metadata Registry Pattern for scalable power equipment definitions.
  */
 
-const VOLTAGE_PRESETS = {
-    '154kV': { name: '154kV', value: 154, unit: 'kV', color: '#7A3E9D', label: '154kV 수전' },
-    '22.9kV': { name: '22.9kV', value: 22.9, unit: 'kV', color: '#9C27B0', label: '22.9kV 특고압' },
-    '6.6kV': { name: '6.6kV', value: 6.6, unit: 'kV', color: '#E65100', label: '6.6kV 고압' },
-    '380V': { name: '380V', value: 0.38, unit: 'kV', color: '#2B6CB0', label: '0.4kV (380V) 저압' },
-    '220V': { name: '220V', value: 0.22, unit: 'kV', color: '#2E7D32', label: '220V 상용' },
-    'DC384V': { name: 'DC 384V', value: 384, unit: 'V', color: '#00838F', label: '384V DC 배터리' },
-    'DC110V': { name: 'DC 110V', value: 110, unit: 'V', color: '#00695C', label: '110V DC 제어전원' },
+const DEFAULT_VOLTAGE_PRESETS = {
+    '154kV': { key: '154kV', name: '154kV', value: 154, unit: 'kV', color: '#7A3E9D', label: '154kV (수전/송전)' },
+    '22.9kV': { key: '22.9kV', name: '22.9kV', value: 22.9, unit: 'kV', color: '#9C27B0', label: '22.9kV (특고압)' },
+    '6.6kV': { key: '6.6kV', name: '6.6kV', value: 6.6, unit: 'kV', color: '#E65100', label: '6.6kV (고압)' },
+    '3.3kV': { key: '3.3kV', name: '3.3kV', value: 3.3, unit: 'kV', color: '#D97706', label: '3.3kV (고압)' },
+    '0.4kV': { key: '0.4kV', name: '0.4kV (380V)', value: 0.4, unit: 'kV', color: '#377DFF', label: '0.4kV / 380V (저압)' },
+    '0.22kV': { key: '0.22kV', name: '220V', value: 0.22, unit: 'kV', color: '#2E7D32', label: '220V (상용 저압)' },
+    'DC384V': { key: 'DC384V', name: 'DC 384V', value: 384, unit: 'V', color: '#00838F', label: '384V DC (배터리/UPS)' },
+    'DC110V': { key: 'DC110V', name: 'DC 110V', value: 110, unit: 'V', color: '#00695C', label: '110V DC (제어전원)' },
 };
+
+function loadVoltageColors() {
+    try {
+        const saved = localStorage.getItem('sld_voltage_colors');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            const merged = JSON.parse(JSON.stringify(DEFAULT_VOLTAGE_PRESETS));
+            Object.keys(parsed).forEach(k => {
+                if (merged[k]) {
+                    merged[k].color = parsed[k];
+                }
+            });
+            return merged;
+        }
+    } catch (e) {
+        console.warn('Failed to load voltage colors from localStorage', e);
+    }
+    return JSON.parse(JSON.stringify(DEFAULT_VOLTAGE_PRESETS));
+}
+
+let VOLTAGE_PRESETS = loadVoltageColors();
+
+function getVoltageColor(voltage, unit = 'kV') {
+    if (voltage === undefined || voltage === null) return '#377DFF';
+    const num = parseFloat(voltage);
+    if (isNaN(num)) return '#377DFF';
+
+    const presets = window.VOLTAGE_PRESETS || VOLTAGE_PRESETS;
+    
+    // Check 154kV
+    if (num >= 100 && (unit === 'kV' || num === 154)) {
+        return presets['154kV'] ? presets['154kV'].color : '#7A3E9D';
+    }
+    // Check 22.9kV
+    if (num >= 20 && num <= 30) {
+        return presets['22.9kV'] ? presets['22.9kV'].color : '#9C27B0';
+    }
+    // Check 6.6kV
+    if (num >= 6 && num <= 10) {
+        return presets['6.6kV'] ? presets['6.6kV'].color : '#E65100';
+    }
+    // Check 3.3kV
+    if (num >= 3 && num < 6) {
+        return presets['3.3kV'] ? presets['3.3kV'].color : '#D97706';
+    }
+    // Check 0.4kV / 380V
+    if (num === 0.4 || num === 0.38 || num === 380 || (num > 0.25 && num <= 0.6)) {
+        return presets['0.4kV'] ? presets['0.4kV'].color : '#377DFF';
+    }
+    // Check 0.22kV / 220V
+    if (num === 0.22 || num === 220 || (num > 0.1 && num <= 0.25)) {
+        return presets['0.22kV'] ? presets['0.22kV'].color : '#2E7D32';
+    }
+    // Check DC 384V / battery
+    if (num === 384 || (num > 300 && unit === 'V')) {
+        return presets['DC384V'] ? presets['DC384V'].color : '#00838F';
+    }
+    // Check DC 110V
+    if (num === 110 || (num >= 100 && num <= 125 && unit === 'V')) {
+        return presets['DC110V'] ? presets['DC110V'].color : '#00695C';
+    }
+    
+    // Default fallback
+    return presets['0.4kV'] ? presets['0.4kV'].color : '#377DFF';
+}
+
+function saveVoltageColors(colorMap) {
+    const presets = window.VOLTAGE_PRESETS || VOLTAGE_PRESETS;
+    const simpleMap = {};
+    Object.keys(colorMap).forEach(k => {
+        if (presets[k]) {
+            presets[k].color = colorMap[k];
+            simpleMap[k] = colorMap[k];
+        }
+    });
+    try {
+        localStorage.setItem('sld_voltage_colors', JSON.stringify(simpleMap));
+    } catch (e) {
+        console.warn('Failed to save voltage colors to localStorage', e);
+    }
+    window.VOLTAGE_PRESETS = presets;
+}
+
+function resetVoltageColors() {
+    try {
+        localStorage.removeItem('sld_voltage_colors');
+    } catch (e) {}
+    window.VOLTAGE_PRESETS = JSON.parse(JSON.stringify(DEFAULT_VOLTAGE_PRESETS));
+    return window.VOLTAGE_PRESETS;
+}
+
+window.DEFAULT_VOLTAGE_PRESETS = DEFAULT_VOLTAGE_PRESETS;
+window.VOLTAGE_PRESETS = VOLTAGE_PRESETS;
+window.getVoltageColor = getVoltageColor;
+window.saveVoltageColors = saveVoltageColors;
+window.resetVoltageColors = resetVoltageColors;
 
 const EQUIPMENT_CATALOG = {
     // 1. 수전 설비 (Receiving Equipment)

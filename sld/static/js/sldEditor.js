@@ -90,6 +90,7 @@ class SLDEditor {
     this.setupPropertiesPanel();
     this.setupToolbar();
     this.setupKeyboardShortcuts();
+    this.setupVoltageColorsModal();
 
     // 3. Load Diagram Data from Server or Seed Data
     this.loadDiagram(this.options.diagramId);
@@ -504,6 +505,20 @@ class SLDEditor {
       type: type,
     });
 
+    // Auto-assign default color based on configured voltage preset
+    const itemVoltage = defaultProps.voltage || defaultProps.priVoltage;
+    if (
+      itemVoltage !== undefined &&
+      typeof window.getVoltageColor === "function"
+    ) {
+      const vColor = window.getVoltageColor(
+        itemVoltage,
+        defaultProps.voltageUnit || "kV",
+      );
+      defaultProps.color = vColor;
+      defaultProps.lineColor = vColor;
+    }
+
     // Calculate size based on type
     let width = 40;
     let height = 40;
@@ -637,6 +652,24 @@ class SLDEditor {
         let val = e.target.value;
         if (isNumber) val = parseFloat(val) || 0;
         sldData[propKey] = val;
+
+        // When voltage changes, automatically update color to matching voltage preset
+        if (
+          propKey === "voltage" &&
+          typeof window.getVoltageColor === "function"
+        ) {
+          const autoColor = window.getVoltageColor(
+            val,
+            sldData.voltageUnit || "kV",
+          );
+          sldData.color = autoColor;
+          sldData.lineColor = autoColor;
+          const colorInput = document.getElementById("prop-symbol-color");
+          const lineInput = document.getElementById("prop-line-color");
+          if (colorInput) colorInput.value = autoColor;
+          if (lineInput) lineInput.value = autoColor;
+        }
+
         this.selectedCell.set("sldData", Object.assign({}, sldData));
 
         // Always trigger symbol-specific visual updates immediately
@@ -1261,6 +1294,147 @@ class SLDEditor {
       "height",
       Math.max(6, Math.min(mmH, vpH)).toFixed(1),
     );
+  }
+
+  setupVoltageColorsModal() {
+    const modal = document.getElementById("modal-voltage-colors");
+    const openBtn = document.getElementById("btn-voltage-colors-modal");
+    const closeBtn = document.getElementById("btn-close-voltage-modal");
+    const cancelBtn = document.getElementById("btn-cancel-voltage-colors");
+    const saveBtn = document.getElementById("btn-save-voltage-colors");
+    const resetBtn = document.getElementById("btn-reset-voltage-colors");
+    const listContainer = document.getElementById("voltage-color-list");
+
+    if (!modal) return;
+
+    const renderList = () => {
+      if (!listContainer) return;
+      const presets =
+        window.VOLTAGE_PRESETS || window.DEFAULT_VOLTAGE_PRESETS || {};
+      listContainer.innerHTML = "";
+
+      Object.keys(presets).forEach((key) => {
+        const item = presets[key];
+        const row = document.createElement("div");
+        row.className = "voltage-color-row";
+        row.style.cssText =
+          "display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; gap:12px;";
+
+        row.innerHTML = `
+          <div style="display:flex; align-items:center; gap:12px; flex:1;">
+            <div class="voltage-color-preview" id="preview-${key}" style="width:24px; height:24px; border-radius:6px; background:${item.color}; border:2px solid #ffffff; box-shadow:0 0 0 1px #cbd5e1; flex-shrink:0;"></div>
+            <div>
+              <div style="font-weight:700; font-size:13px; color:#1e293b;">${item.label || item.name}</div>
+              <div style="font-size:11px; color:#64748b;">기준: ${item.name} (${item.value} ${item.unit})</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="color" class="voltage-color-input" data-key="${key}" value="${item.color}" style="width:36px; height:32px; padding:0; border:1px solid #cbd5e1; border-radius:4px; cursor:pointer; background:#fff;">
+            <input type="text" class="sld-input voltage-hex-input" data-key="${key}" value="${item.color}" style="width:80px; font-family:monospace; font-size:11px; text-transform:uppercase; text-align:center;">
+          </div>
+        `;
+
+        const colorInput = row.querySelector(".voltage-color-input");
+        const hexInput = row.querySelector(".voltage-hex-input");
+        const preview = row.querySelector(".voltage-color-preview");
+
+        colorInput.addEventListener("input", (e) => {
+          hexInput.value = e.target.value.toUpperCase();
+          preview.style.background = e.target.value;
+        });
+
+        hexInput.addEventListener("input", (e) => {
+          let v = e.target.value;
+          if (!v.startsWith("#")) v = "#" + v;
+          if (/^#[0-9A-Fa-f]{6}$/.test(v)) {
+            colorInput.value = v;
+            preview.style.background = v;
+          }
+        });
+
+        listContainer.appendChild(row);
+      });
+    };
+
+    if (openBtn) {
+      openBtn.addEventListener("click", () => {
+        renderList();
+        modal.style.display = "flex";
+      });
+    }
+
+    const closeModal = () => {
+      modal.style.display = "none";
+    };
+
+    if (closeBtn) closeBtn.addEventListener("click", closeModal);
+    if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+
+    if (saveBtn) {
+      saveBtn.addEventListener("click", () => {
+        const colorInputs = modal.querySelectorAll(".voltage-color-input");
+        const newColorMap = {};
+        colorInputs.forEach((inp) => {
+          const key = inp.getAttribute("data-key");
+          newColorMap[key] = inp.value;
+        });
+
+        if (typeof window.saveVoltageColors === "function") {
+          window.saveVoltageColors(newColorMap);
+        }
+        this.applyVoltageColorsToAllElements();
+        closeModal();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        if (confirm("전압별 색상을 기본 표준 설정으로 복원하시겠습니까?")) {
+          if (typeof window.resetVoltageColors === "function") {
+            window.resetVoltageColors();
+          }
+          renderList();
+          this.applyVoltageColorsToAllElements();
+        }
+      });
+    }
+  }
+
+  applyVoltageColorsToAllElements() {
+    this.graph.getElements().forEach((el) => {
+      const sldData = el.get("sldData") || {};
+      const v = sldData.voltage || sldData.priVoltage;
+      if (v !== undefined && typeof window.getVoltageColor === "function") {
+        const newColor = window.getVoltageColor(v, sldData.voltageUnit || "kV");
+        sldData.color = newColor;
+        sldData.lineColor = newColor;
+        el.set("sldData", Object.assign({}, sldData));
+
+        if (typeof el.updateVisual === "function") el.updateVisual();
+        if (typeof el.updateContactVisual === "function")
+          el.updateContactVisual();
+        if (typeof el.updateFromSldData === "function") el.updateFromSldData();
+      }
+    });
+
+    this.graph.getLinks().forEach((link) => {
+      const srcEl = this.graph.getCell(link.get("source").id);
+      if (srcEl) {
+        const sldData = srcEl.get("sldData") || {};
+        const v = sldData.voltage || sldData.priVoltage;
+        if (v !== undefined && typeof window.getVoltageColor === "function") {
+          const newColor = window.getVoltageColor(
+            v,
+            sldData.voltageUnit || "kV",
+          );
+          link.attr("line/stroke", newColor);
+        }
+      }
+    });
+
+    this.topologyTracker.applyStyles(this.paper);
+    this.updateMinimap();
+    this.scheduleAutoSave();
   }
 }
 

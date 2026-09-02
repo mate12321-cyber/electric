@@ -56,3 +56,32 @@
         </div>
     </div>
 </div>
+
+<!-- Voltage Colors Settings Modal -->
+<div class="sld-modal-overlay" id="modal-voltage-colors">
+    <div class="sld-modal" style="max-width: 580px;">
+        <div class="sld-modal-header">
+            <span>🎨 전압 레벨별 색상 설정 (Voltage Color Scheme)</span>
+            <button class="tool-btn" id="btn-close-voltage-modal" style="font-size:16px;">✕</button>
+        </div>
+        <div class="sld-modal-body" style="font-size:13px; max-height: 480px; overflow-y: auto;">
+            <p style="color: #64748b; margin-bottom: 16px; font-size: 12px; line-height: 1.5;">
+                각 계통 전압에 해당하는 기본 색상을 지정합니다. 심볼 배치 및 전압 입력 시 해당 전압의 색상이 <strong>자동으로 기본 설정</strong>됩니다.
+            </p>
+            <div id="voltage-color-list" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Populated dynamically via JavaScript -->
+            </div>
+        </div>
+        <div class="sld-modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+            <button class="sld-btn" id="btn-reset-voltage-colors" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;">
+                <span>🔄 기본값 복원</span>
+            </button>
+            <div style="display: flex; gap: 8px;">
+                <button class="sld-btn" id="btn-cancel-voltage-colors" style="background:#f1f5f9; color:#475569;">취소</button>
+                <button class="sld-btn sld-btn-primary" id="btn-save-voltage-colors">
+                    <span>적용 및 저장</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
