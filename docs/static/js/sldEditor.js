@@ -892,6 +892,23 @@ class SLDEditor {
             const gridSize = this.options.gridSize || 10;
             const busLengthInput = document.getElementById("prop-bus-length");
 
+            // Gather all existing ports and their starting local coordinates
+            const ports = this.selectedCell.getPorts() || [];
+            const initialPortOffsets = {};
+            let minPortLocalX = Infinity;
+            let maxPortLocalX = -Infinity;
+
+            ports.forEach((p) => {
+              const currentX =
+                p.args && p.args.x !== undefined ? p.args.x : 0;
+              initialPortOffsets[p.id] = currentX;
+              if (currentX < minPortLocalX) minPortLocalX = currentX;
+              if (currentX > maxPortLocalX) maxPortLocalX = currentX;
+            });
+
+            // Minimum 10px margin between port and busbar edge
+            const pad = 10;
+
             const onMouseMove = (moveEvent) => {
               const paperPt = this.paper.clientToLocalPoint({
                 x: moveEvent.clientX,
@@ -899,21 +916,45 @@ class SLDEditor {
               });
 
               if (direction === "e") {
+                // Right Handle: Keep left position fixed, guard right edge past ports
+                const minAllowedW =
+                  maxPortLocalX !== -Infinity
+                    ? Math.max(40, maxPortLocalX + pad)
+                    : 40;
                 let newW =
                   Math.round((paperPt.x - startPos.x) / gridSize) * gridSize;
-                newW = Math.max(40, Math.min(3000, newW));
+                newW = Math.max(minAllowedW, Math.min(3000, newW));
                 this.selectedCell.resize(newW, startSize.height);
                 this.updateSelectionOverlay();
                 if (busLengthInput) busLengthInput.value = newW;
               } else if (direction === "w") {
+                // Left Handle: Anchor all ports to world coordinates and guard left edge before ports
+                const maxAllowedX =
+                  minPortLocalX !== Infinity
+                    ? Math.min(
+                        rightEdge - 40,
+                        startPos.x + minPortLocalX - pad,
+                      )
+                    : rightEdge - 40;
+
                 let newX = Math.round(paperPt.x / gridSize) * gridSize;
-                let newW = rightEdge - newX;
-                if (newW >= 40 && newW <= 3000) {
-                  this.selectedCell.position(newX, startPos.y);
-                  this.selectedCell.resize(newW, startSize.height);
-                  this.updateSelectionOverlay();
-                  if (busLengthInput) busLengthInput.value = newW;
-                }
+                newX = Math.min(maxAllowedX, Math.max(rightEdge - 3000, newX));
+                const newW = rightEdge - newX;
+                const dx = newX - startPos.x;
+
+                // 1. Move and resize busbar
+                this.selectedCell.position(newX, startPos.y);
+                this.selectedCell.resize(newW, startSize.height);
+
+                // 2. Adjust all port local coordinates so world position stays 100% stationary
+                ports.forEach((p) => {
+                  const origLocalX = initialPortOffsets[p.id];
+                  const newLocalX = origLocalX - dx;
+                  this.selectedCell.portProp(p.id, "args/x", newLocalX);
+                });
+
+                this.updateSelectionOverlay();
+                if (busLengthInput) busLengthInput.value = newW;
               }
             };
 
@@ -1519,8 +1560,17 @@ class SLDEditor {
         )
           return;
 
+        const ports = this.selectedCell.getPorts() || [];
+        let maxPortX = 0;
+        ports.forEach((p) => {
+          if (p.args && p.args.x !== undefined && p.args.x > maxPortX) {
+            maxPortX = p.args.x;
+          }
+        });
+        const minAllowedWidth = Math.max(40, maxPortX + 10);
+
         let val = parseFloat(e.target.value) || 200;
-        val = Math.max(40, Math.min(3000, val));
+        val = Math.max(minAllowedWidth, Math.min(3000, val));
         const curSize = this.selectedCell.size();
         this.selectedCell.resize(val, curSize.height);
         this.updateSelectionOverlay();

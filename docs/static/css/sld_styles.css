@@ -703,7 +703,9 @@ g[data-type*="Link"].link-dead path.connection {
   fill: #ffffff;
   stroke: #2563eb;
   stroke-width: 2px;
-  transition: transform 0.1s ease, fill 0.1s ease;
+  transition:
+    transform 0.1s ease,
+    fill 0.1s ease;
 }
 
 .sld-bus-resize-handle:hover {
