@@ -608,7 +608,7 @@ class SLDEditor {
     const bindInput = (id, propKey, isNumber = false) => {
       const input = document.getElementById(id);
       if (!input) return;
-      input.addEventListener("input", (e) => {
+      const handler = (e) => {
         if (!this.selectedCell) return;
         const sldData = this.selectedCell.get("sldData") || {};
         let val = e.target.value;
@@ -616,20 +616,24 @@ class SLDEditor {
         sldData[propKey] = val;
         this.selectedCell.set("sldData", Object.assign({}, sldData));
 
-        // Update JointJS labels if name changed
-        if (propKey === "name" || propKey === "color") {
-          if (typeof this.selectedCell.updateFromSldData === "function") {
-            this.selectedCell.updateFromSldData();
-          } else if (typeof this.selectedCell.updateVisual === "function") {
-            this.selectedCell.updateVisual();
-          } else if (
-            typeof this.selectedCell.updateContactVisual === "function"
-          ) {
-            this.selectedCell.updateContactVisual();
-          }
+        // Always trigger symbol-specific visual updates immediately
+        if (typeof this.selectedCell.updateFromSldData === "function") {
+          this.selectedCell.updateFromSldData();
         }
+        if (typeof this.selectedCell.updateVisual === "function") {
+          this.selectedCell.updateVisual();
+        }
+        if (typeof this.selectedCell.updateContactVisual === "function") {
+          this.selectedCell.updateContactVisual();
+        }
+
         this.topologyTracker.applyStyles(this.paper);
-      });
+        this.updateMinimap();
+        this.scheduleAutoSave();
+      };
+
+      input.addEventListener("input", handler);
+      input.addEventListener("change", handler);
     };
 
     bindInput("prop-name", "name");
