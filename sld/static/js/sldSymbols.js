@@ -709,7 +709,7 @@
             tertLead: { display: "none" },
             topVectorLabel: {
               text: priVector,
-              x: 18,
+              x: 22,
               y: 19,
               textAnchor: "middle",
               textVerticalAnchor: "middle",
@@ -720,7 +720,7 @@
             },
             botVectorLabel: {
               text: secVector,
-              x: 18,
+              x: 22,
               y: 42,
               textAnchor: "middle",
               textVerticalAnchor: "middle",
