@@ -4,9 +4,95 @@
  * Evaluates Grounded / Live / Dead states across breakers, transformers, busbars, and feeders.
  */
 
+function resolveVoltageInfo(valOrKey) {
+  const presets =
+    (typeof window !== "undefined" &&
+      (window.VOLTAGE_PRESETS || window.DEFAULT_VOLTAGE_PRESETS)) ||
+    {};
+
+  if (!valOrKey) return { voltage: 0.4, color: "#059669" };
+
+  if (typeof valOrKey === "string") {
+    // 1. Direct key match (e.g. "154kV", "22.9kV", "6.6kV", "3.3kV", "0.4kV", "0.22kV", "DC384V")
+    if (presets[valOrKey]) {
+      return {
+        voltage: presets[valOrKey].value,
+        color: presets[valOrKey].color,
+      };
+    }
+    const cleanKey = valOrKey.replace(/\s+/g, "");
+    for (const [k, v] of Object.entries(presets)) {
+      if (k.toLowerCase() === cleanKey.toLowerCase()) {
+        return { voltage: v.value, color: v.color };
+      }
+    }
+    // 2. Direct hex/rgb color
+    if (valOrKey.startsWith("#") || valOrKey.startsWith("rgb")) {
+      for (const [k, v] of Object.entries(presets)) {
+        if (v.color.toLowerCase() === valOrKey.toLowerCase()) {
+          return { voltage: v.value, color: v.color };
+        }
+      }
+      return { voltage: 0.4, color: valOrKey };
+    }
+    // 3. Parse numbers from string
+    const num = parseFloat(valOrKey.replace(/[^0-9.]/g, ""));
+    if (!isNaN(num)) {
+      if (num >= 100 && num <= 200)
+        return { voltage: 154, color: presets["154kV"]?.color || "#E53935" };
+      if (num >= 20 && num <= 30)
+        return { voltage: 22.9, color: presets["22.9kV"]?.color || "#9C27B0" };
+      if (num >= 6 && num <= 7)
+        return { voltage: 6.6, color: presets["6.6kV"]?.color || "#1E88E5" };
+      if (num >= 3 && num <= 4)
+        return { voltage: 3.3, color: presets["3.3kV"]?.color || "#0284C7" };
+      if (num === 0.4 || num === 380)
+        return { voltage: 0.4, color: presets["0.4kV"]?.color || "#059669" };
+      if (num === 0.22 || num === 220)
+        return { voltage: 0.22, color: presets["0.22kV"]?.color || "#EAB308" };
+      if (num >= 300 && num <= 400 && valOrKey.toUpperCase().includes("DC"))
+        return { voltage: 384, color: presets["DC384V"]?.color || "#EA580C" };
+    }
+  } else if (typeof valOrKey === "number") {
+    if (valOrKey >= 100 && valOrKey <= 200)
+      return { voltage: 154, color: presets["154kV"]?.color || "#E53935" };
+    if (valOrKey >= 20 && valOrKey <= 30)
+      return { voltage: 22.9, color: presets["22.9kV"]?.color || "#9C27B0" };
+    if (valOrKey >= 6 && valOrKey <= 7)
+      return { voltage: 6.6, color: presets["6.6kV"]?.color || "#1E88E5" };
+    if (valOrKey >= 3 && valOrKey <= 4)
+      return { voltage: 3.3, color: presets["3.3kV"]?.color || "#0284C7" };
+    if (valOrKey === 0.4 || valOrKey === 380)
+      return { voltage: 0.4, color: presets["0.4kV"]?.color || "#059669" };
+    if (valOrKey === 0.22 || valOrKey === 220)
+      return { voltage: 0.22, color: presets["0.22kV"]?.color || "#EAB308" };
+    if (valOrKey === 384)
+      return { voltage: 384, color: presets["DC384V"]?.color || "#EA580C" };
+  }
+
+  return { voltage: 0.4, color: presets["0.4kV"]?.color || "#059669" };
+}
+
 class PowerSystemTopologyTracker {
   constructor(graph) {
     this.graph = graph;
+  }
+
+  /**
+   * Resolve an element's nominal or active voltage color
+   */
+  getElementVoltageColor(el) {
+    if (!el || !el.isElement || !el.isElement()) return "#377DFF";
+    const sldData = el.get("sldData") || {};
+    const { nodeStatus } = this.evaluate();
+    const status = nodeStatus.get(el.id);
+    if (status && status.voltageColor && status.state === "LIVE") {
+      return status.voltageColor;
+    }
+    const vInfo = resolveVoltageInfo(
+      sldData.voltage || sldData.voltageLevel || sldData.color || sldData.name,
+    );
+    return vInfo.color;
   }
 
   /**
@@ -125,21 +211,61 @@ class PowerSystemTopologyTracker {
       const defaultState = catalog.type === "GENERATOR" ? "DEAD" : "LIVE";
       const st = (sldData.state || defaultState).toUpperCase();
 
+      // 1. Grid/Generator Sources (Transmission Tower, Generator, UPS, Battery)
       if (catalog.isEnergizedSource && st !== "DEAD" && st !== "OPEN") {
-        // If it is generator/UPS, check if switched on (default on)
         const isOnline = sldData.isOnline !== false;
         if (isOnline) {
+          const vInfo = resolveVoltageInfo(
+            sldData.voltage ||
+              sldData.voltageLevel ||
+              sldData.color ||
+              (sldData.type === "TRANSMISSION_TOWER" ? 154 : 154),
+          );
           liveQueue.push({
             id: el.id,
-            voltage: sldData.voltage || 154,
-            color: sldData.color || "#7A3E9D",
+            voltage: vInfo.voltage,
+            color: sldData.color || vInfo.color,
           });
           liveNodes.add(el.id);
           nodeVoltages.set(el.id, {
-            voltage: sldData.voltage || 154,
-            color: sldData.color || "#7A3E9D",
+            voltage: vInfo.voltage,
+            color: sldData.color || vInfo.color,
           });
         }
+      }
+      // 2. Live Busbars (Any Busbar set to LIVE acts as an energized bus source)
+      else if (
+        (sldData.type === "BUSBAR" || el.get("type") === "sld.Busbar") &&
+        st !== "DEAD" &&
+        st !== "OPEN"
+      ) {
+        const vInfo = resolveVoltageInfo(
+          sldData.voltage || sldData.color || sldData.name,
+        );
+        liveQueue.push({
+          id: el.id,
+          voltage: vInfo.voltage,
+          color: sldData.color || vInfo.color,
+        });
+        liveNodes.add(el.id);
+        nodeVoltages.set(el.id, {
+          voltage: vInfo.voltage,
+          color: sldData.color || vInfo.color,
+        });
+      }
+      // 3. Standalone Live equipment with designated nominal voltage
+      else if (st === "LIVE" && sldData.voltage && !liveNodes.has(el.id)) {
+        const vInfo = resolveVoltageInfo(sldData.voltage);
+        liveQueue.push({
+          id: el.id,
+          voltage: vInfo.voltage,
+          color: sldData.color || vInfo.color,
+        });
+        liveNodes.add(el.id);
+        nodeVoltages.set(el.id, {
+          voltage: vInfo.voltage,
+          color: sldData.color || vInfo.color,
+        });
       }
     });
 
@@ -208,8 +334,7 @@ class PowerSystemTopologyTracker {
                 (p) => p.value === nextVoltage,
               );
             nextColor =
-              neighborSldData.color ||
-              (preset ? preset.color : currentColor);
+              neighborSldData.color || (preset ? preset.color : currentColor);
           }
         } else if (
           neighborSldData.type === "BUSBAR" ||
@@ -376,10 +501,7 @@ class PowerSystemTopologyTracker {
         el.updateVisual(sldData.state || "DEAD");
       }
       // If it is a junction node, update visual based on topological state
-      if (
-        sldData.type === "JUNCTION" ||
-        el.get("type") === "sld.Junction"
-      ) {
+      if (sldData.type === "JUNCTION" || el.get("type") === "sld.Junction") {
         const fillColor =
           status.state === "LIVE"
             ? status.voltageColor || "#377DFF"

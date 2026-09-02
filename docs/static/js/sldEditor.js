@@ -122,19 +122,27 @@ class SLDEditor {
       snapLinks: { radius: 20 },
       linkPinning: false,
       markAvailable: true,
-      defaultLink: new joint.shapes.standard.Link({
-        router: { name: "sldOrthogonal" },
-        connector: { name: "normal" },
-        attrs: {
-          line: {
-            stroke: "#377DFF",
-            strokeWidth: 2.5,
-            strokeDasharray: "none",
-            class: "link-live",
-            targetMarker: { type: "none" },
+      defaultLink: (cellView, magnet) => {
+        let strokeColor = "#377DFF";
+        if (cellView && cellView.model && this.topologyTracker) {
+          strokeColor = this.topologyTracker.getElementVoltageColor(
+            cellView.model,
+          );
+        }
+        return new joint.shapes.standard.Link({
+          router: { name: "sldOrthogonal" },
+          connector: { name: "normal" },
+          attrs: {
+            line: {
+              stroke: strokeColor,
+              strokeWidth: 2.5,
+              strokeDasharray: "none",
+              class: "link-live",
+              targetMarker: { type: "none" },
+            },
           },
-        },
-      }),
+        });
+      },
       validateConnection: function (
         cellViewS,
         magnetS,
@@ -593,6 +601,9 @@ class SLDEditor {
             return;
           }
 
+          const srcCell = this.graph.getCell(this._wireSource.id);
+          const wireColor = this.topologyTracker.getElementVoltageColor(srcCell);
+
           const link = new joint.shapes.standard.Link({
             source: { id: this._wireSource.id, port: this._wireSource.port },
             target: { id: el.id, port: portId || "in" },
@@ -600,8 +611,9 @@ class SLDEditor {
             connector: { name: "normal" },
             attrs: {
               line: {
-                stroke: sldData.color || "#377DFF",
+                stroke: wireColor,
                 strokeWidth: 2.5,
+                class: "link-live",
                 targetMarker: { type: "none" },
               },
             },
