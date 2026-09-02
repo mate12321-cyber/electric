@@ -66,9 +66,33 @@
         this.on("change:sldData", this.updateFromSldData, this);
         this.updateFromSldData();
       },
-      updateFromSldData: function () {
+      updateFromSldData: function (effectiveState, effectiveColor) {
         const data = this.get("sldData") || {};
-        const color = data.color || "#9C27B0";
+        const vUnit = data.voltageUnit || "kV";
+        const getVColor =
+          typeof window.getVoltageColor === "function"
+            ? window.getVoltageColor
+            : (v) => data.color || "#9C27B0";
+
+        const baseState = (data.state || "LIVE").toUpperCase();
+        const state = (effectiveState || baseState).toUpperCase();
+        const isDead = state === "DEAD" || state === "OPEN";
+        const isGrounded =
+          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
+
+        let color;
+        if (isDead) {
+          color = "#94a3b8";
+        } else if (isGrounded) {
+          color = "#16a34a";
+        } else {
+          color =
+            effectiveColor ||
+            getVColor(data.voltage, vUnit) ||
+            data.color ||
+            "#9C27B0";
+        }
+
         const name = data.name || "모선";
         this.attr({
           body: { fill: color, stroke: color },

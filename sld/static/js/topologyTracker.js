@@ -353,6 +353,13 @@ class PowerSystemTopologyTracker {
       ) {
         el.updateVisual(status.state);
       }
+      // If it is a busbar, update visual based on topological state and voltage color
+      if (
+        typeof el.updateFromSldData === "function" &&
+        (sldData.type === "BUSBAR" || el.get("type") === "sld.Busbar")
+      ) {
+        el.updateFromSldData(status.state, status.voltageColor);
+      }
     });
 
     return { nodeStatus, linkStatus };
