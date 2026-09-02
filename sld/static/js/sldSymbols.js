@@ -102,7 +102,7 @@
   joint.shapes.sld.Breaker = joint.dia.Element.define(
     "sld.Breaker",
     {
-      size: { width: 36, height: 44 },
+      size: { width: 28, height: 40 },
       markup: [
         { tagName: "rect", selector: "box" },
         { tagName: "path", selector: "contactPath" },
@@ -123,9 +123,9 @@
           cursor: "pointer",
         },
         contactPath: {
-          d: "M 18 6 L 18 38",
+          d: "M 14 5 L 14 35",
           stroke: "#377DFF",
-          strokeWidth: 2.5,
+          strokeWidth: 2.2,
           strokeLinecap: "round",
         },
         typeLabel: {
@@ -134,14 +134,14 @@
           refY: "50%",
           textAnchor: "middle",
           textVerticalAnchor: "middle",
-          fontSize: 9,
+          fontSize: 8,
           fontWeight: "bold",
           fill: "#377DFF",
           pointerEvents: "none",
         },
         nameLabel: {
           text: "ACB",
-          refX: 40,
+          refX: 34,
           refY: "25%",
           textAnchor: "start",
           fontSize: 9.5,
@@ -150,19 +150,19 @@
         },
         specLabel: {
           text: "3200A",
-          refX: 40,
+          refX: 34,
           refY: "65%",
           textAnchor: "start",
           fontSize: 8.5,
           fill: "#64748b",
         },
         stateBadge: {
-          refX: -6,
-          refY: -6,
-          width: 14,
-          height: 14,
-          rx: 7,
-          ry: 7,
+          refX: -5,
+          refY: -5,
+          width: 12,
+          height: 12,
+          rx: 6,
+          ry: 6,
           fill: "#52c41a",
           stroke: "#ffffff",
           strokeWidth: 1.5,
@@ -184,8 +184,8 @@
           },
         },
         items: [
-          { id: "in", group: "ports", args: { x: 18, y: 0 } },
-          { id: "out", group: "ports", args: { x: 18, y: 44 } },
+          { id: "in", group: "ports", args: { x: 14, y: 0 } },
+          { id: "out", group: "ports", args: { x: 14, y: 40 } },
         ],
       },
     },
@@ -194,12 +194,17 @@
         joint.dia.Element.prototype.initialize.apply(this, arguments);
         this.updateContactVisual();
         this.on("change:sldData", this.updateContactVisual, this);
+        this.on("change:size", this.updateContactVisual, this);
       },
       updateContactVisual: function () {
         const data = this.get("sldData") || {};
         const state = data.state || "CLOSED";
         const color = data.color || "#377DFF";
         const isClosed = state === "CLOSED";
+        const sz = this.get("size") || { width: 28, height: 40 };
+        const cx = Math.round(sz.width / 2);
+        const topY = 5;
+        const botY = sz.height - 5;
 
         this.attr({
           box: { stroke: color },
@@ -211,7 +216,9 @@
           nameLabel: { text: data.name || "CB" },
           specLabel: { text: data.current ? data.current + "A" : "" },
           contactPath: {
-            d: isClosed ? "M 18 6 L 18 38" : "M 18 6 L 28 32",
+            d: isClosed
+              ? `M ${cx} ${topY} L ${cx} ${botY}`
+              : `M ${cx} ${topY} L ${cx + 8} ${botY - 4}`,
             stroke: isClosed ? color : "#ff4d4f",
           },
           stateBadge: {

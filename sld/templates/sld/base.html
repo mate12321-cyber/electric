@@ -7,9 +7,15 @@
     <title>전력 계통도 편집기 - Power System Single-Line Diagram</title>
 
     <!-- JointJS CSS -->
-    <link rel="stylesheet" href="{% static 'css/joint.min.css' %}?v=20260902_02" />
+    <link
+      rel="stylesheet"
+      href="{% static 'css/joint.min.css' %}?v=20260902_02"
+    />
     <!-- SLD Pure CSS Theme -->
-    <link rel="stylesheet" href="{% static 'css/sld_styles.css' %}?v=20260902_02" />
+    <link
+      rel="stylesheet"
+      href="{% static 'css/sld_styles.css' %}?v=20260902_02"
+    />
   </head>
   <body>
     {% csrf_token %} {% block content %}{% endblock %}
