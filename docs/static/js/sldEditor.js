@@ -123,7 +123,7 @@ class SLDEditor {
           line: {
             stroke: "#377DFF",
             strokeWidth: 2.5,
-            strokeDasharray: "8,4",
+            strokeDasharray: "none",
             class: "link-live",
             targetMarker: { type: "none" },
           },

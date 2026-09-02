@@ -30,7 +30,7 @@ def get_default_sld_schema():
                 'line': {
                     'stroke': color,
                     'strokeWidth': stroke_width,
-                    'strokeDasharray': '8,4',
+                    'strokeDasharray': 'none',
                     'class': 'link-live',
                     'targetMarker': {'name': 'none'}
                 }

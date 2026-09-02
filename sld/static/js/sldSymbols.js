@@ -1802,7 +1802,7 @@
     },
   });
 
-  // 15. Load (부하 - 내부 부하 텍스트 제거, 외부에 nameLabel 배치)
+  // 15. Load (부하 - 내부 화살표 비활성화, 심볼 박스 및 외부에 nameLabel 배치)
   joint.shapes.sld.Load = joint.dia.Element.define(
     "sld.Load",
     {
@@ -1810,7 +1810,6 @@
       markup: [
         { tagName: "path", selector: "lead" },
         { tagName: "rect", selector: "box" },
-        { tagName: "path", selector: "arrow" },
         { tagName: "text", selector: "nameLabel" },
       ],
       attrs: {
@@ -1824,14 +1823,6 @@
           fill: "#ffffff",
           stroke: "#64748b",
           strokeWidth: 1.5,
-        },
-        arrow: {
-          d: "M 17 12 L 17 28 M 12 23 L 17 28 L 22 23",
-          stroke: "#64748b",
-          strokeWidth: 1.5,
-          fill: "none",
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
         },
         nameLabel: {
           text: "부하",

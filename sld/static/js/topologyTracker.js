@@ -269,7 +269,7 @@ class PowerSystemTopologyTracker {
           line: {
             stroke: status.voltageColor,
             strokeWidth: 2.5,
-            strokeDasharray: "8,4",
+            strokeDasharray: "none",
             class: "link-live",
           },
         });
