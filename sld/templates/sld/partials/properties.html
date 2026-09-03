@@ -51,7 +51,7 @@
           style="font-size: 11px; color: #475569; line-height: 1.4"
           id="prop-multi-summary-text"
         >
-          선택된 심볼들의 상태 변경(활선/사선/접지) 및 일괄 삭제가 가능합니다.
+          선택된 심볼들의 상태 변경(투입/개방/접지) 및 일괄 삭제가 가능합니다.
         </div>
       </div>
 
@@ -128,7 +128,7 @@
             data-state="LIVE"
           >
             <span class="state-dot dot-live"></span>
-            <span>활선 (Live)</span>
+            <span>투입 (Closed)</span>
           </button>
           <button
             type="button"
@@ -136,7 +136,7 @@
             data-state="DEAD"
           >
             <span class="state-dot dot-dead"></span>
-            <span>사선 (Dead)</span>
+            <span>개방 (Open)</span>
           </button>
           <button
             type="button"
@@ -148,8 +148,8 @@
           </button>
         </div>
         <select class="sld-select" id="prop-state" style="display: none">
-          <option value="LIVE">활선 (Live)</option>
-          <option value="DEAD">사선 (Dead)</option>
+          <option value="LIVE">투입 (Closed)</option>
+          <option value="DEAD">개방 (Open)</option>
           <option value="GROUNDED">접지 (Grounded)</option>
         </select>
       </div>

@@ -81,11 +81,41 @@ class PowerSystemTopologyTracker {
   /**
    * Resolve an element's nominal or active voltage color
    */
-  getElementVoltageColor(el) {
+  /**
+   * Resolve an element's nominal or active voltage color
+   */
+  getElementVoltageColor(el, portId) {
     if (!el || !el.isElement || !el.isElement()) return "#377DFF";
     const sldData = el.get("sldData") || {};
     const { nodeStatus } = this.evaluate();
     const status = nodeStatus.get(el.id);
+
+    const isTR =
+      sldData.type === "TR_2W" ||
+      sldData.type === "TR_3W" ||
+      el.get("type") === "sld.Transformer2W" ||
+      el.get("type") === "sld.Transformer3W";
+
+    if (isTR && portId) {
+      if (portId === "sec") {
+        const secV =
+          sldData.secVoltage !== undefined ? sldData.secVoltage : 22.9;
+        return sldData.secColor || resolveVoltageInfo(secV).color;
+      }
+      if (portId === "tert") {
+        const tertV =
+          sldData.tertVoltage !== undefined ? sldData.tertVoltage : 6.6;
+        return sldData.tertColor || resolveVoltageInfo(tertV).color;
+      }
+      if (portId === "pri") {
+        const priV =
+          sldData.priVoltage !== undefined ? sldData.priVoltage : 154;
+        return (
+          sldData.priColor || sldData.color || resolveVoltageInfo(priV).color
+        );
+      }
+    }
+
     if (status && status.voltageColor && status.state === "LIVE") {
       return status.voltageColor;
     }
@@ -205,6 +235,19 @@ class PowerSystemTopologyTracker {
     const conflictLinks = new Set();
     const conflictNodes = new Set();
 
+    // Check if graph contains online grid/generator sources
+    const hasGridSource = elements.some((el) => {
+      const sldData = el.get("sldData") || {};
+      const catalog = window.EQUIPMENT_CATALOG[sldData.type] || {};
+      const st = (sldData.state || "").toUpperCase();
+      return (
+        catalog.isEnergizedSource &&
+        st !== "DEAD" &&
+        st !== "OPEN" &&
+        sldData.isOnline !== false
+      );
+    });
+
     elements.forEach((el) => {
       // If already grounded, it cannot be safely energized live
       if (groundedNodes.has(el.id)) return;
@@ -236,8 +279,9 @@ class PowerSystemTopologyTracker {
           });
         }
       }
-      // 2. Live Busbars (Any Busbar set to LIVE acts as an energized bus source)
+      // 2. Live Busbars (Only act as initial sources if there are no grid sources in graph)
       else if (
+        !hasGridSource &&
         (sldData.type === "BUSBAR" || el.get("type") === "sld.Busbar") &&
         st !== "DEAD" &&
         st !== "OPEN"
@@ -245,20 +289,6 @@ class PowerSystemTopologyTracker {
         const vInfo = resolveVoltageInfo(
           sldData.voltage || sldData.color || sldData.name,
         );
-        liveQueue.push({
-          id: el.id,
-          voltage: vInfo.voltage,
-          color: sldData.color || vInfo.color,
-        });
-        liveNodes.add(el.id);
-        nodeVoltages.set(el.id, {
-          voltage: vInfo.voltage,
-          color: sldData.color || vInfo.color,
-        });
-      }
-      // 3. Standalone Live equipment with designated nominal voltage
-      else if (st === "LIVE" && sldData.voltage && !liveNodes.has(el.id)) {
-        const vInfo = resolveVoltageInfo(sldData.voltage);
         liveQueue.push({
           id: el.id,
           voltage: vInfo.voltage,
@@ -281,6 +311,13 @@ class PowerSystemTopologyTracker {
       const currentEl = this.graph.getCell(currentId);
       const currentSldData = currentEl ? currentEl.get("sldData") || {} : {};
 
+      const isCurrentTR =
+        currentSldData.type === "TR_2W" ||
+        currentSldData.type === "TR_3W" ||
+        (currentEl &&
+          (currentEl.get("type") === "sld.Transformer2W" ||
+            currentEl.get("type") === "sld.Transformer3W"));
+
       const neighbors = adj.get(currentId) || [];
 
       for (const edge of neighbors) {
@@ -290,55 +327,68 @@ class PowerSystemTopologyTracker {
         if (!neighborEl) continue;
 
         const neighborSldData = neighborEl.get("sldData") || {};
-        const conducting = isElementConducting(neighborEl);
-
-        if (!conducting) {
-          // Switch is OPEN: edge leading to it is energized, but cannot pass through to neighbor
-          liveLinks.add(edge.link.id);
-          linkStatus.set(edge.link.id, {
-            state: "LIVE",
-            voltageColor: currentColor,
-          });
-          continue;
-        }
-
-        // Voltage propagation & Transformation logic
-        let nextVoltage = currentVoltage;
-        let nextColor = currentColor;
-
-        const isTransformer =
+        const isNeighborTR =
           neighborSldData.type === "TR_2W" ||
           neighborSldData.type === "TR_3W" ||
           neighborEl.get("type") === "sld.Transformer2W" ||
           neighborEl.get("type") === "sld.Transformer3W";
 
-        if (isTransformer) {
-          // Transformer step down/up
+        const conducting = isElementConducting(neighborEl);
+
+        // Voltage propagation & Transformation logic
+        let nextVoltage = currentVoltage;
+        let nextColor = currentColor;
+
+        if (isCurrentTR) {
+          // BFS stepping OUT of Transformer
+          if (edge.portFrom === "sec") {
+            nextVoltage =
+              currentSldData.secVoltage !== undefined
+                ? currentSldData.secVoltage
+                : currentVoltage === 154
+                  ? 22.9
+                  : 0.4;
+            const vInfo = resolveVoltageInfo(nextVoltage);
+            nextColor = currentSldData.secColor || vInfo.color;
+          } else if (edge.portFrom === "tert") {
+            nextVoltage =
+              currentSldData.tertVoltage !== undefined
+                ? currentSldData.tertVoltage
+                : 6.6;
+            const vInfo = resolveVoltageInfo(nextVoltage);
+            nextColor = currentSldData.tertColor || vInfo.color;
+          } else {
+            // portFrom === "pri" or other
+            nextVoltage =
+              currentSldData.priVoltage !== undefined
+                ? currentSldData.priVoltage
+                : currentVoltage === 22.9
+                  ? 154
+                  : currentVoltage;
+            const vInfo = resolveVoltageInfo(nextVoltage);
+            nextColor = currentSldData.priColor || vInfo.color;
+          }
+        } else if (isNeighborTR) {
+          // BFS stepping INTO Transformer
           if (edge.portTo === "sec") {
             nextVoltage =
-              neighborSldData.secVoltage ||
-              (currentVoltage === 154 ? 22.9 : 0.4);
-            const preset =
-              window.DEFAULT_VOLTAGE_PRESETS &&
-              Object.values(window.DEFAULT_VOLTAGE_PRESETS).find(
-                (p) => p.value === nextVoltage,
-              );
-            nextColor =
-              neighborSldData.secColor ||
-              (preset
-                ? preset.color
-                : currentVoltage === 154
-                  ? "#9C27B0"
-                  : "#059669");
+              neighborSldData.secVoltage !== undefined
+                ? neighborSldData.secVoltage
+                : currentVoltage;
+            nextColor = currentColor;
+          } else if (edge.portTo === "tert") {
+            nextVoltage =
+              neighborSldData.tertVoltage !== undefined
+                ? neighborSldData.tertVoltage
+                : currentVoltage;
+            nextColor = currentColor;
           } else {
-            nextVoltage = neighborSldData.priVoltage || currentVoltage;
-            const preset =
-              window.DEFAULT_VOLTAGE_PRESETS &&
-              Object.values(window.DEFAULT_VOLTAGE_PRESETS).find(
-                (p) => p.value === nextVoltage,
-              );
-            nextColor =
-              neighborSldData.color || (preset ? preset.color : currentColor);
+            // portTo === "pri"
+            nextVoltage =
+              neighborSldData.priVoltage !== undefined
+                ? neighborSldData.priVoltage
+                : currentVoltage;
+            nextColor = currentColor;
           }
         } else if (
           neighborSldData.type === "BUSBAR" ||
@@ -348,13 +398,24 @@ class PowerSystemTopologyTracker {
           if (neighborSldData.voltage) nextVoltage = neighborSldData.voltage;
         } else {
           // Pass-through equipment (JUNCTION, CB, DS, MCCB, ACB, FUSE, CT, PT, LOAD, etc.):
-          // PRESERVE the incoming voltage and color!
+          // PRESERVE incoming voltage and color!
           nextVoltage = currentVoltage;
           nextColor = currentColor;
         }
 
+        if (!conducting) {
+          // Switch is OPEN: edge leading to it is energized, but cannot pass through to neighbor
+          liveLinks.add(edge.link.id);
+          linkStatus.set(edge.link.id, {
+            state: "LIVE",
+            voltageColor: isCurrentTR ? nextColor : currentColor,
+            isConflict: false,
+          });
+          continue;
+        }
+
         // Check for Voltage Mismatch / Conflict if node was already reached with different voltage
-        if (liveNodes.has(edge.neighborId) && !isTransformer) {
+        if (liveNodes.has(edge.neighborId) && !isCurrentTR && !isNeighborTR) {
           const existingVInfo = nodeVoltages.get(edge.neighborId);
           if (
             existingVInfo &&
@@ -406,8 +467,16 @@ class PowerSystemTopologyTracker {
         if (srcEl && tgtEl) {
           const srcSld = srcEl.get("sldData") || {};
           const tgtSld = tgtEl.get("sldData") || {};
-          const isSrcTR = srcSld.type === "TR_2W" || srcSld.type === "TR_3W";
-          const isTgtTR = tgtSld.type === "TR_2W" || tgtSld.type === "TR_3W";
+          const isSrcTR =
+            srcSld.type === "TR_2W" ||
+            srcSld.type === "TR_3W" ||
+            srcEl.get("type") === "sld.Transformer2W" ||
+            srcEl.get("type") === "sld.Transformer3W";
+          const isTgtTR =
+            tgtSld.type === "TR_2W" ||
+            tgtSld.type === "TR_3W" ||
+            tgtEl.get("type") === "sld.Transformer2W" ||
+            tgtEl.get("type") === "sld.Transformer3W";
 
           if (!isSrcTR && !isTgtTR) {
             const srcV = nodeVoltages.get(srcEl.id);
@@ -538,6 +607,10 @@ class PowerSystemTopologyTracker {
         paths.forEach((p) => {
           p.removeAttribute("marker-end");
           p.removeAttribute("marker-start");
+          if (p.classList.contains("sld-jumpover-halo")) {
+            return;
+          }
+
           const isWrapper =
             p.getAttribute("joint-selector") === "wrapper" ||
             p.classList.contains("wrapper") ||

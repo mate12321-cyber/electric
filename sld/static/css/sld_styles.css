@@ -993,3 +993,21 @@ g[data-type*="sld"].node-voltage-conflict {
     opacity: 0;
   }
 }
+
+/* CAD Jumper Arch Knockout Halo (Applied strictly to the arch curve only) */
+.joint-link path.sld-jumpover-halo {
+  stroke: #ffffff !important;
+  stroke-width: 7px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  fill: none !important;
+  pointer-events: none !important;
+}
+
+.joint-link path[joint-selector="wrapper"],
+.joint-link path.wrapper,
+.joint-link path.connection-wrap {
+  stroke: transparent !important;
+  stroke-width: 10px !important;
+  stroke-opacity: 0 !important;
+}

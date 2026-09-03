@@ -226,67 +226,12 @@ class SLDEditor {
         (this.activeTool === "wire" ? this._wireSource : null);
 
       if (drawingSrc && drawingSrc.id) {
-        const found = this.findLinkAtPoint(
-          p,
-          40,
-          this._activeDrawingLink ? this._activeDrawingLink.id : null,
-          drawingSrc.id,
-        );
+        const found = this.findTBranchTarget(p, drawingSrc, 50);
 
         if (found) {
-          let jx = Math.round(found.projection.x / 10) * 10;
-          let jy = Math.round(found.projection.y / 10) * 10;
-
+          const jx = found.projection.x;
+          const jy = found.projection.y;
           const srcEl = this.graph.getCell(drawingSrc.id);
-          if (srcEl && srcEl.isElement && srcEl.isElement()) {
-            const srcPos = srcEl.position();
-            const srcSize = srcEl.size();
-            let srcPortX = srcPos.x + srcSize.width / 2;
-            let srcPortY = srcPos.y + srcSize.height / 2;
-
-            if (typeof srcEl.getPorts === "function") {
-              const ports = srcEl.getPorts() || [];
-              const portObj = ports.find((prt) => prt.id === drawingSrc.port);
-              if (portObj && portObj.args) {
-                srcPortX =
-                  srcPos.x +
-                  (portObj.args.x !== undefined
-                    ? portObj.args.x
-                    : srcSize.width / 2);
-                srcPortY =
-                  srcPos.y +
-                  (portObj.args.y !== undefined
-                    ? portObj.args.y
-                    : srcSize.height / 2);
-              }
-            }
-
-            const seg = found.segment;
-            if (seg) {
-              const isHorizontal = Math.abs(seg.p1.y - seg.p2.y) < 5;
-              const isVertical = Math.abs(seg.p1.x - seg.p2.x) < 5;
-
-              if (isHorizontal) {
-                jy = seg.p1.y;
-                const minX = Math.min(seg.p1.x, seg.p2.x);
-                const maxX = Math.max(seg.p1.x, seg.p2.x);
-                if (srcPortX >= minX - 10 && srcPortX <= maxX + 10) {
-                  jx = srcPortX;
-                } else {
-                  jx = Math.max(minX, Math.min(maxX, found.projection.x));
-                }
-              } else if (isVertical) {
-                jx = seg.p1.x;
-                const minY = Math.min(seg.p1.y, seg.p2.y);
-                const maxY = Math.max(seg.p1.y, seg.p2.y);
-                if (srcPortY >= minY - 10 && srcPortY <= maxY + 10) {
-                  jy = srcPortY;
-                } else {
-                  jy = Math.max(minY, Math.min(maxY, found.projection.y));
-                }
-              }
-            }
-          }
 
           // Live snap the dragging wire target to the orthogonal intersection
           if (this._activeDrawingLink) {
@@ -437,26 +382,31 @@ class SLDEditor {
           x: e.clientX,
           y: e.clientY,
         });
-        const found = this.findLinkAtPoint(
-          paperPt,
-          40,
-          linkToRemove ? linkToRemove.id : null,
-          srcInfo.id,
-        );
+
+        const branchTarget =
+          this._snappedTBranch || this.findTBranchTarget(paperPt, srcInfo, 50);
+
         if (
-          found &&
-          found.link.get("source")?.id !== srcInfo.id &&
-          found.link.get("target")?.id !== srcInfo.id
+          branchTarget &&
+          branchTarget.link &&
+          branchTarget.link.get("source")?.id !== srcInfo.id &&
+          branchTarget.link.get("target")?.id !== srcInfo.id
         ) {
           if (linkToRemove) {
             linkToRemove.remove();
           }
-          this.splitLinkAtPoint(found.link, found.projection, srcInfo);
+          this.splitLinkAtPoint(
+            branchTarget.link,
+            branchTarget.projection,
+            srcInfo,
+          );
           this.showToast("연결선에 분기 접속점(T-분기)이 연결되었습니다.");
         }
+        this._snappedTBranch = null;
       } else {
         this._activeDrawingLink = null;
         this._lastDrawingSource = null;
+        this._snappedTBranch = null;
       }
     });
 
@@ -475,16 +425,29 @@ class SLDEditor {
 
     // Graph Real-time Transform -> Update Topology Tracker & Minimap (History pushed on drag completion)
     this.graph.on("change:position change:size", () => {
+      this.refreshAllLinks();
       this.topologyTracker.applyStyles(this.paper);
       this.updateMinimap();
       this.scheduleAutoSave();
     });
 
     this.graph.on("add remove change:sldData", () => {
+      this.refreshAllLinks();
       this.topologyTracker.applyStyles(this.paper);
       this.updateMinimap();
       this.pushHistory();
       this.scheduleAutoSave();
+    });
+  }
+
+  refreshAllLinks() {
+    if (!this.paper || !this.graph) return;
+    const links = this.graph.getLinks();
+    links.forEach((link) => {
+      const view = this.paper.findViewByModel(link);
+      if (view && typeof view.update === "function") {
+        view.update();
+      }
     });
   }
 
@@ -859,12 +822,21 @@ class SLDEditor {
       }
 
       if (this.selectedCells.length > 1) {
-        this.selectedCells.forEach((c) => {
-          if (c.isElement && c.isElement()) {
-            this.snapElementToPortGrid(c);
+        const pivotEl = elementView ? elementView.model : this.selectedCells[0];
+        if (pivotEl && pivotEl.isElement && pivotEl.isElement()) {
+          const oldPos = Object.assign({}, pivotEl.position());
+          this.snapElementToPortGrid(pivotEl);
+          const newPos = pivotEl.position();
+          const ddx = newPos.x - oldPos.x;
+          const ddy = newPos.y - oldPos.y;
+
+          this.selectedCells.forEach((c) => {
+            if (c.isElement && c.isElement() && c.id !== pivotEl.id) {
+              c.position(c.position().x + ddx, c.position().y + ddy);
+            }
             this.syncConnectedBusbarPorts(c);
-          }
-        });
+          });
+        }
       } else {
         const el = elementView ? elementView.model : null;
         if (el && el.isElement && el.isElement()) {
@@ -1061,9 +1033,18 @@ class SLDEditor {
       }
     });
 
-    this.graph.on("change:position", (element) => {
-      if (element.isElement && element.isElement()) {
+    this.graph.on("change:position change:size", (element) => {
+      if (element && element.isElement && element.isElement()) {
         this.syncConnectedBusbarPorts(element);
+        this.refreshAllLinks();
+      }
+    });
+
+    this.graph.on("remove", (cell) => {
+      if (cell) {
+        this.cleanupUnusedBusbarPorts();
+        this.cleanupOrphanedJunctions();
+        this.refreshAllLinks();
       }
     });
   }
@@ -1104,13 +1085,180 @@ class SLDEditor {
 
     const vertices = link.get("vertices") || [];
     let routePoints = [];
-    if (linkView._route && linkView._route.length > 0) {
+    if (linkView.route && linkView.route.length > 0) {
+      routePoints = linkView.route;
+    } else if (linkView._route && linkView._route.length > 0) {
       routePoints = linkView._route;
     } else if (vertices.length > 0) {
       routePoints = vertices;
+    } else if (
+      typeof joint !== "undefined" &&
+      joint.routers &&
+      typeof joint.routers.sldOrthogonal === "function"
+    ) {
+      routePoints =
+        joint.routers.sldOrthogonal(
+          vertices,
+          { sourcePoint: srcPt, targetPoint: tgtPt },
+          linkView,
+        ) || [];
     }
 
     return [srcPt, ...routePoints, tgtPt];
+  }
+
+  findTBranchTarget(paperPoint, sourceInfo, maxDist = 50) {
+    if (!paperPoint || !this.graph) return null;
+
+    let srcEl = null;
+    let srcPortX = null;
+    let srcPortY = null;
+
+    if (sourceInfo && sourceInfo.id) {
+      srcEl = this.graph.getCell(sourceInfo.id);
+      if (srcEl && srcEl.isElement && srcEl.isElement()) {
+        const srcPos = srcEl.position();
+        const srcSize = srcEl.size();
+        srcPortX = srcPos.x + srcSize.width / 2;
+        srcPortY = srcPos.y + srcSize.height / 2;
+
+        if (typeof srcEl.getPorts === "function") {
+          const ports = srcEl.getPorts() || [];
+          const portObj = ports.find((prt) => prt.id === sourceInfo.port);
+          if (portObj && portObj.args) {
+            srcPortX =
+              srcPos.x +
+              (portObj.args.x !== undefined
+                ? portObj.args.x
+                : srcSize.width / 2);
+            srcPortY =
+              srcPos.y +
+              (portObj.args.y !== undefined
+                ? portObj.args.y
+                : srcSize.height / 2);
+          }
+        }
+      }
+    }
+
+    const links = this.graph.getLinks();
+    let bestMatch = null;
+    let bestDist = maxDist;
+
+    links.forEach((link) => {
+      if (
+        sourceInfo &&
+        (link.get("source")?.id === sourceInfo.id ||
+          link.get("target")?.id === sourceInfo.id)
+      ) {
+        return;
+      }
+
+      const pts = this.getLinkPoints(link);
+      if (!pts || pts.length < 2) return;
+
+      const srcPt = pts[0];
+      const tgtPt = pts[pts.length - 1];
+
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+
+        const isHorizontal = Math.abs(p1.y - p2.y) < 5;
+        const isVertical = Math.abs(p1.x - p2.x) < 5;
+
+        const minX = Math.min(p1.x, p2.x);
+        const maxX = Math.max(p1.x, p2.x);
+        const minY = Math.min(p1.y, p2.y);
+        const maxY = Math.max(p1.y, p2.y);
+
+        let candidatePoint = null;
+
+        // 1. Prioritize Orthogonal Ray Alignment from Source Port
+        if (srcPortX !== null && srcPortY !== null) {
+          if (isHorizontal && srcPortX >= minX - 10 && srcPortX <= maxX + 10) {
+            candidatePoint = {
+              x: Math.round(srcPortX / 10) * 10,
+              y: Math.round(p1.y / 10) * 10,
+            };
+          } else if (
+            isVertical &&
+            srcPortY >= minY - 10 &&
+            srcPortY <= maxY + 10
+          ) {
+            candidatePoint = {
+              x: Math.round(p1.x / 10) * 10,
+              y: Math.round(srcPortY / 10) * 10,
+            };
+          }
+        }
+
+        // 2. Fallback to normal perpendicular projection onto segment
+        if (!candidatePoint) {
+          const dx = p2.x - p1.x;
+          const dy = p2.y - p1.y;
+          const l2 = dx * dx + dy * dy;
+          if (l2 === 0) continue;
+
+          let t =
+            ((paperPoint.x - p1.x) * dx + (paperPoint.y - p1.y) * dy) / l2;
+          t = Math.max(0, Math.min(1, t));
+
+          if (isHorizontal) {
+            candidatePoint = {
+              x: Math.round((p1.x + t * dx) / 10) * 10,
+              y: Math.round(p1.y / 10) * 10,
+            };
+          } else if (isVertical) {
+            candidatePoint = {
+              x: Math.round(p1.x / 10) * 10,
+              y: Math.round((p1.y + t * dy) / 10) * 10,
+            };
+          } else {
+            candidatePoint = {
+              x: Math.round((p1.x + t * dx) / 10) * 10,
+              y: Math.round((p1.y + t * dy) / 10) * 10,
+            };
+          }
+        }
+
+        // Must not be at terminal endpoints of existing link
+        if (
+          Math.hypot(candidatePoint.x - srcPt.x, candidatePoint.y - srcPt.y) <
+            18 ||
+          Math.hypot(candidatePoint.x - tgtPt.x, candidatePoint.y - tgtPt.y) <
+            18
+        ) {
+          continue;
+        }
+
+        const dist = Math.hypot(
+          paperPoint.x - candidatePoint.x,
+          paperPoint.y - candidatePoint.y,
+        );
+
+        // Strong score bonus if candidate gives a straight branch line
+        const isStraightBranch =
+          (srcPortX !== null &&
+            candidatePoint.x === Math.round(srcPortX / 10) * 10) ||
+          (srcPortY !== null &&
+            candidatePoint.y === Math.round(srcPortY / 10) * 10);
+
+        const scoreDist = isStraightBranch ? dist * 0.45 : dist;
+
+        if (scoreDist < bestDist) {
+          bestDist = scoreDist;
+          bestMatch = {
+            link,
+            projection: candidatePoint,
+            segment: { p1, p2 },
+            dist,
+          };
+        }
+      }
+    });
+
+    return bestMatch;
   }
 
   findLinkAtPoint(
@@ -1294,74 +1442,12 @@ class SLDEditor {
     let jx = Math.round(projPoint.x / gridSize) * gridSize;
     let jy = Math.round(projPoint.y / gridSize) * gridSize;
 
-    // Smart Alignment: If branching from a source element, align junction coordinate with source port
+    // Smart Alignment: Match junction coordinate to source port
     if (newSourceInfo && newSourceInfo.id) {
-      const srcEl = this.graph.getCell(newSourceInfo.id);
-      if (srcEl && srcEl.isElement && srcEl.isElement()) {
-        const srcPos = srcEl.position();
-        const srcSize = srcEl.size();
-        let srcPortX = srcPos.x + srcSize.width / 2;
-        let srcPortY = srcPos.y + srcSize.height / 2;
-
-        if (typeof srcEl.getPorts === "function") {
-          const ports = srcEl.getPorts() || [];
-          const portObj = ports.find((p) => p.id === newSourceInfo.port);
-          if (portObj && portObj.args) {
-            srcPortX =
-              srcPos.x +
-              (portObj.args.x !== undefined
-                ? portObj.args.x
-                : srcSize.width / 2);
-            srcPortY =
-              srcPos.y +
-              (portObj.args.y !== undefined
-                ? portObj.args.y
-                : srcSize.height / 2);
-          }
-        }
-
-        const pts = this.getLinkPoints(targetLink);
-        if (pts && pts.length >= 2) {
-          let bestSeg = null;
-          let bestSegDist = Infinity;
-          for (let i = 0; i < pts.length - 1; i++) {
-            const p1 = pts[i];
-            const p2 = pts[i + 1];
-            const segDist = Math.hypot(
-              projPoint.x - (p1.x + p2.x) / 2,
-              projPoint.y - (p1.y + p2.y) / 2,
-            );
-            if (segDist < bestSegDist) {
-              bestSegDist = segDist;
-              bestSeg = { p1, p2 };
-            }
-          }
-
-          if (bestSeg) {
-            const isHorizontal = Math.abs(bestSeg.p1.y - bestSeg.p2.y) < 5;
-            const isVertical = Math.abs(bestSeg.p1.x - bestSeg.p2.x) < 5;
-
-            if (isHorizontal) {
-              jy = bestSeg.p1.y;
-              const minX = Math.min(bestSeg.p1.x, bestSeg.p2.x);
-              const maxX = Math.max(bestSeg.p1.x, bestSeg.p2.x);
-              if (srcPortX >= minX - 10 && srcPortX <= maxX + 10) {
-                jx = srcPortX;
-              } else {
-                jx = Math.max(minX, Math.min(maxX, projPoint.x));
-              }
-            } else if (isVertical) {
-              jx = bestSeg.p1.x;
-              const minY = Math.min(bestSeg.p1.y, bestSeg.p2.y);
-              const maxY = Math.max(bestSeg.p1.y, bestSeg.p2.y);
-              if (srcPortY >= minY - 10 && srcPortY <= maxY + 10) {
-                jy = srcPortY;
-              } else {
-                jy = Math.max(minY, Math.min(maxY, projPoint.y));
-              }
-            }
-          }
-        }
+      const match = this.findTBranchTarget(projPoint, newSourceInfo, 80);
+      if (match && match.projection) {
+        jx = match.projection.x;
+        jy = match.projection.y;
       }
     }
 
@@ -1476,6 +1562,27 @@ class SLDEditor {
     }, 1800);
   }
 
+  getCellPortOffset(cell, portId) {
+    if (!cell) return { x: 0, y: 0 };
+    const size = cell.size ? cell.size() : { width: 0, height: 0 };
+    if (typeof cell.getPort === "function" && portId) {
+      const port = cell.getPort(portId);
+      if (port && port.args) {
+        return {
+          x: port.args.x !== undefined ? port.args.x : size.width / 2,
+          y: port.args.y !== undefined ? port.args.y : size.height / 2,
+        };
+      }
+    }
+    const sldData = cell.get("sldData") || {};
+    return this.getPrimaryPortOffset(
+      sldData.type,
+      size.width,
+      size.height,
+      cell,
+    );
+  }
+
   autoCreateBusbarPort(link) {
     if (!link || !link.isLink || !link.isLink()) return;
 
@@ -1501,14 +1608,7 @@ class SLDEditor {
       const busPos = busbar.position();
       const busSize = busbar.size();
 
-      const sourceSize = sourceCell.size();
-      const sourceData = sourceCell.get("sldData") || {};
-      const sourceOffset = this.getPrimaryPortOffset(
-        sourceData.type,
-        sourceSize.width,
-        sourceSize.height,
-        sourceCell,
-      );
+      const sourceOffset = this.getCellPortOffset(sourceCell, source.port);
       const sourcePortAbsX = sourceCell.position().x + sourceOffset.x;
       const rawLocalX = sourcePortAbsX - busPos.x;
       let portX = Math.max(10, Math.min(busSize.width - 10, rawLocalX));
@@ -1551,6 +1651,7 @@ class SLDEditor {
         link.prop("target", { id: busbar.id, port: portId });
       } else {
         busbar.portProp(currentPortId, "args/x", portX);
+        busbar.portProp(currentPortId, "args/y", busSize.height / 2);
       }
     }
 
@@ -1563,14 +1664,7 @@ class SLDEditor {
       const busPos = busbar.position();
       const busSize = busbar.size();
 
-      const targetSize = targetCell.size();
-      const targetData = targetCell.get("sldData") || {};
-      const targetOffset = this.getPrimaryPortOffset(
-        targetData.type,
-        targetSize.width,
-        targetSize.height,
-        targetCell,
-      );
+      const targetOffset = this.getCellPortOffset(targetCell, target.port);
       const targetPortAbsX = targetCell.position().x + targetOffset.x;
       const rawLocalX = targetPortAbsX - busPos.x;
       let portX = Math.max(10, Math.min(busSize.width - 10, rawLocalX));
@@ -1612,6 +1706,7 @@ class SLDEditor {
         link.prop("source", { id: busbar.id, port: portId });
       } else {
         busbar.portProp(currentPortId, "args/x", portX);
+        busbar.portProp(currentPortId, "args/y", busSize.height / 2);
       }
     }
   }
@@ -1646,25 +1741,114 @@ class SLDEditor {
     });
   }
 
+  cleanupOrphanedJunctions() {
+    if (!this.graph) return;
+    const junctions = this.graph
+      .getElements()
+      .filter(
+        (el) =>
+          el.get("type") === "sld.Junction" ||
+          el.get("sldData")?.type === "JUNCTION",
+      );
+
+    junctions.forEach((junction) => {
+      const connectedLinks = this.graph.getConnectedLinks(junction);
+      if (connectedLinks.length === 0) {
+        junction.remove();
+      } else if (connectedLinks.length === 1) {
+        connectedLinks[0].remove();
+        junction.remove();
+      } else if (connectedLinks.length === 2) {
+        const l1 = connectedLinks[0];
+        const l2 = connectedLinks[1];
+
+        const getOtherEndpoint = (link, junctionId) => {
+          const s = link.get("source");
+          const t = link.get("target");
+          return s && s.id === junctionId ? t : s;
+        };
+
+        const ep1 = getOtherEndpoint(l1, junction.id);
+        const ep2 = getOtherEndpoint(l2, junction.id);
+
+        if (ep1 && ep2 && ep1.id && ep2.id && ep1.id !== ep2.id) {
+          const color =
+            l1.attr("line/stroke") || l2.attr("line/stroke") || "#377DFF";
+
+          l1.remove();
+          l2.remove();
+          junction.remove();
+
+          const mergedLink = new joint.shapes.standard.Link({
+            source: ep1,
+            target: ep2,
+            router: { name: "sldOrthogonal" },
+            connector: { name: "normal" },
+            attrs: {
+              line: {
+                stroke: color,
+                strokeWidth: 2.5,
+                targetMarker: { type: "none" },
+              },
+            },
+          });
+          this.graph.addCell(mergedLink);
+        } else {
+          l1.remove();
+          l2.remove();
+          junction.remove();
+        }
+      }
+    });
+  }
+
   syncConnectedBusbarPorts(element) {
     if (!element || !element.isElement || !element.isElement()) return;
-    if (
+    const gridSize = this.options.gridSize || 10;
+    const isBus =
       element.get("type") === "sld.Busbar" ||
-      element.get("sldData")?.type === "BUSBAR"
-    )
-      return;
+      element.get("sldData")?.type === "BUSBAR";
 
     const connectedLinks = this.graph.getConnectedLinks(element);
+
+    if (isBus) {
+      // Element is a Busbar: sync all its ports with connected equipment
+      const busPos = element.position();
+      const busSize = element.size();
+
+      connectedLinks.forEach((link) => {
+        const s = link.get("source");
+        const t = link.get("target");
+        const isSrcBus = s && s.id === element.id;
+        const isTgtBus = t && t.id === element.id;
+
+        const busPortId = isSrcBus ? s.port : isTgtBus ? t.port : null;
+        const otherId = isSrcBus ? t?.id : isTgtBus ? s?.id : null;
+        const otherPortId = isSrcBus ? t?.port : isTgtBus ? s?.port : null;
+
+        if (busPortId && otherId) {
+          const otherEl = this.graph.getCell(otherId);
+          if (otherEl && otherEl.isElement && otherEl.isElement()) {
+            const otherPos = otherEl.position();
+            const otherOffset = this.getCellPortOffset(otherEl, otherPortId);
+            const otherPortAbsX = otherPos.x + otherOffset.x;
+            const localX = Math.max(
+              10,
+              Math.min(busSize.width - 10, otherPortAbsX - busPos.x),
+            );
+            const snappedX = Math.round(localX / gridSize) * gridSize;
+            if (element.getPort(busPortId)) {
+              element.portProp(busPortId, "args/x", snappedX);
+              element.portProp(busPortId, "args/y", busSize.height / 2);
+            }
+          }
+        }
+      });
+      return;
+    }
+
+    // Element is standard equipment: sync any connected busbar's ports to this element
     const elemPos = element.position();
-    const elemSize = element.size();
-    const elemData = element.get("sldData") || {};
-    const elemOffset = this.getPrimaryPortOffset(
-      elemData.type,
-      elemSize.width,
-      elemSize.height,
-      element,
-    );
-    const elemPortAbsX = elemPos.x + elemOffset.x;
 
     connectedLinks.forEach((link) => {
       const s = link.get("source");
@@ -1679,14 +1863,16 @@ class SLDEditor {
         ) {
           const busPos = other.position();
           const busSize = other.size();
+          const elemOffset = this.getCellPortOffset(element, t?.port);
+          const elemPortAbsX = elemPos.x + elemOffset.x;
           const localX = Math.max(
             10,
             Math.min(busSize.width - 10, elemPortAbsX - busPos.x),
           );
-          const gridSize = this.options.gridSize || 10;
           const snappedX = Math.round(localX / gridSize) * gridSize;
           if (s.port && other.getPort(s.port)) {
             other.portProp(s.port, "args/x", snappedX);
+            other.portProp(s.port, "args/y", busSize.height / 2);
           }
         }
       }
@@ -1700,14 +1886,16 @@ class SLDEditor {
         ) {
           const busPos = other.position();
           const busSize = other.size();
+          const elemOffset = this.getCellPortOffset(element, s?.port);
+          const elemPortAbsX = elemPos.x + elemOffset.x;
           const localX = Math.max(
             10,
             Math.min(busSize.width - 10, elemPortAbsX - busPos.x),
           );
-          const gridSize = this.options.gridSize || 10;
           const snappedX = Math.round(localX / gridSize) * gridSize;
           if (t.port && other.getPort(t.port)) {
             other.portProp(t.port, "args/x", snappedX);
+            other.portProp(t.port, "args/y", busSize.height / 2);
           }
         }
       }
@@ -2021,6 +2209,8 @@ class SLDEditor {
     });
 
     this.cleanupUnusedBusbarPorts();
+    this.cleanupOrphanedJunctions();
+    this.refreshAllLinks();
     this.removeSelectionOverlay();
     this.selectedCells = [];
     this.selectedCell = null;
@@ -2846,13 +3036,13 @@ class SLDEditor {
         : "0.0 MW";
     if (statusBadge) {
       if (isLive) {
-        statusBadge.innerText = "⚡ 활선 (LIVE)";
+        statusBadge.innerText = "⚡ 투입 (CLOSED)";
         statusBadge.className = "telemetry-badge-live";
       } else if (isGrounded) {
         statusBadge.innerText = "⏚ 접지 (GROUNDED)";
         statusBadge.className = "telemetry-badge-grounded";
       } else {
-        statusBadge.innerText = "⚪ 사선 (DEAD)";
+        statusBadge.innerText = "⚪ 개방 (OPEN)";
         statusBadge.className = "telemetry-badge-dead";
       }
     }
@@ -3209,8 +3399,8 @@ class SLDEditor {
 
       clonedJson.id = newId;
       clonedJson.position = {
-        x: Math.round((clonedJson.position.x + dx) / gridSize) * gridSize,
-        y: Math.round((clonedJson.position.y + dy) / gridSize) * gridSize,
+        x: clonedJson.position.x + dx,
+        y: clonedJson.position.y + dy,
       };
 
       // Clone ports if present (e.g. Busbar or custom element)
@@ -3352,8 +3542,8 @@ class SLDEditor {
     this.scheduleAutoSave();
 
     const stateNames = {
-      LIVE: "🔴 활선 (Live)",
-      DEAD: "⚪ 사선 (Dead)",
+      LIVE: "🔴 투입 (Closed)",
+      DEAD: "⚪ 개방 (Open)",
       GROUNDED: "🟢 접지 (Ground)",
       GROUND: "🟢 접지 (Ground)",
     };
@@ -3568,6 +3758,16 @@ class SLDEditor {
       });
       this.graph.fromJSON(schema);
     }
+    this.cleanupUnusedBusbarPorts();
+    this.cleanupOrphanedJunctions();
+    const busbars = this.graph
+      .getElements()
+      .filter(
+        (el) =>
+          el.get("type") === "sld.Busbar" ||
+          el.get("sldData")?.type === "BUSBAR",
+      );
+    busbars.forEach((b) => this.syncConnectedBusbarPorts(b));
     this.topologyTracker.applyStyles(this.paper);
     this.isHistoryTracking = true;
     this.pushHistory();

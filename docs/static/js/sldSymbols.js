@@ -2575,12 +2575,82 @@
         ];
       }
 
+      // If already vertically aligned within tolerance (<= 6px) for vertical flows
+      if (
+        Math.abs(sx - tx) <= 6 &&
+        (srcDir === "TOP" ||
+          srcDir === "BOTTOM" ||
+          tgtDir === "TOP" ||
+          tgtDir === "BOTTOM" ||
+          !srcDir ||
+          !tgtDir)
+      ) {
+        return [];
+      }
+
+      // If already horizontally aligned within tolerance (<= 6px) for horizontal flows
+      if (
+        Math.abs(sy - ty) <= 6 &&
+        (srcDir === "LEFT" ||
+          srcDir === "RIGHT" ||
+          tgtDir === "LEFT" ||
+          tgtDir === "RIGHT" ||
+          !srcDir ||
+          !tgtDir)
+      ) {
+        return [];
+      }
+
       // If already perfectly aligned horizontally or vertically, return 0 bend points
       if (sx === tx || sy === ty) {
         return [];
       }
 
-      // 5. Source BOTTOM -> Target TOP (Standard Top-Down Flow)
+      // 5. Source or Target is a Junction (Clean right-angled L-branch routing)
+      const isSrcJunction =
+        srcCell &&
+        (srcCell.get("type") === "sld.Junction" ||
+          srcCell.get("sldData")?.type === "JUNCTION");
+      const isTgtJunction =
+        tgtCell &&
+        (tgtCell.get("type") === "sld.Junction" ||
+          tgtCell.get("sldData")?.type === "JUNCTION");
+
+      if (isTgtJunction) {
+        if (srcDir === "BOTTOM") {
+          return [{ x: sx, y: ty }];
+        }
+        if (srcDir === "TOP") {
+          const midY = Math.round((sy + ty) / 2 / 10) * 10;
+          return [
+            { x: sx, y: midY },
+            { x: tx, y: midY },
+          ];
+        }
+        if (srcDir === "LEFT" || srcDir === "RIGHT") {
+          return [{ x: tx, y: sy }];
+        }
+        return [{ x: sx, y: ty }];
+      }
+
+      if (isSrcJunction) {
+        if (tgtDir === "BOTTOM") {
+          return [{ x: tx, y: sy }];
+        }
+        if (tgtDir === "TOP") {
+          const midY = Math.round((sy + ty) / 2 / 10) * 10;
+          return [
+            { x: sx, y: midY },
+            { x: tx, y: midY },
+          ];
+        }
+        if (tgtDir === "LEFT" || tgtDir === "RIGHT") {
+          return [{ x: sx, y: ty }];
+        }
+        return [{ x: tx, y: sy }];
+      }
+
+      // 6. Source BOTTOM -> Target TOP (Standard Top-Down Flow)
       if (srcDir === "BOTTOM" && tgtDir === "TOP") {
         if (sy <= ty) {
           const bottomOfSrc = srcBBox ? srcBBox.y + srcBBox.height : sy;
@@ -2680,5 +2750,197 @@
         { x: tx, y: midY },
       ];
     };
+
+    // --- CAD Crossover Connector (Jumpover Arc on Non-Connected Busbar Crossings) ---
+    if (joint.connectors) {
+      joint.connectors.sldJumpover = function (
+        sourcePoint,
+        targetPoint,
+        routePoints,
+        opt,
+        linkView,
+      ) {
+        const pts = [
+          sourcePoint,
+          ...((routePoints && routePoints.filter(Boolean)) || []),
+          targetPoint,
+        ];
+        if (pts.length < 2) {
+          return `M ${sourcePoint.x} ${sourcePoint.y} L ${targetPoint.x} ${targetPoint.y}`;
+        }
+
+        const link = linkView && linkView.model;
+        const graph =
+          (linkView && linkView.paper && linkView.paper.model) ||
+          (link && link.graph);
+
+        // Collect all busbars that this link is NOT connected to
+        const crossingBusbars = [];
+        if (graph && link) {
+          const srcId = link.get("source")?.id;
+          const tgtId = link.get("target")?.id;
+          const elements =
+            typeof graph.getElements === "function" ? graph.getElements() : [];
+          elements.forEach((el) => {
+            const sld = el.get("sldData") || {};
+            if (
+              (el.get("type") === "sld.Busbar" || sld.type === "BUSBAR") &&
+              el.id !== srcId &&
+              el.id !== tgtId
+            ) {
+              const pos = el.position();
+              const sz = el.size();
+              crossingBusbars.push({
+                id: el.id,
+                x1: pos.x,
+                x2: pos.x + sz.width,
+                y1: pos.y,
+                y2: pos.y + sz.height,
+                centerX: pos.x + sz.width / 2,
+                centerY: pos.y + sz.height / 2,
+              });
+            }
+          });
+        }
+
+        let d = `M ${Math.round(pts[0].x)} ${Math.round(pts[0].y)}`;
+        let allHaloD = "";
+
+        for (let i = 0; i < pts.length - 1; i++) {
+          const p1 = pts[i];
+          const p2 = pts[i + 1];
+
+          const isVert = Math.abs(p1.x - p2.x) < 2;
+          const isHoriz = Math.abs(p1.y - p2.y) < 2;
+          const jumps = [];
+
+          if (isVert && crossingBusbars.length > 0) {
+            const segX = p1.x;
+            const minY = Math.min(p1.y, p2.y);
+            const maxY = Math.max(p1.y, p2.y);
+            const isDown = p1.y < p2.y;
+
+            crossingBusbars.forEach((bus) => {
+              if (segX >= bus.x1 - 2 && segX <= bus.x2 + 2) {
+                if (bus.centerY > minY + 6 && bus.centerY < maxY - 6) {
+                  jumps.push({
+                    type: "vert",
+                    busY1: bus.y1,
+                    busY2: bus.y2,
+                    pos: bus.centerY,
+                    isDown,
+                    segX,
+                  });
+                }
+              }
+            });
+          } else if (isHoriz && crossingBusbars.length > 0) {
+            const segY = p1.y;
+            const minX = Math.min(p1.x, p2.x);
+            const maxX = Math.max(p1.x, p2.x);
+            const isRight = p1.x < p2.x;
+
+            crossingBusbars.forEach((bus) => {
+              if (segY >= bus.y1 - 2 && segY <= bus.y2 + 2) {
+                if (bus.centerX > minX + 6 && bus.centerX < maxX - 6) {
+                  jumps.push({
+                    type: "horiz",
+                    busX1: bus.x1,
+                    busX2: bus.x2,
+                    pos: bus.centerX,
+                    isRight,
+                    segY,
+                  });
+                }
+              }
+            });
+          }
+
+          if (jumps.length === 0) {
+            d += ` L ${Math.round(p2.x)} ${Math.round(p2.y)}`;
+          } else {
+            if (isVert) {
+              if (p1.y < p2.y) {
+                jumps.sort((a, b) => a.pos - b.pos);
+              } else {
+                jumps.sort((a, b) => b.pos - a.pos);
+              }
+
+              const segX = Math.round(p1.x);
+
+              jumps.forEach((j) => {
+                const startY = Math.round(j.isDown ? j.busY1 - 4 : j.busY2 + 4);
+                const endY = Math.round(j.isDown ? j.busY2 + 4 : j.busY1 - 4);
+                const cp1Y = Math.round((startY * 2 + endY) / 3);
+                const cp2Y = Math.round((startY + endY * 2) / 3);
+                const bulgeX = segX + 14;
+
+                d += ` L ${segX} ${startY}`;
+                d += ` C ${bulgeX} ${cp1Y}, ${bulgeX} ${cp2Y}, ${segX} ${endY}`;
+                allHaloD += `M ${segX} ${startY} C ${bulgeX} ${cp1Y}, ${bulgeX} ${cp2Y}, ${segX} ${endY} `;
+              });
+            } else if (isHoriz) {
+              if (p1.x < p2.x) {
+                jumps.sort((a, b) => a.pos - b.pos);
+              } else {
+                jumps.sort((a, b) => b.pos - a.pos);
+              }
+
+              const segY = Math.round(p1.y);
+
+              jumps.forEach((j) => {
+                const startX = Math.round(
+                  j.isRight ? j.busX1 - 4 : j.busX2 + 4,
+                );
+                const endX = Math.round(j.isRight ? j.busX2 + 4 : j.busX1 - 4);
+                const cp1X = Math.round((startX * 2 + endX) / 3);
+                const cp2X = Math.round((startX + endX * 2) / 3);
+                const bulgeY = segY - 14;
+
+                d += ` L ${startX} ${segY}`;
+                d += ` C ${cp1X} ${bulgeY}, ${cp2X} ${bulgeY}, ${endX} ${segY}`;
+                allHaloD += `M ${startX} ${segY} C ${cp1X} ${bulgeY}, ${cp2X} ${bulgeY}, ${endX} ${segY} `;
+              });
+            }
+
+            d += ` L ${Math.round(p2.x)} ${Math.round(p2.y)}`;
+          }
+        }
+
+        if (linkView && linkView.el) {
+          let halo = linkView.el.querySelector(".sld-jumpover-halo");
+          if (allHaloD) {
+            if (!halo) {
+              halo = document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "path",
+              );
+              halo.setAttribute("class", "sld-jumpover-halo");
+              halo.setAttribute("fill", "none");
+              halo.setAttribute("stroke", "#ffffff");
+              halo.setAttribute("stroke-width", "7");
+              halo.setAttribute("stroke-linecap", "round");
+              halo.setAttribute("stroke-linejoin", "round");
+              const lineEl =
+                linkView.el.querySelector("path[joint-selector='line']") ||
+                linkView.el.querySelector("path");
+              if (lineEl) {
+                linkView.el.insertBefore(halo, lineEl);
+              } else {
+                linkView.el.appendChild(halo);
+              }
+            }
+            halo.setAttribute("d", allHaloD);
+            halo.style.display = "block";
+          } else if (halo) {
+            halo.setAttribute("d", "");
+            halo.style.display = "none";
+          }
+        }
+
+        return d;
+      };
+      joint.connectors.normal = joint.connectors.sldJumpover;
+    }
   }
 })();
