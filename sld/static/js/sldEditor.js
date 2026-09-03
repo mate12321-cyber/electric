@@ -484,6 +484,8 @@ class SLDEditor {
     });
 
     this.graph.on("add remove change:sldData", () => {
+      if (this._isBatchOperation || !this.historyManager.isHistoryTracking)
+        return;
       this.refreshAllLinks();
       this.topologyTracker.applyStyles(this.paper);
       this.requestMinimapUpdate();
@@ -1169,17 +1171,21 @@ class SLDEditor {
   loadDiagram(diagramId) {
     const cacheKey = "sld_diagram_" + diagramId;
 
+    const isValidSchema = (s) => {
+      if (!s || typeof s !== "object") return false;
+      if (Array.isArray(s.elements) && s.elements.length > 0) return true;
+      if (Array.isArray(s.links) && s.links.length > 0) return true;
+      if (Array.isArray(s.cells) && s.cells.length > 0) return true;
+      return false;
+    };
+
     fetch("/api/sld/" + diagramId + "/")
       .then((res) => {
         if (!res.ok) throw new Error("API not available");
         return res.json();
       })
       .then((data) => {
-        if (
-          data.schema_data &&
-          data.schema_data.cells &&
-          data.schema_data.cells.length > 0
-        ) {
+        if (data.schema_data && isValidSchema(data.schema_data)) {
           this.applyLoadedSchema(data.schema_data);
           try {
             localStorage.setItem(cacheKey, JSON.stringify(data.schema_data));
@@ -1189,13 +1195,16 @@ class SLDEditor {
           if (cached) {
             try {
               const schema = JSON.parse(cached);
-              if (schema && schema.cells && schema.cells.length > 0) {
+              if (isValidSchema(schema)) {
                 this.applyLoadedSchema(schema);
                 return;
               }
             } catch (e) {}
           }
-          if (window.DEFAULT_SLD_SCHEMA) {
+          if (
+            window.DEFAULT_SLD_SCHEMA &&
+            isValidSchema(window.DEFAULT_SLD_SCHEMA)
+          ) {
             this.applyLoadedSchema(window.DEFAULT_SLD_SCHEMA);
           }
         }
@@ -1208,14 +1217,17 @@ class SLDEditor {
         if (cached) {
           try {
             const schema = JSON.parse(cached);
-            if (schema && schema.cells && schema.cells.length > 0) {
+            if (isValidSchema(schema)) {
               this.applyLoadedSchema(schema);
               this.startStaticTelemetrySimulation();
               return;
             }
           } catch (e) {}
         }
-        if (window.DEFAULT_SLD_SCHEMA) {
+        if (
+          window.DEFAULT_SLD_SCHEMA &&
+          isValidSchema(window.DEFAULT_SLD_SCHEMA)
+        ) {
           this.applyLoadedSchema(window.DEFAULT_SLD_SCHEMA);
         } else {
           fetch("./static/data/default_schema.json")
@@ -1228,71 +1240,16 @@ class SLDEditor {
   }
 
   applyLoadedSchema(schema) {
-    if (!schema || !schema.cells || schema.cells.length === 0) return;
-
-    const elementIds = new Set();
-    schema.cells.forEach((cell) => {
-      if (cell.type !== "standard.Link" && cell.type !== "link") {
-        if (cell.id) elementIds.add(cell.id);
-      }
-    });
-
-    const validCells = [];
-    schema.cells.forEach((cell) => {
-      if (cell.type === "standard.Link" || cell.type === "link") {
-        const srcId = cell.source?.id;
-        const tgtId = cell.target?.id;
-        if (
-          !srcId ||
-          !tgtId ||
-          !elementIds.has(srcId) ||
-          !elementIds.has(tgtId)
-        ) {
-          console.warn(
-            "Skipping invalid link with missing endpoint:",
-            cell.id,
-            srcId,
-            tgtId,
-          );
-          return;
-        }
-        cell.router = { name: "sldOrthogonal" };
-        cell.connector = { name: "normal" };
-        if (cell.attrs?.line?.targetMarker?.type === "none") {
-          cell.attrs.line.targetMarker = { name: "none" };
-        }
-      } else {
-        if (
-          (cell.type === "sld.ACB" &&
-            (!joint.shapes.sld || !joint.shapes.sld.ACB)) ||
-          (cell.type === "sld.MCCB" &&
-            (!joint.shapes.sld || !joint.shapes.sld.MCCB))
-        ) {
-          cell.type = "sld.Breaker";
-        }
-      }
-      validCells.push(cell);
-    });
-
-    schema.cells = validCells;
+    if (!schema || (!schema.elements && !schema.links)) return;
 
     this.isHistoryTracking = false;
-    try {
-      this.graph.fromJSON(schema);
-    } catch (e) {
-      console.warn("Retrying graph loading with fallback types:", e);
-      schema.cells.forEach((cell) => {
-        if (
-          cell.type &&
-          cell.type.startsWith("sld.") &&
-          (!joint.shapes.sld ||
-            !joint.shapes.sld[cell.type.replace("sld.", "")])
-        ) {
-          cell.type = "sld.Breaker";
-        }
-      });
-      this.graph.fromJSON(schema);
-    }
+    this._isBatchOperation = true;
+
+    const parsed = SLDSerializer.fromCompactJSON(schema);
+    this.graph.clear();
+    this.graph.addCells([...parsed.elements, ...parsed.links]);
+    const restoredMeta = parsed.meta || {};
+
     this.busbarManager.cleanupUnusedBusbarPorts();
     this.tJunctionManager.cleanupOrphanedJunctions();
     const busbars = this.graph
@@ -1304,12 +1261,25 @@ class SLDEditor {
       );
     busbars.forEach((b) => this.busbarManager.syncConnectedBusbarPorts(b));
     this.topologyTracker.applyStyles(this.paper);
+
+    this._isBatchOperation = false;
     this.isHistoryTracking = true;
     this.pushHistory();
     this.updateMinimap();
-    this.zoomToFit();
-    setTimeout(() => this.zoomToFit(), 100);
-    setTimeout(() => this.zoomToFit(), 400);
+
+    // Restore saved viewport or auto zoom to fit
+    if (
+      restoredMeta.viewport &&
+      typeof restoredMeta.viewport.zoom === "number"
+    ) {
+      const vp = restoredMeta.viewport;
+      this.paper.scale(vp.zoom, vp.zoom);
+      this.paper.translate(vp.x || 0, vp.y || 0);
+    } else {
+      this.zoomToFit();
+      setTimeout(() => this.zoomToFit(), 100);
+      setTimeout(() => this.zoomToFit(), 400);
+    }
   }
 
   startStaticTelemetrySimulation() {
@@ -1345,7 +1315,13 @@ class SLDEditor {
   }
 
   saveDiagram(isManual = false) {
-    const schemaData = this.graph.toJSON();
+    const schemaData =
+      typeof SLDSerializer !== "undefined"
+        ? SLDSerializer.toCompactJSON(this.graph, this.paper, {
+            diagramId: this.options.diagramId,
+          })
+        : this.graph.toJSON();
+
     const data = {
       schema_data: schemaData,
     };

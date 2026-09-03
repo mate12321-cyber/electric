@@ -443,6 +443,10 @@ class SelectionManager {
     const targets = [...this.selectedCells];
     const count = targets.length;
 
+    this.editor._isBatchOperation = true;
+    const wasTracking = this.editor.historyManager.isHistoryTracking;
+    this.editor.historyManager.isHistoryTracking = false;
+
     targets.forEach((cell) => {
       if (cell.isElement && cell.isElement()) {
         cell.off(
@@ -464,6 +468,9 @@ class SelectionManager {
     if (this.editor.tJunctionManager) {
       this.editor.tJunctionManager.cleanupOrphanedJunctions();
     }
+
+    this.editor._isBatchOperation = false;
+    this.editor.historyManager.isHistoryTracking = wasTracking;
 
     this.editor.refreshAllLinks();
     this.removeSelectionOverlay();

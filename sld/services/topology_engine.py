@@ -126,25 +126,36 @@ class PowerSystemTopologyEngine:
         self._parse_schema()
 
     def _parse_schema(self):
-        """Extract elements and links from raw schema."""
-        if isinstance(self.raw_schema, dict):
-            self.cells = self.raw_schema.get("cells", [])
-        elif isinstance(self.raw_schema, list):
-            self.cells = self.raw_schema
-        else:
-            self.cells = []
+        """Extract elements and links from v2.0 compact schema."""
+        if not isinstance(self.raw_schema, dict):
+            return
 
-        for cell in self.cells:
-            cell_type = cell.get("type", "")
-            cell_id = cell.get("id")
-            if not cell_id:
+        raw_elements = self.raw_schema.get("elements", [])
+        for el in raw_elements:
+            el_id = el.get("id")
+            if not el_id:
                 continue
+            sld_data = el.get("data") or el.get("sldData") or {}
+            el_type = el.get("type", "")
+            self.elements[el_id] = {
+                "id": el_id,
+                "type": f"sld.{el_type}" if not el_type.startswith("sld.") else el_type,
+                "sldData": sld_data
+            }
+            self.adjacency[el_id] = []
+            self.links.append(link)
+            src = link.get("from") or link.get("source") or {}
+            tgt = link.get("to") or link.get("target") or {}
+            src_id = src.get("id")
+            tgt_id = tgt.get("id")
+            src_port = src.get("port")
+            tgt_port = tgt.get("port")
+            link_id = link.get("id", f"{src_id}_{tgt_id}")
 
-            if cell_type in ["standard.Link", "sld.Link"] or ("source" in cell and "target" in cell):
-                self.links.append(cell)
-            else:
-                self.elements[cell_id] = cell
-                self.adjacency[cell_id] = []
+            if src_id in self.adjacency and tgt_id in self.adjacency:
+                edge_info_fwd = {
+                self.adjacency[src_id].append(edge_info_fwd)
+                self.adjacency[tgt_id].append(edge_info_rev)
 
         # Build adjacency graph
         for link in self.links:
@@ -162,39 +173,12 @@ class PowerSystemTopologyEngine:
                     "target_id": tgt_id,
                     "src_port": src_port,
                     "tgt_port": tgt_port,
-                    "link": link
-                }
-                edge_info_rev = {
-                    "link_id": link_id,
-                    "target_id": src_id,
-                    "src_port": tgt_port,
-                    "tgt_port": src_port,
-                    "link": link
-                }
-                self.adjacency[src_id].append(edge_info_fwd)
                 self.adjacency[tgt_id].append(edge_info_rev)
 
     def _is_conducting(self, el_id: str) -> bool:
         """Check if an element currently conducts electricity."""
         el = self.elements.get(el_id, {})
         sld_data = el.get("sldData", {})
-        el_type = (sld_data.get("type") or el.get("type") or "").upper()
-        state = (sld_data.get("state") or "LIVE").upper()
-
-        if state in ["DEAD", "OPEN", "OFF", "TRIPPED"]:
-            return False
-
-        if any(sw in el_type for sw in self.SWITCH_TYPES):
-            return state in ["LIVE", "CLOSED", "ON"]
-
-        return True
-
-    def analyze(self) -> Dict[str, Any]:
-        """
-        Run complete electrical and topological analysis.
-        Returns detailed summary, node states, diagnostic issues, and transformer load reports.
-        """
-        node_states: Dict[str, Dict[str, Any]] = {}
         issues: List[Dict[str, Any]] = []
 
         # Initialize node default states

@@ -2,40 +2,38 @@ import uuid
 from sld.models import SingleLineDiagram
 
 def get_default_sld_schema():
-    """Generates JointJS graph JSON for the default 154kV Substation & UPS System diagram with exact CAD alignment."""
+    """Generates ultra-compact v2.0 SLD schema for the default 154kV Substation & UPS System diagram."""
+    elements = []
+    links = []
     cells = []
 
     def make_cell(cid, ctype, x, y, width, height, sld_data, extra_attrs=None, ports_config=None):
-        cell = {
-            'type': ctype,
+        type_name = ctype.replace('sld.', '')
+        el = {
             'id': cid,
-            'position': {'x': x, 'y': y},
-            'size': {'width': width, 'height': height},
-            'sldData': sld_data,
-            'attrs': extra_attrs or {}
+            'type': type_name,
+            'x': x,
+            'y': y,
+            'w': width,
+            'h': height,
+            'data': sld_data
         }
-        if ports_config:
-            cell['ports'] = ports_config
-        return cell
+        if ports_config and 'items' in ports_config:
+            el['ports'] = [
+                {'id': p['id'], 'group': p.get('group', 'bus-ports'), 'args': p.get('args', {'x': 0, 'y': 6})}
+                for p in ports_config['items']
+            ]
+        elements.append(el)
+        return el
 
-    def make_link(lid, src_id, src_port, tgt_id, tgt_port, color='#7A3E9D', stroke_width=2.5):
-        return {
-            'type': 'standard.Link',
+    def make_link(lid, src_id, src_port, tgt_id, tgt_port, color=None, stroke_width=None):
+        link = {
             'id': lid,
-            'source': {'id': src_id, 'port': src_port},
-            'target': {'id': tgt_id, 'port': tgt_port},
-            'router': {'name': 'sldOrthogonal'},
-            'connector': {'name': 'normal'},
-            'attrs': {
-                'line': {
-                    'stroke': color,
-                    'strokeWidth': stroke_width,
-                    'strokeDasharray': 'none',
-                    'class': 'link-live',
-                    'targetMarker': {'name': 'none'}
-                }
-            }
+            'from': {'id': src_id, 'port': src_port},
+            'to': {'id': tgt_id, 'port': tgt_port}
         }
+        links.append(link)
+        return link
 
     # 1. 154kV Receiving Line (Center Column X = 520)
     cells.append(make_cell(
@@ -307,7 +305,16 @@ def get_default_sld_schema():
     ))
     cells.append(make_link('link-rect-bat110', 'rect-1', 'dc_out', 'battery-110', 'out', '#F97316'))
 
-    return {'cells': cells}
+    return {
+        'version': '2.0',
+        'meta': {
+            'title': '프로젝트 01 - 154kV 수전 단선도',
+            'gridSize': 10,
+            'viewport': {'zoom': 1.0, 'x': 0, 'y': 0}
+        },
+        'elements': elements,
+        'links': links
+    }
 
 
 def init_default_diagram():

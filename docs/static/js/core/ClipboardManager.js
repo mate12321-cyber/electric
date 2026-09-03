@@ -64,6 +64,12 @@ class ClipboardManager {
 
     const idMap = new Map();
     const newElements = [];
+    const allNewCells = [];
+
+    // Temporarily pause intermediate history tracking & batch operations
+    const wasTracking = this.editor.historyManager.isHistoryTracking;
+    this.editor.historyManager.isHistoryTracking = false;
+    this.editor._isBatchOperation = true;
 
     // 1. Clone and instantiate Elements
     this.clipboard.elements.forEach((elJson) => {
@@ -112,8 +118,8 @@ class ClipboardManager {
       }
 
       const newEl = new shapeClass(clonedJson);
-      this.editor.graph.addCell(newEl);
       newElements.push(newEl);
+      allNewCells.push(newEl);
     });
 
     // 2. Clone internal Links connecting the cloned elements
@@ -145,12 +151,20 @@ class ClipboardManager {
         clonedLink.connector = { name: "normal" };
 
         const link = new joint.shapes.standard.Link(clonedLink);
-        this.editor.graph.addCell(link);
+        allNewCells.push(link);
       }
     });
 
-    // 3. Select all newly pasted elements
+    // 3. Batch Add All Cells in a single graph operation
+    this.editor.graph.addCells(allNewCells);
+
+    // End batch mode and restore history tracking
+    this.editor._isBatchOperation = false;
+    this.editor.historyManager.isHistoryTracking = wasTracking;
+
+    // 4. Select all newly pasted elements & perform post-processing ONCE
     this.editor.selectCells(newElements);
+    this.editor.refreshAllLinks();
     if (this.editor.topologyTracker) {
       this.editor.topologyTracker.applyStyles(this.editor.paper);
     }

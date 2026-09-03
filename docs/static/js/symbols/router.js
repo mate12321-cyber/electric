@@ -1165,7 +1165,11 @@
               jumps.sort((a, b) => b.pos - a.pos);
             }
 
-            const resolvedJumps = resolveOverlappingJumps(jumps, isRight, false);
+            const resolvedJumps = resolveOverlappingJumps(
+              jumps,
+              isRight,
+              false,
+            );
             const segY = Math.round(p1.y);
 
             resolvedJumps.forEach((j) => {

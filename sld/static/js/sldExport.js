@@ -87,16 +87,18 @@ const SLDExport = {
   },
 
   /**
-   * Export Diagram to JSON Schema
+   * Export Diagram to Compact JSON Schema (v2.0)
    */
   toJSON: function (graph, metadata = {}, filename = "power_diagram.json") {
-    const graphJSON = graph.toJSON();
-    const exportData = {
-      version: "1.0",
-      exportedAt: new Date().toISOString(),
-      metadata: metadata,
-      graph: graphJSON,
-    };
+    const exportData =
+      typeof SLDSerializer !== "undefined"
+        ? SLDSerializer.toCompactJSON(graph, null, metadata)
+        : {
+            version: "1.0",
+            exportedAt: new Date().toISOString(),
+            metadata: metadata,
+            graph: graph.toJSON(),
+          };
 
     const jsonStr = JSON.stringify(exportData, null, 2);
     const blob = new Blob([jsonStr], { type: "application/json" });

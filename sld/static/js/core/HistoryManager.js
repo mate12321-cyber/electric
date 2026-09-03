@@ -13,9 +13,14 @@ class HistoryManager {
 
   pushHistory() {
     if (!this.isHistoryTracking || !this.editor.graph) return;
-    const json = this.editor.graph.toJSON();
+    const compactObj = SLDSerializer.toCompactJSON(
+      this.editor.graph,
+      this.editor.paper,
+      { diagramId: this.editor.options?.diagramId },
+    );
+
     this.history = this.history.slice(0, this.historyIndex + 1);
-    this.history.push(JSON.stringify(json));
+    this.history.push(JSON.stringify(compactObj));
 
     // Max history cap
     if (this.history.length > this.maxHistory) {
@@ -33,8 +38,18 @@ class HistoryManager {
 
       this.historyIndex--;
       this.isHistoryTracking = false;
+      this.editor._isBatchOperation = true;
       this.editor.removeSelectionOverlay();
-      this.editor.graph.fromJSON(JSON.parse(this.history[this.historyIndex]));
+
+      const schema = JSON.parse(this.history[this.historyIndex]);
+      const { elements, links } = SLDSerializer.fromCompactJSON(schema);
+      this.editor.graph.clear();
+      this.editor.graph.addCells([...elements, ...links]);
+
+      this.editor.busbarManager?.cleanupUnusedBusbarPorts();
+      this.editor.tJunctionManager?.cleanupOrphanedJunctions();
+      this.editor.refreshAllLinks();
+
       if (this.editor.topologyTracker) {
         this.editor.topologyTracker.applyStyles(this.editor.paper);
       }
@@ -54,6 +69,7 @@ class HistoryManager {
 
       this.editor.updateMinimap();
       this.editor.scheduleAutoSave();
+      this.editor._isBatchOperation = false;
       this.isHistoryTracking = true;
       this.editor.showToast("실행취소 (Undo)");
     }
@@ -67,8 +83,18 @@ class HistoryManager {
 
       this.historyIndex++;
       this.isHistoryTracking = false;
+      this.editor._isBatchOperation = true;
       this.editor.removeSelectionOverlay();
-      this.editor.graph.fromJSON(JSON.parse(this.history[this.historyIndex]));
+
+      const schema = JSON.parse(this.history[this.historyIndex]);
+      const { elements, links } = SLDSerializer.fromCompactJSON(schema);
+      this.editor.graph.clear();
+      this.editor.graph.addCells([...elements, ...links]);
+
+      this.editor.busbarManager?.cleanupUnusedBusbarPorts();
+      this.editor.tJunctionManager?.cleanupOrphanedJunctions();
+      this.editor.refreshAllLinks();
+
       if (this.editor.topologyTracker) {
         this.editor.topologyTracker.applyStyles(this.editor.paper);
       }
@@ -88,6 +114,7 @@ class HistoryManager {
 
       this.editor.updateMinimap();
       this.editor.scheduleAutoSave();
+      this.editor._isBatchOperation = false;
       this.isHistoryTracking = true;
       this.editor.showToast("다시실행 (Redo)");
     }

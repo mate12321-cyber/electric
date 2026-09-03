@@ -12,1450 +12,1366 @@
 
     <script>
       window.DEFAULT_SLD_SCHEMA = {
-        cells: [
-          {
-            type: "sld.TransmissionTower",
-            id: "tower-154",
-            position: { x: 492, y: 40 },
-            size: { width: 56, height: 56 },
-            sldData: {
-              type: "TRANSMISSION_TOWER",
-              name: "154kV 수전",
-              voltage: 154,
-              voltageUnit: "kV",
-              color: "#E53935",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Breaker",
-            id: "cb-154",
-            position: { x: 506, y: 130 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_GCB",
-              name: "154kV CB",
-              state: "LIVE",
-              voltage: 154,
-              current: 2000,
-              poles: "3P",
-              color: "#E53935",
-              memo: "154kV 수전 주 차단기",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Disconnector",
-            id: "ds-154",
-            position: { x: 506, y: 205 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "DS",
-              name: "154kV DS",
-              state: "LIVE",
-              voltage: 154,
-              current: 2000,
-              color: "#E53935",
-              memo: "154kV 수전 단로기",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Transformer2W",
-            id: "tr-1",
-            position: { x: 498, y: 275 },
-            size: { width: 44, height: 64 },
-            sldData: {
-              type: "TR_2W",
-              name: "154/22.9kV TR#1",
-              priVoltage: 154,
-              secVoltage: 22.9,
-              connection: "Y-Δ",
-              capacity: "20MVA",
-              color: "#E53935",
-              memo: "154kV / 22.9kV 20MVA 변압기",
-            },
-            attrs: {},
-          },
-          {
-            type: "standard.Link",
-            id: "link-tower-cb",
-            source: { id: "tower-154", port: "out" },
-            target: { id: "cb-154", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#E53935",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-cb-ds",
-            source: { id: "cb-154", port: "out" },
-            target: { id: "ds-154", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#E53935",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-ds-tr1",
-            source: { id: "ds-154", port: "out" },
-            target: { id: "tr-1", port: "pri" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#E53935",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.Busbar",
-            id: "bus-22-9",
-            position: { x: 200, y: 370 },
-            size: { width: 700, height: 12 },
-            sldData: {
-              type: "BUSBAR",
-              name: "22.9kV 모선",
-              voltage: 22.9,
-              voltageUnit: "kV",
-              color: "#9C27B0",
-            },
-            attrs: {},
-            ports: {
-              groups: {
-                "bus-ports": {
-                  position: { name: "absolute" },
-                  attrs: {
-                    circle: {
-                      r: 3.5,
-                      magnet: true,
-                      fill: "#ffffff",
-                      stroke: "#9C27B0",
-                      strokeWidth: 1.5,
-                    },
-                  },
-                },
-              },
-              items: [
-                { id: "p_f1", group: "bus-ports", args: { x: 80, y: 6 } },
-                { id: "p_f2", group: "bus-ports", args: { x: 290, y: 6 } },
-                { id: "p_in", group: "bus-ports", args: { x: 320, y: 6 } },
-                { id: "p_f3", group: "bus-ports", args: { x: 500, y: 6 } },
-                { id: "p_gen", group: "bus-ports", args: { x: 630, y: 6 } },
-              ],
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-tr1-bus22",
-            source: { id: "tr-1", port: "sec" },
-            target: { id: "bus-22-9", port: "p_in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#9C27B0",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.Breaker",
-            id: "vcb-a",
-            position: { x: 266, y: 410 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_VCB",
-              name: "VCB",
-              state: "LIVE",
-              voltage: 22.9,
-              current: 630,
-              color: "#9C27B0",
-              location: "22.9kV 모선",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Transformer2W",
-            id: "tr-2",
-            position: { x: 258, y: 480 },
-            size: { width: 44, height: 64 },
-            sldData: {
-              type: "TR_2W",
-              name: "22.9/0.4kV TR#2",
-              priVoltage: 22.9,
-              secVoltage: 0.4,
-              connection: "Δ-Y",
-              capacity: "1000kVA",
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Busbar",
-            id: "bus-04-a",
-            position: { x: 180, y: 575 },
-            size: { width: 200, height: 10 },
-            sldData: {
-              type: "BUSBAR",
-              name: "0.4kV 모선 (A)",
-              voltage: 0.4,
-              voltageUnit: "kV",
-              color: "#059669",
-            },
-            attrs: {},
-            ports: {
-              groups: {
-                "bus-ports": {
-                  position: { name: "absolute" },
-                  attrs: {
-                    circle: {
-                      r: 3.5,
-                      magnet: true,
-                      fill: "#fff",
-                      stroke: "#059669",
-                      strokeWidth: 1.5,
-                    },
-                  },
-                },
-              },
-              items: [
-                { id: "p1", group: "bus-ports", args: { x: 40, y: 5 } },
-                { id: "p_tr", group: "bus-ports", args: { x: 100, y: 5 } },
-                { id: "p2", group: "bus-ports", args: { x: 100, y: 5 } },
-                { id: "p3", group: "bus-ports", args: { x: 160, y: 5 } },
-              ],
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-bus22-vcba",
-            source: { id: "bus-22-9", port: "p_f1" },
-            target: { id: "vcb-a", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#9C27B0",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-vcba-tr2",
-            source: { id: "vcb-a", port: "out" },
-            target: { id: "tr-2", port: "pri" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#9C27B0",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-tr2-bus04a",
-            source: { id: "tr-2", port: "sec" },
-            target: { id: "bus-04-a", port: "p_tr" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.ACB",
-            id: "acb-a1",
-            position: { x: 206, y: 615 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_ACB",
-              name: "ACB",
-              state: "LIVE",
-              voltage: 0.4,
-              current: 1600,
-              color: "#059669",
-              location: "0.4kV 모선 (A)",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Load",
-            id: "load-a1",
-            position: { x: 203, y: 680 },
-            size: { width: 34, height: 36 },
-            sldData: { type: "LOAD", name: "부하", color: "#059669" },
-            attrs: {},
-          },
-          {
-            type: "standard.Link",
-            id: "link-busa-acba1",
-            source: { id: "bus-04-a", port: "p1" },
-            target: { id: "acb-a1", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-acba1-loada1",
-            source: { id: "acb-a1", port: "out" },
-            target: { id: "load-a1", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.MCCB",
-            id: "mccb-a2",
-            position: { x: 266, y: 615 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_MCCB",
-              name: "MCCB",
-              state: "LIVE",
-              voltage: 0.4,
-              current: 225,
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Load",
-            id: "load-a2",
-            position: { x: 263, y: 680 },
-            size: { width: 34, height: 36 },
-            sldData: { type: "LOAD", name: "부하", color: "#059669" },
-            attrs: {},
-          },
-          {
-            type: "standard.Link",
-            id: "link-busa-mccba2",
-            source: { id: "bus-04-a", port: "p2" },
-            target: { id: "mccb-a2", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-mccba2-loada2",
-            source: { id: "mccb-a2", port: "out" },
-            target: { id: "load-a2", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.MCCB",
-            id: "mccb-a3",
-            position: { x: 326, y: 615 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_MCCB",
-              name: "MCCB",
-              state: "LIVE",
-              voltage: 0.4,
-              current: 225,
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Load",
-            id: "load-a3",
-            position: { x: 323, y: 680 },
-            size: { width: 34, height: 36 },
-            sldData: { type: "LOAD", name: "부하", color: "#059669" },
-            attrs: {},
-          },
-          {
-            type: "standard.Link",
-            id: "link-busa-mccba3",
-            source: { id: "bus-04-a", port: "p3" },
-            target: { id: "mccb-a3", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-mccba3-loada3",
-            source: { id: "mccb-a3", port: "out" },
-            target: { id: "load-a3", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.Breaker",
-            id: "vcb-b",
-            position: { x: 476, y: 410 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_VCB",
-              name: "VCB",
-              state: "LIVE",
-              voltage: 22.9,
-              current: 630,
-              color: "#9C27B0",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Transformer2W",
-            id: "tr-3",
-            position: { x: 468, y: 480 },
-            size: { width: 44, height: 64 },
-            sldData: {
-              type: "TR_2W",
-              name: "22.9/0.4kV TR#3",
-              priVoltage: 22.9,
-              secVoltage: 0.4,
-              connection: "Δ-Y",
-              capacity: "1000kVA",
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Busbar",
-            id: "bus-04-b",
-            position: { x: 390, y: 575 },
-            size: { width: 200, height: 10 },
-            sldData: {
-              type: "BUSBAR",
-              name: "0.4kV 모선 (B)",
-              voltage: 0.4,
-              voltageUnit: "kV",
-              color: "#059669",
-            },
-            attrs: {},
-            ports: {
-              groups: {
-                "bus-ports": {
-                  position: { name: "absolute" },
-                  attrs: {
-                    circle: {
-                      r: 3.5,
-                      magnet: true,
-                      fill: "#fff",
-                      stroke: "#059669",
-                      strokeWidth: 1.5,
-                    },
-                  },
-                },
-              },
-              items: [
-                { id: "p1", group: "bus-ports", args: { x: 40, y: 5 } },
-                { id: "p_tr", group: "bus-ports", args: { x: 100, y: 5 } },
-                { id: "p2", group: "bus-ports", args: { x: 100, y: 5 } },
-                { id: "p3", group: "bus-ports", args: { x: 160, y: 5 } },
-              ],
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-bus22-vcbb",
-            source: { id: "bus-22-9", port: "p_f2" },
-            target: { id: "vcb-b", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#9C27B0",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-vcbb-tr3",
-            source: { id: "vcb-b", port: "out" },
-            target: { id: "tr-3", port: "pri" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#9C27B0",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-tr3-bus04b",
-            source: { id: "tr-3", port: "sec" },
-            target: { id: "bus-04-b", port: "p_tr" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.MCCB",
-            id: "mccb-b1",
-            position: { x: 416, y: 615 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_MCCB",
-              name: "MCCB",
-              state: "LIVE",
-              voltage: 0.4,
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Load",
-            id: "load-b1",
-            position: { x: 413, y: 680 },
-            size: { width: 34, height: 36 },
-            sldData: { type: "LOAD", name: "부하", color: "#059669" },
-            attrs: {},
-          },
-          {
-            type: "standard.Link",
-            id: "link-busb-mccbb1",
-            source: { id: "bus-04-b", port: "p1" },
-            target: { id: "mccb-b1", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-mccbb1-loadb1",
-            source: { id: "mccb-b1", port: "out" },
-            target: { id: "load-b1", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.MCCB",
-            id: "mccb-b2",
-            position: { x: 476, y: 615 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_MCCB",
-              name: "MCCB",
-              state: "LIVE",
-              voltage: 0.4,
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Load",
-            id: "load-b2",
-            position: { x: 473, y: 680 },
-            size: { width: 34, height: 36 },
-            sldData: { type: "LOAD", name: "부하", color: "#059669" },
-            attrs: {},
-          },
-          {
-            type: "standard.Link",
-            id: "link-busb-mccbb2",
-            source: { id: "bus-04-b", port: "p2" },
-            target: { id: "mccb-b2", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-mccbb2-loadb2",
-            source: { id: "mccb-b2", port: "out" },
-            target: { id: "load-b2", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.MCCB",
-            id: "mccb-b3",
-            position: { x: 536, y: 615 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_MCCB",
-              name: "MCCB",
-              state: "LIVE",
-              voltage: 0.4,
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Load",
-            id: "load-b3",
-            position: { x: 533, y: 680 },
-            size: { width: 34, height: 36 },
-            sldData: { type: "LOAD", name: "부하", color: "#059669" },
-            attrs: {},
-          },
-          {
-            type: "standard.Link",
-            id: "link-busb-mccbb3",
-            source: { id: "bus-04-b", port: "p3" },
-            target: { id: "mccb-b3", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-mccbb3-loadb3",
-            source: { id: "mccb-b3", port: "out" },
-            target: { id: "load-b3", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.Breaker",
-            id: "vcb-c",
-            position: { x: 686, y: 410 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_VCB",
-              name: "VCB",
-              state: "LIVE",
-              voltage: 22.9,
-              current: 630,
-              color: "#9C27B0",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Transformer2W",
-            id: "tr-4",
-            position: { x: 678, y: 480 },
-            size: { width: 44, height: 64 },
-            sldData: {
-              type: "TR_2W",
-              name: "22.9/0.4kV TR#4",
-              priVoltage: 22.9,
-              secVoltage: 0.4,
-              connection: "Δ-Y",
-              capacity: "1000kVA",
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Busbar",
-            id: "bus-04-c",
-            position: { x: 600, y: 575 },
-            size: { width: 200, height: 10 },
-            sldData: {
-              type: "BUSBAR",
-              name: "0.4kV 모선 (C)",
-              voltage: 0.4,
-              voltageUnit: "kV",
-              color: "#059669",
-            },
-            attrs: {},
-            ports: {
-              groups: {
-                "bus-ports": {
-                  position: { name: "absolute" },
-                  attrs: {
-                    circle: {
-                      r: 3.5,
-                      magnet: true,
-                      fill: "#fff",
-                      stroke: "#059669",
-                      strokeWidth: 1.5,
-                    },
-                  },
-                },
-              },
-              items: [
-                { id: "p1", group: "bus-ports", args: { x: 40, y: 5 } },
-                { id: "p_tr", group: "bus-ports", args: { x: 100, y: 5 } },
-                { id: "p2", group: "bus-ports", args: { x: 100, y: 5 } },
-                { id: "p3", group: "bus-ports", args: { x: 160, y: 5 } },
-              ],
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-bus22-vcbc",
-            source: { id: "bus-22-9", port: "p_f3" },
-            target: { id: "vcb-c", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#9C27B0",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-vcbc-tr4",
-            source: { id: "vcb-c", port: "out" },
-            target: { id: "tr-4", port: "pri" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#9C27B0",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-tr4-bus04c",
-            source: { id: "tr-4", port: "sec" },
-            target: { id: "bus-04-c", port: "p_tr" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.MCCB",
-            id: "mccb-c1",
-            position: { x: 626, y: 615 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_MCCB",
-              name: "MCCB",
-              state: "LIVE",
-              voltage: 0.4,
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Load",
-            id: "load-c1",
-            position: { x: 623, y: 680 },
-            size: { width: 34, height: 36 },
-            sldData: { type: "LOAD", name: "부하", color: "#059669" },
-            attrs: {},
-          },
-          {
-            type: "standard.Link",
-            id: "link-busc-mccbc1",
-            source: { id: "bus-04-c", port: "p1" },
-            target: { id: "mccb-c1", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-mccbc1-loadc1",
-            source: { id: "mccb-c1", port: "out" },
-            target: { id: "load-c1", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.MCCB",
-            id: "mccb-c2",
-            position: { x: 686, y: 615 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_MCCB",
-              name: "MCCB",
-              state: "LIVE",
-              voltage: 0.4,
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Load",
-            id: "load-c2",
-            position: { x: 683, y: 680 },
-            size: { width: 34, height: 36 },
-            sldData: { type: "LOAD", name: "부하", color: "#059669" },
-            attrs: {},
-          },
-          {
-            type: "standard.Link",
-            id: "link-busc-mccbc2",
-            source: { id: "bus-04-c", port: "p2" },
-            target: { id: "mccb-c2", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-mccbc2-loadc2",
-            source: { id: "mccb-c2", port: "out" },
-            target: { id: "load-c2", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.MCCB",
-            id: "mccb-c3",
-            position: { x: 746, y: 615 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_MCCB",
-              name: "MCCB",
-              state: "LIVE",
-              voltage: 0.4,
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Load",
-            id: "load-c3",
-            position: { x: 743, y: 680 },
-            size: { width: 34, height: 36 },
-            sldData: { type: "LOAD", name: "부하", color: "#059669" },
-            attrs: {},
-          },
-          {
-            type: "standard.Link",
-            id: "link-busc-mccbc3",
-            source: { id: "bus-04-c", port: "p3" },
-            target: { id: "mccb-c3", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-mccbc3-loadc3",
-            source: { id: "mccb-c3", port: "out" },
-            target: { id: "load-c3", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.Generator",
-            id: "gen-1",
-            position: { x: 808, y: 520 },
-            size: { width: 44, height: 44 },
-            sldData: {
-              type: "GENERATOR",
-              name: "비상 발전기",
-              state: "DEAD",
-              capacity: "500kVA",
-              voltage: 22.9,
-              color: "#E65100",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.ACB",
-            id: "acb-gen",
-            position: { x: 816, y: 430 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_ACB",
-              name: "ACB",
-              state: "OPEN",
-              voltage: 22.9,
-              current: 800,
-              color: "#9C27B0",
-            },
-            attrs: {},
-          },
-          {
-            type: "standard.Link",
-            id: "link-gen-acb",
-            source: { id: "gen-1", port: "out" },
-            target: { id: "acb-gen", port: "out" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#595959",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-acbgen-bus22",
-            source: { id: "acb-gen", port: "in" },
-            target: { id: "bus-22-9", port: "p_gen" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#9C27B0",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.GroupBox",
-            id: "group-ups",
-            position: { x: 180, y: 750 },
-            size: { width: 680, height: 240 },
-            sldData: {
-              type: "GROUP_BOX",
-              title: "중요 부하 (무정전 전원 계통)",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.TextLabel",
-            id: "text-comm-power",
-            position: { x: 200, y: 775 },
-            size: { width: 140, height: 26 },
-            sldData: {
-              type: "TEXT_LABEL",
-              text: "상용 전원 AC 3Φ 380V",
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.ACB",
-            id: "acb-ups-in",
-            position: { x: 206, y: 810 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_ACB",
-              name: "ACB",
-              state: "LIVE",
-              voltage: 0.38,
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.UPS",
-            id: "ups-1",
-            position: { x: 312, y: 808 },
-            size: { width: 56, height: 48 },
-            sldData: {
-              type: "UPS",
-              name: "UPS",
-              capacity: "100kVA",
-              color: "#EA580C",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Battery",
-            id: "battery-1",
-            position: { x: 314, y: 905 },
-            size: { width: 52, height: 34 },
-            sldData: {
-              type: "BATTERY",
-              name: "배터리 뱅크",
-              voltage: 384,
-              voltageUnit: "V DC",
-              color: "#EA580C",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Switchgear",
-            id: "swg-ups",
-            position: { x: 428, y: 802 },
-            size: { width: 44, height: 60 },
-            sldData: {
-              type: "SWITCHGEAR",
-              name: "UPS 배전반",
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Busbar",
-            id: "bus-ups",
-            position: { x: 520, y: 828 },
-            size: { width: 170, height: 8 },
-            sldData: {
-              type: "BUSBAR",
-              name: "UPS 모선 (380V)",
-              voltage: 0.38,
-              voltageUnit: "kV",
-              color: "#059669",
-            },
-            attrs: {},
-            ports: {
-              groups: {
-                "bus-ports": {
-                  position: { name: "absolute" },
-                  attrs: {
-                    circle: {
-                      r: 3.5,
-                      magnet: true,
-                      fill: "#fff",
-                      stroke: "#059669",
-                      strokeWidth: 1.5,
-                    },
-                  },
-                },
-              },
-              items: [
-                { id: "p_in", group: "bus-ports", args: { x: 0, y: 4 } },
-                { id: "p1", group: "bus-ports", args: { x: 50, y: 8 } },
-                { id: "p2", group: "bus-ports", args: { x: 130, y: 8 } },
-              ],
-            },
-          },
-          {
-            type: "sld.MCCB",
-            id: "mccb-ups1",
-            position: { x: 556, y: 860 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_MCCB",
-              name: "MCCB",
-              state: "LIVE",
-              voltage: 0.38,
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Load",
-            id: "load-ups1",
-            position: { x: 553, y: 925 },
-            size: { width: 34, height: 36 },
-            sldData: { type: "LOAD", name: "중요 부하 1", color: "#059669" },
-            attrs: {},
-          },
-          {
-            type: "sld.MCCB",
-            id: "mccb-ups2",
-            position: { x: 636, y: 860 },
-            size: { width: 28, height: 40 },
-            sldData: {
-              type: "CB_MCCB",
-              name: "MCCB",
-              state: "LIVE",
-              voltage: 0.38,
-              color: "#059669",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Load",
-            id: "load-ups2",
-            position: { x: 633, y: 925 },
-            size: { width: 34, height: 36 },
-            sldData: { type: "LOAD", name: "중요 부하 2", color: "#059669" },
-            attrs: {},
-          },
-          {
-            type: "standard.Link",
-            id: "link-acbups-ups",
-            source: { id: "acb-ups-in", port: "out" },
-            target: { id: "ups-1", port: "ac_in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-bat-ups",
-            source: { id: "battery-1", port: "out" },
-            target: { id: "ups-1", port: "dc_bat" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#EA580C",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-ups-swg",
-            source: { id: "ups-1", port: "ac_out" },
-            target: { id: "swg-ups", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-swg-busups",
-            source: { id: "swg-ups", port: "out" },
-            target: { id: "bus-ups", port: "p_in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-busups-mccb1",
-            source: { id: "bus-ups", port: "p1" },
-            target: { id: "mccb-ups1", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-mccb1-loadups1",
-            source: { id: "mccb-ups1", port: "out" },
-            target: { id: "load-ups1", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-busups-mccb2",
-            source: { id: "bus-ups", port: "p2" },
-            target: { id: "mccb-ups2", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "standard.Link",
-            id: "link-mccb2-loadups2",
-            source: { id: "mccb-ups2", port: "out" },
-            target: { id: "load-ups2", port: "in" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#059669",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-          {
-            type: "sld.TextLabel",
-            id: "text-ac220",
-            position: { x: 740, y: 775 },
-            size: { width: 90, height: 20 },
-            sldData: { type: "TEXT_LABEL", text: "AC 220V", color: "#EAB308" },
-            attrs: {},
-          },
-          {
-            type: "sld.Rectifier",
-            id: "rect-1",
-            position: { x: 745, y: 810 },
-            size: { width: 50, height: 40 },
-            sldData: {
-              type: "RECTIFIER",
-              name: "정류기",
-              inputVoltage: "220V",
-              outputVoltage: "110V DC",
-              color: "#F97316",
-            },
-            attrs: {},
-          },
-          {
-            type: "sld.Battery",
-            id: "battery-110",
-            position: { x: 744, y: 905 },
-            size: { width: 52, height: 34 },
-            sldData: {
-              type: "BATTERY",
-              name: "110V 축전지",
-              voltage: 110,
-              voltageUnit: "V DC",
-              color: "#F97316",
-            },
-            attrs: {},
-          },
-          {
-            type: "standard.Link",
-            id: "link-rect-bat110",
-            source: { id: "rect-1", port: "dc_out" },
-            target: { id: "battery-110", port: "out" },
-            router: { name: "sldOrthogonal" },
-            connector: { name: "normal" },
-            attrs: {
-              line: {
-                stroke: "#F97316",
-                strokeWidth: 2.5,
-                strokeDasharray: "none",
-                class: "link-live",
-                targetMarker: { name: "none" },
-              },
-            },
-          },
-        ],
-      };
-    </script>
+  "version": "2.0",
+  "meta": {
+    "title": "프로젝트 01 - 154kV 수전 단선도",
+    "gridSize": 10,
+    "viewport": {
+      "zoom": 1.0,
+      "x": 0,
+      "y": 0
+    }
+  },
+  "elements": [
+    {
+      "id": "tower-154",
+      "type": "TransmissionTower",
+      "x": 492,
+      "y": 40,
+      "w": 56,
+      "h": 56,
+      "data": {
+        "type": "TRANSMISSION_TOWER",
+        "name": "154kV 수전",
+        "voltage": 154,
+        "voltageUnit": "kV",
+        "color": "#E53935"
+      }
+    },
+    {
+      "id": "cb-154",
+      "type": "Breaker",
+      "x": 506,
+      "y": 130,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_GCB",
+        "name": "154kV CB",
+        "state": "LIVE",
+        "voltage": 154,
+        "current": 2000,
+        "poles": "3P",
+        "color": "#E53935",
+        "memo": "154kV 수전 주 차단기"
+      }
+    },
+    {
+      "id": "ds-154",
+      "type": "Disconnector",
+      "x": 506,
+      "y": 205,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "DS",
+        "name": "154kV DS",
+        "state": "LIVE",
+        "voltage": 154,
+        "current": 2000,
+        "color": "#E53935",
+        "memo": "154kV 수전 단로기"
+      }
+    },
+    {
+      "id": "tr-1",
+      "type": "Transformer2W",
+      "x": 498,
+      "y": 275,
+      "w": 44,
+      "h": 64,
+      "data": {
+        "type": "TR_2W",
+        "name": "154/22.9kV TR#1",
+        "priVoltage": 154,
+        "secVoltage": 22.9,
+        "connection": "Y-Δ",
+        "capacity": "20MVA",
+        "color": "#E53935",
+        "memo": "154kV / 22.9kV 20MVA 변압기"
+      }
+    },
+    {
+      "id": "bus-22-9",
+      "type": "Busbar",
+      "x": 200,
+      "y": 370,
+      "w": 700,
+      "h": 12,
+      "data": {
+        "type": "BUSBAR",
+        "name": "22.9kV 모선",
+        "voltage": 22.9,
+        "voltageUnit": "kV",
+        "color": "#9C27B0"
+      },
+      "ports": [
+        {
+          "id": "p_f1",
+          "group": "bus-ports",
+          "args": {
+            "x": 80,
+            "y": 6
+          }
+        },
+        {
+          "id": "p_f2",
+          "group": "bus-ports",
+          "args": {
+            "x": 290,
+            "y": 6
+          }
+        },
+        {
+          "id": "p_in",
+          "group": "bus-ports",
+          "args": {
+            "x": 320,
+            "y": 6
+          }
+        },
+        {
+          "id": "p_f3",
+          "group": "bus-ports",
+          "args": {
+            "x": 500,
+            "y": 6
+          }
+        },
+        {
+          "id": "p_gen",
+          "group": "bus-ports",
+          "args": {
+            "x": 630,
+            "y": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "vcb-a",
+      "type": "Breaker",
+      "x": 266,
+      "y": 410,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_VCB",
+        "name": "VCB",
+        "state": "LIVE",
+        "voltage": 22.9,
+        "current": 630,
+        "color": "#9C27B0",
+        "location": "22.9kV 모선"
+      }
+    },
+    {
+      "id": "tr-2",
+      "type": "Transformer2W",
+      "x": 258,
+      "y": 480,
+      "w": 44,
+      "h": 64,
+      "data": {
+        "type": "TR_2W",
+        "name": "22.9/0.4kV TR#2",
+        "priVoltage": 22.9,
+        "secVoltage": 0.4,
+        "connection": "Δ-Y",
+        "capacity": "1000kVA",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "bus-04-a",
+      "type": "Busbar",
+      "x": 180,
+      "y": 575,
+      "w": 200,
+      "h": 10,
+      "data": {
+        "type": "BUSBAR",
+        "name": "0.4kV 모선 (A)",
+        "voltage": 0.4,
+        "voltageUnit": "kV",
+        "color": "#059669"
+      },
+      "ports": [
+        {
+          "id": "p1",
+          "group": "bus-ports",
+          "args": {
+            "x": 40,
+            "y": 5
+          }
+        },
+        {
+          "id": "p_tr",
+          "group": "bus-ports",
+          "args": {
+            "x": 100,
+            "y": 5
+          }
+        },
+        {
+          "id": "p2",
+          "group": "bus-ports",
+          "args": {
+            "x": 100,
+            "y": 5
+          }
+        },
+        {
+          "id": "p3",
+          "group": "bus-ports",
+          "args": {
+            "x": 160,
+            "y": 5
+          }
+        }
+      ]
+    },
+    {
+      "id": "acb-a1",
+      "type": "ACB",
+      "x": 206,
+      "y": 615,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_ACB",
+        "name": "ACB",
+        "state": "LIVE",
+        "voltage": 0.4,
+        "current": 1600,
+        "color": "#059669",
+        "location": "0.4kV 모선 (A)"
+      }
+    },
+    {
+      "id": "load-a1",
+      "type": "Load",
+      "x": 203,
+      "y": 680,
+      "w": 34,
+      "h": 36,
+      "data": {
+        "type": "LOAD",
+        "name": "부하",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "mccb-a2",
+      "type": "MCCB",
+      "x": 266,
+      "y": 615,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_MCCB",
+        "name": "MCCB",
+        "state": "LIVE",
+        "voltage": 0.4,
+        "current": 225,
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "load-a2",
+      "type": "Load",
+      "x": 263,
+      "y": 680,
+      "w": 34,
+      "h": 36,
+      "data": {
+        "type": "LOAD",
+        "name": "부하",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "mccb-a3",
+      "type": "MCCB",
+      "x": 326,
+      "y": 615,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_MCCB",
+        "name": "MCCB",
+        "state": "LIVE",
+        "voltage": 0.4,
+        "current": 225,
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "load-a3",
+      "type": "Load",
+      "x": 323,
+      "y": 680,
+      "w": 34,
+      "h": 36,
+      "data": {
+        "type": "LOAD",
+        "name": "부하",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "vcb-b",
+      "type": "Breaker",
+      "x": 476,
+      "y": 410,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_VCB",
+        "name": "VCB",
+        "state": "LIVE",
+        "voltage": 22.9,
+        "current": 630,
+        "color": "#9C27B0"
+      }
+    },
+    {
+      "id": "tr-3",
+      "type": "Transformer2W",
+      "x": 468,
+      "y": 480,
+      "w": 44,
+      "h": 64,
+      "data": {
+        "type": "TR_2W",
+        "name": "22.9/0.4kV TR#3",
+        "priVoltage": 22.9,
+        "secVoltage": 0.4,
+        "connection": "Δ-Y",
+        "capacity": "1000kVA",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "bus-04-b",
+      "type": "Busbar",
+      "x": 390,
+      "y": 575,
+      "w": 200,
+      "h": 10,
+      "data": {
+        "type": "BUSBAR",
+        "name": "0.4kV 모선 (B)",
+        "voltage": 0.4,
+        "voltageUnit": "kV",
+        "color": "#059669"
+      },
+      "ports": [
+        {
+          "id": "p1",
+          "group": "bus-ports",
+          "args": {
+            "x": 40,
+            "y": 5
+          }
+        },
+        {
+          "id": "p_tr",
+          "group": "bus-ports",
+          "args": {
+            "x": 100,
+            "y": 5
+          }
+        },
+        {
+          "id": "p2",
+          "group": "bus-ports",
+          "args": {
+            "x": 100,
+            "y": 5
+          }
+        },
+        {
+          "id": "p3",
+          "group": "bus-ports",
+          "args": {
+            "x": 160,
+            "y": 5
+          }
+        }
+      ]
+    },
+    {
+      "id": "mccb-b1",
+      "type": "MCCB",
+      "x": 416,
+      "y": 615,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_MCCB",
+        "name": "MCCB",
+        "state": "LIVE",
+        "voltage": 0.4,
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "load-b1",
+      "type": "Load",
+      "x": 413,
+      "y": 680,
+      "w": 34,
+      "h": 36,
+      "data": {
+        "type": "LOAD",
+        "name": "부하",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "mccb-b2",
+      "type": "MCCB",
+      "x": 476,
+      "y": 615,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_MCCB",
+        "name": "MCCB",
+        "state": "LIVE",
+        "voltage": 0.4,
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "load-b2",
+      "type": "Load",
+      "x": 473,
+      "y": 680,
+      "w": 34,
+      "h": 36,
+      "data": {
+        "type": "LOAD",
+        "name": "부하",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "mccb-b3",
+      "type": "MCCB",
+      "x": 536,
+      "y": 615,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_MCCB",
+        "name": "MCCB",
+        "state": "LIVE",
+        "voltage": 0.4,
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "load-b3",
+      "type": "Load",
+      "x": 533,
+      "y": 680,
+      "w": 34,
+      "h": 36,
+      "data": {
+        "type": "LOAD",
+        "name": "부하",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "vcb-c",
+      "type": "Breaker",
+      "x": 686,
+      "y": 410,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_VCB",
+        "name": "VCB",
+        "state": "LIVE",
+        "voltage": 22.9,
+        "current": 630,
+        "color": "#9C27B0"
+      }
+    },
+    {
+      "id": "tr-4",
+      "type": "Transformer2W",
+      "x": 678,
+      "y": 480,
+      "w": 44,
+      "h": 64,
+      "data": {
+        "type": "TR_2W",
+        "name": "22.9/0.4kV TR#4",
+        "priVoltage": 22.9,
+        "secVoltage": 0.4,
+        "connection": "Δ-Y",
+        "capacity": "1000kVA",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "bus-04-c",
+      "type": "Busbar",
+      "x": 600,
+      "y": 575,
+      "w": 200,
+      "h": 10,
+      "data": {
+        "type": "BUSBAR",
+        "name": "0.4kV 모선 (C)",
+        "voltage": 0.4,
+        "voltageUnit": "kV",
+        "color": "#059669"
+      },
+      "ports": [
+        {
+          "id": "p1",
+          "group": "bus-ports",
+          "args": {
+            "x": 40,
+            "y": 5
+          }
+        },
+        {
+          "id": "p_tr",
+          "group": "bus-ports",
+          "args": {
+            "x": 100,
+            "y": 5
+          }
+        },
+        {
+          "id": "p2",
+          "group": "bus-ports",
+          "args": {
+            "x": 100,
+            "y": 5
+          }
+        },
+        {
+          "id": "p3",
+          "group": "bus-ports",
+          "args": {
+            "x": 160,
+            "y": 5
+          }
+        }
+      ]
+    },
+    {
+      "id": "mccb-c1",
+      "type": "MCCB",
+      "x": 626,
+      "y": 615,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_MCCB",
+        "name": "MCCB",
+        "state": "LIVE",
+        "voltage": 0.4,
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "load-c1",
+      "type": "Load",
+      "x": 623,
+      "y": 680,
+      "w": 34,
+      "h": 36,
+      "data": {
+        "type": "LOAD",
+        "name": "부하",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "mccb-c2",
+      "type": "MCCB",
+      "x": 686,
+      "y": 615,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_MCCB",
+        "name": "MCCB",
+        "state": "LIVE",
+        "voltage": 0.4,
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "load-c2",
+      "type": "Load",
+      "x": 683,
+      "y": 680,
+      "w": 34,
+      "h": 36,
+      "data": {
+        "type": "LOAD",
+        "name": "부하",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "mccb-c3",
+      "type": "MCCB",
+      "x": 746,
+      "y": 615,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_MCCB",
+        "name": "MCCB",
+        "state": "LIVE",
+        "voltage": 0.4,
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "load-c3",
+      "type": "Load",
+      "x": 743,
+      "y": 680,
+      "w": 34,
+      "h": 36,
+      "data": {
+        "type": "LOAD",
+        "name": "부하",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "gen-1",
+      "type": "Generator",
+      "x": 808,
+      "y": 520,
+      "w": 44,
+      "h": 44,
+      "data": {
+        "type": "GENERATOR",
+        "name": "비상 발전기",
+        "state": "DEAD",
+        "capacity": "500kVA",
+        "voltage": 22.9,
+        "color": "#E65100"
+      }
+    },
+    {
+      "id": "acb-gen",
+      "type": "ACB",
+      "x": 816,
+      "y": 430,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_ACB",
+        "name": "ACB",
+        "state": "OPEN",
+        "voltage": 22.9,
+        "current": 800,
+        "color": "#9C27B0"
+      }
+    },
+    {
+      "id": "group-ups",
+      "type": "GroupBox",
+      "x": 180,
+      "y": 750,
+      "w": 680,
+      "h": 240,
+      "data": {
+        "type": "GROUP_BOX",
+        "title": "중요 부하 (무정전 전원 계통)"
+      }
+    },
+    {
+      "id": "text-comm-power",
+      "type": "TextLabel",
+      "x": 200,
+      "y": 775,
+      "w": 140,
+      "h": 26,
+      "data": {
+        "type": "TEXT_LABEL",
+        "text": "상용 전원 AC 3Φ 380V",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "acb-ups-in",
+      "type": "ACB",
+      "x": 206,
+      "y": 810,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_ACB",
+        "name": "ACB",
+        "state": "LIVE",
+        "voltage": 0.38,
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "ups-1",
+      "type": "UPS",
+      "x": 312,
+      "y": 808,
+      "w": 56,
+      "h": 48,
+      "data": {
+        "type": "UPS",
+        "name": "UPS",
+        "capacity": "100kVA",
+        "color": "#EA580C"
+      }
+    },
+    {
+      "id": "battery-1",
+      "type": "Battery",
+      "x": 314,
+      "y": 905,
+      "w": 52,
+      "h": 34,
+      "data": {
+        "type": "BATTERY",
+        "name": "배터리 뱅크",
+        "voltage": 384,
+        "voltageUnit": "V DC",
+        "color": "#EA580C"
+      }
+    },
+    {
+      "id": "swg-ups",
+      "type": "Switchgear",
+      "x": 428,
+      "y": 802,
+      "w": 44,
+      "h": 60,
+      "data": {
+        "type": "SWITCHGEAR",
+        "name": "UPS 배전반",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "bus-ups",
+      "type": "Busbar",
+      "x": 520,
+      "y": 828,
+      "w": 170,
+      "h": 8,
+      "data": {
+        "type": "BUSBAR",
+        "name": "UPS 모선 (380V)",
+        "voltage": 0.38,
+        "voltageUnit": "kV",
+        "color": "#059669"
+      },
+      "ports": [
+        {
+          "id": "p_in",
+          "group": "bus-ports",
+          "args": {
+            "x": 0,
+            "y": 4
+          }
+        },
+        {
+          "id": "p1",
+          "group": "bus-ports",
+          "args": {
+            "x": 50,
+            "y": 8
+          }
+        },
+        {
+          "id": "p2",
+          "group": "bus-ports",
+          "args": {
+            "x": 130,
+            "y": 8
+          }
+        }
+      ]
+    },
+    {
+      "id": "mccb-ups1",
+      "type": "MCCB",
+      "x": 556,
+      "y": 860,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_MCCB",
+        "name": "MCCB",
+        "state": "LIVE",
+        "voltage": 0.38,
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "load-ups1",
+      "type": "Load",
+      "x": 553,
+      "y": 925,
+      "w": 34,
+      "h": 36,
+      "data": {
+        "type": "LOAD",
+        "name": "중요 부하 1",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "mccb-ups2",
+      "type": "MCCB",
+      "x": 636,
+      "y": 860,
+      "w": 28,
+      "h": 40,
+      "data": {
+        "type": "CB_MCCB",
+        "name": "MCCB",
+        "state": "LIVE",
+        "voltage": 0.38,
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "load-ups2",
+      "type": "Load",
+      "x": 633,
+      "y": 925,
+      "w": 34,
+      "h": 36,
+      "data": {
+        "type": "LOAD",
+        "name": "중요 부하 2",
+        "color": "#059669"
+      }
+    },
+    {
+      "id": "text-ac220",
+      "type": "TextLabel",
+      "x": 740,
+      "y": 775,
+      "w": 90,
+      "h": 20,
+      "data": {
+        "type": "TEXT_LABEL",
+        "text": "AC 220V",
+        "color": "#EAB308"
+      }
+    },
+    {
+      "id": "rect-1",
+      "type": "Rectifier",
+      "x": 745,
+      "y": 810,
+      "w": 50,
+      "h": 40,
+      "data": {
+        "type": "RECTIFIER",
+        "name": "정류기",
+        "inputVoltage": "220V",
+        "outputVoltage": "110V DC",
+        "color": "#F97316"
+      }
+    },
+    {
+      "id": "battery-110",
+      "type": "Battery",
+      "x": 744,
+      "y": 905,
+      "w": 52,
+      "h": 34,
+      "data": {
+        "type": "BATTERY",
+        "name": "110V 축전지",
+        "voltage": 110,
+        "voltageUnit": "V DC",
+        "color": "#F97316"
+      }
+    }
+  ],
+  "links": [
+    {
+      "id": "link-tower-cb",
+      "from": {
+        "id": "tower-154",
+        "port": "out"
+      },
+      "to": {
+        "id": "cb-154",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-cb-ds",
+      "from": {
+        "id": "cb-154",
+        "port": "out"
+      },
+      "to": {
+        "id": "ds-154",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-ds-tr1",
+      "from": {
+        "id": "ds-154",
+        "port": "out"
+      },
+      "to": {
+        "id": "tr-1",
+        "port": "pri"
+      }
+    },
+    {
+      "id": "link-tr1-bus22",
+      "from": {
+        "id": "tr-1",
+        "port": "sec"
+      },
+      "to": {
+        "id": "bus-22-9",
+        "port": "p_in"
+      }
+    },
+    {
+      "id": "link-bus22-vcba",
+      "from": {
+        "id": "bus-22-9",
+        "port": "p_f1"
+      },
+      "to": {
+        "id": "vcb-a",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-vcba-tr2",
+      "from": {
+        "id": "vcb-a",
+        "port": "out"
+      },
+      "to": {
+        "id": "tr-2",
+        "port": "pri"
+      }
+    },
+    {
+      "id": "link-tr2-bus04a",
+      "from": {
+        "id": "tr-2",
+        "port": "sec"
+      },
+      "to": {
+        "id": "bus-04-a",
+        "port": "p_tr"
+      }
+    },
+    {
+      "id": "link-busa-acba1",
+      "from": {
+        "id": "bus-04-a",
+        "port": "p1"
+      },
+      "to": {
+        "id": "acb-a1",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-acba1-loada1",
+      "from": {
+        "id": "acb-a1",
+        "port": "out"
+      },
+      "to": {
+        "id": "load-a1",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-busa-mccba2",
+      "from": {
+        "id": "bus-04-a",
+        "port": "p2"
+      },
+      "to": {
+        "id": "mccb-a2",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-mccba2-loada2",
+      "from": {
+        "id": "mccb-a2",
+        "port": "out"
+      },
+      "to": {
+        "id": "load-a2",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-busa-mccba3",
+      "from": {
+        "id": "bus-04-a",
+        "port": "p3"
+      },
+      "to": {
+        "id": "mccb-a3",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-mccba3-loada3",
+      "from": {
+        "id": "mccb-a3",
+        "port": "out"
+      },
+      "to": {
+        "id": "load-a3",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-bus22-vcbb",
+      "from": {
+        "id": "bus-22-9",
+        "port": "p_f2"
+      },
+      "to": {
+        "id": "vcb-b",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-vcbb-tr3",
+      "from": {
+        "id": "vcb-b",
+        "port": "out"
+      },
+      "to": {
+        "id": "tr-3",
+        "port": "pri"
+      }
+    },
+    {
+      "id": "link-tr3-bus04b",
+      "from": {
+        "id": "tr-3",
+        "port": "sec"
+      },
+      "to": {
+        "id": "bus-04-b",
+        "port": "p_tr"
+      }
+    },
+    {
+      "id": "link-busb-mccbb1",
+      "from": {
+        "id": "bus-04-b",
+        "port": "p1"
+      },
+      "to": {
+        "id": "mccb-b1",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-mccbb1-loadb1",
+      "from": {
+        "id": "mccb-b1",
+        "port": "out"
+      },
+      "to": {
+        "id": "load-b1",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-busb-mccbb2",
+      "from": {
+        "id": "bus-04-b",
+        "port": "p2"
+      },
+      "to": {
+        "id": "mccb-b2",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-mccbb2-loadb2",
+      "from": {
+        "id": "mccb-b2",
+        "port": "out"
+      },
+      "to": {
+        "id": "load-b2",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-busb-mccbb3",
+      "from": {
+        "id": "bus-04-b",
+        "port": "p3"
+      },
+      "to": {
+        "id": "mccb-b3",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-mccbb3-loadb3",
+      "from": {
+        "id": "mccb-b3",
+        "port": "out"
+      },
+      "to": {
+        "id": "load-b3",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-bus22-vcbc",
+      "from": {
+        "id": "bus-22-9",
+        "port": "p_f3"
+      },
+      "to": {
+        "id": "vcb-c",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-vcbc-tr4",
+      "from": {
+        "id": "vcb-c",
+        "port": "out"
+      },
+      "to": {
+        "id": "tr-4",
+        "port": "pri"
+      }
+    },
+    {
+      "id": "link-tr4-bus04c",
+      "from": {
+        "id": "tr-4",
+        "port": "sec"
+      },
+      "to": {
+        "id": "bus-04-c",
+        "port": "p_tr"
+      }
+    },
+    {
+      "id": "link-busc-mccbc1",
+      "from": {
+        "id": "bus-04-c",
+        "port": "p1"
+      },
+      "to": {
+        "id": "mccb-c1",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-mccbc1-loadc1",
+      "from": {
+        "id": "mccb-c1",
+        "port": "out"
+      },
+      "to": {
+        "id": "load-c1",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-busc-mccbc2",
+      "from": {
+        "id": "bus-04-c",
+        "port": "p2"
+      },
+      "to": {
+        "id": "mccb-c2",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-mccbc2-loadc2",
+      "from": {
+        "id": "mccb-c2",
+        "port": "out"
+      },
+      "to": {
+        "id": "load-c2",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-busc-mccbc3",
+      "from": {
+        "id": "bus-04-c",
+        "port": "p3"
+      },
+      "to": {
+        "id": "mccb-c3",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-mccbc3-loadc3",
+      "from": {
+        "id": "mccb-c3",
+        "port": "out"
+      },
+      "to": {
+        "id": "load-c3",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-gen-acb",
+      "from": {
+        "id": "gen-1",
+        "port": "out"
+      },
+      "to": {
+        "id": "acb-gen",
+        "port": "out"
+      }
+    },
+    {
+      "id": "link-acbgen-bus22",
+      "from": {
+        "id": "acb-gen",
+        "port": "in"
+      },
+      "to": {
+        "id": "bus-22-9",
+        "port": "p_gen"
+      }
+    },
+    {
+      "id": "link-acbups-ups",
+      "from": {
+        "id": "acb-ups-in",
+        "port": "out"
+      },
+      "to": {
+        "id": "ups-1",
+        "port": "ac_in"
+      }
+    },
+    {
+      "id": "link-bat-ups",
+      "from": {
+        "id": "battery-1",
+        "port": "out"
+      },
+      "to": {
+        "id": "ups-1",
+        "port": "dc_bat"
+      }
+    },
+    {
+      "id": "link-ups-swg",
+      "from": {
+        "id": "ups-1",
+        "port": "ac_out"
+      },
+      "to": {
+        "id": "swg-ups",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-swg-busups",
+      "from": {
+        "id": "swg-ups",
+        "port": "out"
+      },
+      "to": {
+        "id": "bus-ups",
+        "port": "p_in"
+      }
+    },
+    {
+      "id": "link-busups-mccb1",
+      "from": {
+        "id": "bus-ups",
+        "port": "p1"
+      },
+      "to": {
+        "id": "mccb-ups1",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-mccb1-loadups1",
+      "from": {
+        "id": "mccb-ups1",
+        "port": "out"
+      },
+      "to": {
+        "id": "load-ups1",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-busups-mccb2",
+      "from": {
+        "id": "bus-ups",
+        "port": "p2"
+      },
+      "to": {
+        "id": "mccb-ups2",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-mccb2-loadups2",
+      "from": {
+        "id": "mccb-ups2",
+        "port": "out"
+      },
+      "to": {
+        "id": "load-ups2",
+        "port": "in"
+      }
+    },
+    {
+      "id": "link-rect-bat110",
+      "from": {
+        "id": "rect-1",
+        "port": "dc_out"
+      },
+      "to": {
+        "id": "battery-110",
+        "port": "out"
+      }
+    }
+  ]
+};
+</script>
   </head>
   <body>
     <input
@@ -3452,7 +3368,8 @@
     <script src="./static/js/sldExport.js?v=20260903_05"></script>
 
     <!-- Sub-Managers -->
-    <script src="./static/js/core/HistoryManager.js?v=20260903_04"></script>
+    <script src="./static/js/core/SLDSerializer.js?v=20260903_06"></script>
+    <script src="./static/js/core/HistoryManager.js?v=20260903_06"></script>
     <script src="./static/js/core/ClipboardManager.js?v=20260903_04"></script>
     <script src="./static/js/core/SelectionManager.js?v=20260903_04"></script>
     <script src="./static/js/wiring/TJunctionManager.js?v=20260903_04"></script>
