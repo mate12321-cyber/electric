@@ -2420,10 +2420,7 @@
       if (!cell || (typeof cell.isElement === "function" && !cell.isElement()))
         return null;
       const type = cell.get("type");
-      if (
-        type === "sld.Junction" ||
-        cell.get("sldData")?.type === "JUNCTION"
-      ) {
+      if (type === "sld.Junction" || cell.get("sldData")?.type === "JUNCTION") {
         return null; // Junctions are omnidirectional
       }
 
@@ -2465,11 +2462,6 @@
         return vertices;
       }
 
-      // If already perfectly aligned horizontally or vertically, return 0 bend points
-      if (sx === tx || sy === ty) {
-        return [];
-      }
-
       // Resolve source & target cells and bounding boxes
       let srcCell = null;
       let tgtCell = null;
@@ -2483,8 +2475,7 @@
         srcPortId = source.port;
         tgtPortId = target.port;
 
-        const graph =
-          (linkView.paper && linkView.paper.model) || link.graph;
+        const graph = (linkView.paper && linkView.paper.model) || link.graph;
         if (graph) {
           if (source.id) srcCell = graph.getCell(source.id);
           if (target.id) tgtCell = graph.getCell(target.id);
@@ -2568,8 +2559,9 @@
         if (sy <= ty) {
           const bottomOfSrc = srcBBox ? srcBBox.y + srcBBox.height : sy;
           const topOfTgt = tgtBBox ? tgtBBox.y : ty;
-          let midY = Math.round(((bottomOfSrc + topOfTgt) / 2) / 10) * 10;
-          if (midY <= bottomOfSrc) midY = Math.ceil((bottomOfSrc + 10) / 10) * 10;
+          let midY = Math.round((bottomOfSrc + topOfTgt) / 2 / 10) * 10;
+          if (midY <= bottomOfSrc)
+            midY = Math.ceil((bottomOfSrc + 10) / 10) * 10;
           if (midY >= topOfTgt) midY = Math.floor((topOfTgt - 10) / 10) * 10;
           return [
             { x: sx, y: midY },
@@ -2577,11 +2569,29 @@
           ];
         } else {
           // Source is BELOW target: Route around
-          const safeY1 = Math.ceil(((srcBBox ? srcBBox.y + srcBBox.height : sy) + 20) / 10) * 10;
-          const safeY2 = Math.floor(((tgtBBox ? tgtBBox.y : ty) - 20) / 10) * 10;
-          const bypassX = sx < tx
-            ? Math.floor((Math.min(srcBBox ? srcBBox.x : sx, tgtBBox ? tgtBBox.x : tx) - 30) / 10) * 10
-            : Math.ceil((Math.max(srcBBox ? srcBBox.x + srcBBox.width : sx, tgtBBox ? tgtBBox.x + tgtBBox.width : tx) + 30) / 10) * 10;
+          const safeY1 =
+            Math.ceil(((srcBBox ? srcBBox.y + srcBBox.height : sy) + 20) / 10) *
+            10;
+          const safeY2 =
+            Math.floor(((tgtBBox ? tgtBBox.y : ty) - 20) / 10) * 10;
+          const bypassX =
+            sx < tx
+              ? Math.floor(
+                  (Math.min(
+                    srcBBox ? srcBBox.x : sx,
+                    tgtBBox ? tgtBBox.x : tx,
+                  ) -
+                    30) /
+                    10,
+                ) * 10
+              : Math.ceil(
+                  (Math.max(
+                    srcBBox ? srcBBox.x + srcBBox.width : sx,
+                    tgtBBox ? tgtBBox.x + tgtBBox.width : tx,
+                  ) +
+                    30) /
+                    10,
+                ) * 10;
           return [
             { x: sx, y: safeY1 },
             { x: bypassX, y: safeY1 },
@@ -2596,19 +2606,38 @@
         if (sy >= ty) {
           const topOfSrc = srcBBox ? srcBBox.y : sy;
           const bottomOfTgt = tgtBBox ? tgtBBox.y + tgtBBox.height : ty;
-          let midY = Math.round(((topOfSrc + bottomOfTgt) / 2) / 10) * 10;
+          let midY = Math.round((topOfSrc + bottomOfTgt) / 2 / 10) * 10;
           if (midY >= topOfSrc) midY = Math.floor((topOfSrc - 10) / 10) * 10;
-          if (midY <= bottomOfTgt) midY = Math.ceil((bottomOfTgt + 10) / 10) * 10;
+          if (midY <= bottomOfTgt)
+            midY = Math.ceil((bottomOfTgt + 10) / 10) * 10;
           return [
             { x: sx, y: midY },
             { x: tx, y: midY },
           ];
         } else {
-          const safeY1 = Math.floor(((srcBBox ? srcBBox.y : sy) - 20) / 10) * 10;
-          const safeY2 = Math.ceil(((tgtBBox ? tgtBBox.y + tgtBBox.height : ty) + 20) / 10) * 10;
-          const bypassX = sx < tx
-            ? Math.floor((Math.min(srcBBox ? srcBBox.x : sx, tgtBBox ? tgtBBox.x : tx) - 30) / 10) * 10
-            : Math.ceil((Math.max(srcBBox ? srcBBox.x + srcBBox.width : sx, tgtBBox ? tgtBBox.x + tgtBBox.width : tx) + 30) / 10) * 10;
+          const safeY1 =
+            Math.floor(((srcBBox ? srcBBox.y : sy) - 20) / 10) * 10;
+          const safeY2 =
+            Math.ceil(((tgtBBox ? tgtBBox.y + tgtBBox.height : ty) + 20) / 10) *
+            10;
+          const bypassX =
+            sx < tx
+              ? Math.floor(
+                  (Math.min(
+                    srcBBox ? srcBBox.x : sx,
+                    tgtBBox ? tgtBBox.x : tx,
+                  ) -
+                    30) /
+                    10,
+                ) * 10
+              : Math.ceil(
+                  (Math.max(
+                    srcBBox ? srcBBox.x + srcBBox.width : sx,
+                    tgtBBox ? tgtBBox.x + tgtBBox.width : tx,
+                  ) +
+                    30) /
+                    10,
+                ) * 10;
           return [
             { x: sx, y: safeY1 },
             { x: bypassX, y: safeY1 },
@@ -2620,7 +2649,9 @@
 
       // 7. Omnidirectional connections (e.g. Junction Node <-> Breaker)
       if (tgtDir === "BOTTOM" && sy < ty) {
-        const dropY = Math.ceil(((tgtBBox ? tgtBBox.y + tgtBBox.height : ty) + 20) / 10) * 10;
+        const dropY =
+          Math.ceil(((tgtBBox ? tgtBBox.y + tgtBBox.height : ty) + 20) / 10) *
+          10;
         return [
           { x: sx, y: dropY },
           { x: tx, y: dropY },
@@ -2634,7 +2665,9 @@
         ];
       }
       if (srcDir === "BOTTOM" && ty < sy) {
-        const dropY = Math.ceil(((srcBBox ? srcBBox.y + srcBBox.height : sy) + 20) / 10) * 10;
+        const dropY =
+          Math.ceil(((srcBBox ? srcBBox.y + srcBBox.height : sy) + 20) / 10) *
+          10;
         return [
           { x: sx, y: dropY },
           { x: tx, y: dropY },
@@ -2648,8 +2681,13 @@
         ];
       }
 
+      // If already perfectly aligned horizontally or vertically, return 0 bend points
+      if (sx === tx || sy === ty) {
+        return [];
+      }
+
       // Default Clean Step: Midpoint Y
-      const midY = Math.round(((sy + ty) / 2) / 10) * 10;
+      const midY = Math.round((sy + ty) / 2 / 10) * 10;
       return [
         { x: sx, y: midY },
         { x: tx, y: midY },
