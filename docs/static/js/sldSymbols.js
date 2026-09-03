@@ -2422,9 +2422,11 @@
       const type = cell.get("type");
       if (
         type === "sld.Junction" ||
-        cell.get("sldData")?.type === "JUNCTION"
+        type === "sld.Busbar" ||
+        cell.get("sldData")?.type === "JUNCTION" ||
+        cell.get("sldData")?.type === "BUSBAR"
       ) {
-        return null; // Junctions are omnidirectional
+        return null; // Junctions and Busbars are omnidirectional connection targets
       }
 
       // 1. Check physical port position relative to element bounding box FIRST!
@@ -2573,12 +2575,17 @@
         ];
       }
 
+      // If already perfectly aligned horizontally or vertically, return 0 bend points
+      if (sx === tx || sy === ty) {
+        return [];
+      }
+
       // 5. Source BOTTOM -> Target TOP (Standard Top-Down Flow)
       if (srcDir === "BOTTOM" && tgtDir === "TOP") {
         if (sy <= ty) {
           const bottomOfSrc = srcBBox ? srcBBox.y + srcBBox.height : sy;
           const topOfTgt = tgtBBox ? tgtBBox.y : ty;
-          let midY = Math.round((bottomOfSrc + topOfTgt) / 2 / 10) * 10;
+          let midY = Math.round(((bottomOfSrc + topOfTgt) / 2) / 10) * 10;
           if (midY <= bottomOfSrc)
             midY = Math.ceil((bottomOfSrc + 10) / 10) * 10;
           if (midY >= topOfTgt) midY = Math.floor((topOfTgt - 10) / 10) * 10;
@@ -2625,7 +2632,7 @@
         if (sy >= ty) {
           const topOfSrc = srcBBox ? srcBBox.y : sy;
           const bottomOfTgt = tgtBBox ? tgtBBox.y + tgtBBox.height : ty;
-          let midY = Math.round((topOfSrc + bottomOfTgt) / 2 / 10) * 10;
+          let midY = Math.round(((topOfSrc + bottomOfTgt) / 2) / 10) * 10;
           if (midY >= topOfSrc) midY = Math.floor((topOfSrc - 10) / 10) * 10;
           if (midY <= bottomOfTgt)
             midY = Math.ceil((bottomOfTgt + 10) / 10) * 10;
@@ -2666,47 +2673,8 @@
         }
       }
 
-      // 7. Omnidirectional connections (e.g. Junction Node <-> Breaker)
-      if (tgtDir === "BOTTOM" && sy < ty) {
-        const dropY =
-          Math.ceil(((tgtBBox ? tgtBBox.y + tgtBBox.height : ty) + 20) / 10) *
-          10;
-        return [
-          { x: sx, y: dropY },
-          { x: tx, y: dropY },
-        ];
-      }
-      if (tgtDir === "TOP" && sy > ty) {
-        const riseY = Math.floor(((tgtBBox ? tgtBBox.y : ty) - 20) / 10) * 10;
-        return [
-          { x: sx, y: riseY },
-          { x: tx, y: riseY },
-        ];
-      }
-      if (srcDir === "BOTTOM" && ty < sy) {
-        const dropY =
-          Math.ceil(((srcBBox ? srcBBox.y + srcBBox.height : sy) + 20) / 10) *
-          10;
-        return [
-          { x: sx, y: dropY },
-          { x: tx, y: dropY },
-        ];
-      }
-      if (srcDir === "TOP" && ty > sy) {
-        const riseY = Math.floor(((srcBBox ? srcBBox.y : sy) - 20) / 10) * 10;
-        return [
-          { x: sx, y: riseY },
-          { x: tx, y: riseY },
-        ];
-      }
-
-      // If already perfectly aligned horizontally or vertically, return 0 bend points
-      if (sx === tx || sy === ty) {
-        return [];
-      }
-
       // Default Clean Step: Midpoint Y
-      const midY = Math.round((sy + ty) / 2 / 10) * 10;
+      const midY = Math.round(((sy + ty) / 2) / 10) * 10;
       return [
         { x: sx, y: midY },
         { x: tx, y: midY },
