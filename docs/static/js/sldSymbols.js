@@ -2414,8 +2414,37 @@
     },
   });
 
-  // 25. Custom CAD SLD Orthogonal Router (Guarantees 100% strict right-angled routing)
+  // 25. Custom CAD SLD Orthogonal Router (Guarantees 100% strict right-angled routing without symbol penetration)
   if (joint.routers) {
+    function getPortDirection(cell, portId, pt, bbox) {
+      if (!cell || (typeof cell.isElement === "function" && !cell.isElement()))
+        return null;
+      const type = cell.get("type");
+      if (
+        type === "sld.Junction" ||
+        cell.get("sldData")?.type === "JUNCTION"
+      ) {
+        return null; // Junctions are omnidirectional
+      }
+
+      if (portId === "out" || portId === "bottom" || portId === "p2") {
+        return "BOTTOM";
+      }
+      if (portId === "in" || portId === "top") {
+        return "TOP";
+      }
+      if (portId === "left") return "LEFT";
+      if (portId === "right") return "RIGHT";
+
+      if (bbox && pt) {
+        if (pt.y >= bbox.y + bbox.height * 0.7) return "BOTTOM";
+        if (pt.y <= bbox.y + bbox.height * 0.3) return "TOP";
+        if (pt.x <= bbox.x + bbox.width * 0.3) return "LEFT";
+        if (pt.x >= bbox.x + bbox.width * 0.7) return "RIGHT";
+      }
+      return "BOTTOM";
+    }
+
     joint.routers.sldOrthogonal = function (vertices, opt, linkView) {
       const src =
         (linkView && (linkView.sourceAnchor || linkView.sourcePoint)) ||
@@ -2441,9 +2470,186 @@
         return [];
       }
 
-      // If not aligned, route with clean orthogonal steps:
-      // Vertical flow default: Step vertically halfway, step horizontally, step vertically to target
-      const midY = Math.round((sy + ty) / 2 / 10) * 10;
+      // Resolve source & target cells and bounding boxes
+      let srcCell = null;
+      let tgtCell = null;
+      let srcPortId = null;
+      let tgtPortId = null;
+
+      if (linkView && linkView.model) {
+        const link = linkView.model;
+        const source = link.get("source") || {};
+        const target = link.get("target") || {};
+        srcPortId = source.port;
+        tgtPortId = target.port;
+
+        const graph =
+          (linkView.paper && linkView.paper.model) || link.graph;
+        if (graph) {
+          if (source.id) srcCell = graph.getCell(source.id);
+          if (target.id) tgtCell = graph.getCell(target.id);
+        }
+      }
+
+      const getBox = (c) => {
+        if (!c || (typeof c.isElement === "function" && !c.isElement()))
+          return null;
+        if (typeof c.getBBox === "function") return c.getBBox();
+        const pos = c.position ? c.position() : { x: 0, y: 0 };
+        const size = c.size ? c.size() : { width: 0, height: 0 };
+        return {
+          x: pos.x,
+          y: pos.y,
+          width: size.width,
+          height: size.height,
+        };
+      };
+
+      const srcBBox = getBox(srcCell);
+      const tgtBBox = getBox(tgtCell);
+
+      const srcDir = getPortDirection(srcCell, srcPortId, src, srcBBox);
+      const tgtDir = getPortDirection(tgtCell, tgtPortId, tgt, tgtBBox);
+
+      // 1. Both BOTTOM ports (out -> out) -> 'ㄷ' shape below both symbols
+      if (srcDir === "BOTTOM" && tgtDir === "BOTTOM") {
+        const lowestBottom = Math.max(
+          srcBBox ? srcBBox.y + srcBBox.height : sy,
+          tgtBBox ? tgtBBox.y + tgtBBox.height : ty,
+        );
+        const safeY = Math.ceil((lowestBottom + 20) / 10) * 10;
+        return [
+          { x: sx, y: safeY },
+          { x: tx, y: safeY },
+        ];
+      }
+
+      // 2. Both TOP ports (in -> in) -> 'ㄷ' shape above both symbols
+      if (srcDir === "TOP" && tgtDir === "TOP") {
+        const highestTop = Math.min(
+          srcBBox ? srcBBox.y : sy,
+          tgtBBox ? tgtBBox.y : ty,
+        );
+        const safeY = Math.floor((highestTop - 20) / 10) * 10;
+        return [
+          { x: sx, y: safeY },
+          { x: tx, y: safeY },
+        ];
+      }
+
+      // 3. Both LEFT ports -> 'ㄷ' shape to the left
+      if (srcDir === "LEFT" && tgtDir === "LEFT") {
+        const leftX = Math.min(
+          srcBBox ? srcBBox.x : sx,
+          tgtBBox ? tgtBBox.x : tx,
+        );
+        const safeX = Math.floor((leftX - 20) / 10) * 10;
+        return [
+          { x: safeX, y: sy },
+          { x: safeX, y: ty },
+        ];
+      }
+
+      // 4. Both RIGHT ports -> 'ㄷ' shape to the right
+      if (srcDir === "RIGHT" && tgtDir === "RIGHT") {
+        const rightX = Math.max(
+          srcBBox ? srcBBox.x + srcBBox.width : sx,
+          tgtBBox ? tgtBBox.x + tgtBBox.width : tx,
+        );
+        const safeX = Math.ceil((rightX + 20) / 10) * 10;
+        return [
+          { x: safeX, y: sy },
+          { x: safeX, y: ty },
+        ];
+      }
+
+      // 5. Source BOTTOM -> Target TOP (Standard Top-Down Flow)
+      if (srcDir === "BOTTOM" && tgtDir === "TOP") {
+        if (sy <= ty) {
+          const bottomOfSrc = srcBBox ? srcBBox.y + srcBBox.height : sy;
+          const topOfTgt = tgtBBox ? tgtBBox.y : ty;
+          let midY = Math.round(((bottomOfSrc + topOfTgt) / 2) / 10) * 10;
+          if (midY <= bottomOfSrc) midY = Math.ceil((bottomOfSrc + 10) / 10) * 10;
+          if (midY >= topOfTgt) midY = Math.floor((topOfTgt - 10) / 10) * 10;
+          return [
+            { x: sx, y: midY },
+            { x: tx, y: midY },
+          ];
+        } else {
+          // Source is BELOW target: Route around
+          const safeY1 = Math.ceil(((srcBBox ? srcBBox.y + srcBBox.height : sy) + 20) / 10) * 10;
+          const safeY2 = Math.floor(((tgtBBox ? tgtBBox.y : ty) - 20) / 10) * 10;
+          const bypassX = sx < tx
+            ? Math.floor((Math.min(srcBBox ? srcBBox.x : sx, tgtBBox ? tgtBBox.x : tx) - 30) / 10) * 10
+            : Math.ceil((Math.max(srcBBox ? srcBBox.x + srcBBox.width : sx, tgtBBox ? tgtBBox.x + tgtBBox.width : tx) + 30) / 10) * 10;
+          return [
+            { x: sx, y: safeY1 },
+            { x: bypassX, y: safeY1 },
+            { x: bypassX, y: safeY2 },
+            { x: tx, y: safeY2 },
+          ];
+        }
+      }
+
+      // 6. Source TOP -> Target BOTTOM (Bottom-Up Flow)
+      if (srcDir === "TOP" && tgtDir === "BOTTOM") {
+        if (sy >= ty) {
+          const topOfSrc = srcBBox ? srcBBox.y : sy;
+          const bottomOfTgt = tgtBBox ? tgtBBox.y + tgtBBox.height : ty;
+          let midY = Math.round(((topOfSrc + bottomOfTgt) / 2) / 10) * 10;
+          if (midY >= topOfSrc) midY = Math.floor((topOfSrc - 10) / 10) * 10;
+          if (midY <= bottomOfTgt) midY = Math.ceil((bottomOfTgt + 10) / 10) * 10;
+          return [
+            { x: sx, y: midY },
+            { x: tx, y: midY },
+          ];
+        } else {
+          const safeY1 = Math.floor(((srcBBox ? srcBBox.y : sy) - 20) / 10) * 10;
+          const safeY2 = Math.ceil(((tgtBBox ? tgtBBox.y + tgtBBox.height : ty) + 20) / 10) * 10;
+          const bypassX = sx < tx
+            ? Math.floor((Math.min(srcBBox ? srcBBox.x : sx, tgtBBox ? tgtBBox.x : tx) - 30) / 10) * 10
+            : Math.ceil((Math.max(srcBBox ? srcBBox.x + srcBBox.width : sx, tgtBBox ? tgtBBox.x + tgtBBox.width : tx) + 30) / 10) * 10;
+          return [
+            { x: sx, y: safeY1 },
+            { x: bypassX, y: safeY1 },
+            { x: bypassX, y: safeY2 },
+            { x: tx, y: safeY2 },
+          ];
+        }
+      }
+
+      // 7. Omnidirectional connections (e.g. Junction Node <-> Breaker)
+      if (tgtDir === "BOTTOM" && sy < ty) {
+        const dropY = Math.ceil(((tgtBBox ? tgtBBox.y + tgtBBox.height : ty) + 20) / 10) * 10;
+        return [
+          { x: sx, y: dropY },
+          { x: tx, y: dropY },
+        ];
+      }
+      if (tgtDir === "TOP" && sy > ty) {
+        const riseY = Math.floor(((tgtBBox ? tgtBBox.y : ty) - 20) / 10) * 10;
+        return [
+          { x: sx, y: riseY },
+          { x: tx, y: riseY },
+        ];
+      }
+      if (srcDir === "BOTTOM" && ty < sy) {
+        const dropY = Math.ceil(((srcBBox ? srcBBox.y + srcBBox.height : sy) + 20) / 10) * 10;
+        return [
+          { x: sx, y: dropY },
+          { x: tx, y: dropY },
+        ];
+      }
+      if (srcDir === "TOP" && ty > sy) {
+        const riseY = Math.floor(((srcBBox ? srcBBox.y : sy) - 20) / 10) * 10;
+        return [
+          { x: sx, y: riseY },
+          { x: tx, y: riseY },
+        ];
+      }
+
+      // Default Clean Step: Midpoint Y
+      const midY = Math.round(((sy + ty) / 2) / 10) * 10;
       return [
         { x: sx, y: midY },
         { x: tx, y: midY },
