@@ -2906,7 +2906,8 @@ class SLDEditor {
 
     // Save & Export buttons
     const btnSave = document.getElementById("btn-save-project");
-    if (btnSave) btnSave.addEventListener("click", () => this.saveDiagram(true));
+    if (btnSave)
+      btnSave.addEventListener("click", () => this.saveDiagram(true));
 
     const btnExportSvg = document.getElementById("btn-export-svg");
     const btnExportPng = document.getElementById("btn-export-png");

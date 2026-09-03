@@ -70,6 +70,16 @@ def save_diagram_api(request, diagram_id):
     return JsonResponse({'status': 'invalid method'}, status=405)
 
 
+@csrf_exempt
+def diagram_api(request, diagram_id):
+    """Unified API for GET (load) and POST (save) diagram schema."""
+    if request.method == 'GET':
+        return get_diagram_api(request, diagram_id)
+    elif request.method in ['POST', 'PUT']:
+        return save_diagram_api(request, diagram_id)
+    return JsonResponse({'status': 'invalid method'}, status=405)
+
+
 def telemetry_api(request, diagram_id):
     """Simulate real-time switch states & P/Q/V measurements for HTMX polling."""
     # Generate realistic power system telemetry with slight noise
