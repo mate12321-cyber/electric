@@ -2906,7 +2906,7 @@ class SLDEditor {
 
     // Save & Export buttons
     const btnSave = document.getElementById("btn-save-project");
-    if (btnSave) btnSave.addEventListener("click", () => this.saveDiagram());
+    if (btnSave) btnSave.addEventListener("click", () => this.saveDiagram(true));
 
     const btnExportSvg = document.getElementById("btn-export-svg");
     const btnExportPng = document.getElementById("btn-export-png");
@@ -3015,7 +3015,7 @@ class SLDEditor {
         this.redo();
       } else if ((e.ctrlKey || e.metaKey) && e.key === "s") {
         e.preventDefault();
-        this.saveDiagram();
+        this.saveDiagram(true);
       }
     });
   }
@@ -3319,15 +3319,7 @@ class SLDEditor {
   }
 
   loadDiagram(diagramId) {
-    try {
-      Object.keys(localStorage).forEach((k) => {
-        if (k.startsWith("sld_diagram_") || k.startsWith("sld_current_")) {
-          localStorage.removeItem(k);
-        }
-      });
-    } catch (e) {}
-
-    const cacheKey = "sld_diagram_v5_" + diagramId;
+    const cacheKey = "sld_diagram_" + diagramId;
 
     fetch("/api/sld/" + diagramId + "/")
       .then((res) => {
@@ -3341,8 +3333,23 @@ class SLDEditor {
           data.schema_data.cells.length > 0
         ) {
           this.applyLoadedSchema(data.schema_data);
-        } else if (window.DEFAULT_SLD_SCHEMA) {
-          this.applyLoadedSchema(window.DEFAULT_SLD_SCHEMA);
+          try {
+            localStorage.setItem(cacheKey, JSON.stringify(data.schema_data));
+          } catch (e) {}
+        } else {
+          const cached = localStorage.getItem(cacheKey);
+          if (cached) {
+            try {
+              const schema = JSON.parse(cached);
+              if (schema && schema.cells && schema.cells.length > 0) {
+                this.applyLoadedSchema(schema);
+                return;
+              }
+            } catch (e) {}
+          }
+          if (window.DEFAULT_SLD_SCHEMA) {
+            this.applyLoadedSchema(window.DEFAULT_SLD_SCHEMA);
+          }
         }
       })
       .catch(() => {
@@ -3482,21 +3489,22 @@ class SLDEditor {
     this._telemetrySimTimer = setInterval(updateValues, 10000);
   }
 
-  saveDiagram() {
+  saveDiagram(isManual = false) {
     const schemaData = this.graph.toJSON();
     const data = {
       schema_data: schemaData,
     };
 
+    const cacheKey = "sld_diagram_" + this.options.diagramId;
     try {
-      localStorage.setItem(
-        "sld_diagram_v4_" + this.options.diagramId,
-        JSON.stringify(schemaData),
-      );
+      localStorage.setItem(cacheKey, JSON.stringify(schemaData));
     } catch (e) {}
 
     const csrfToken =
       document.querySelector("[name=csrfmiddlewaretoken]")?.value || "";
+
+    const now = new Date();
+    const timeStr = now.toTimeString().split(" ")[0];
 
     fetch("/api/sld/" + this.options.diagramId + "/", {
       method: "POST",
@@ -3513,23 +3521,27 @@ class SLDEditor {
       .then(() => {
         const autoSaveBadge = document.getElementById("auto-save-status");
         if (autoSaveBadge) {
-          const now = new Date();
-          const timeStr = now.toTimeString().split(" ")[0];
           autoSaveBadge.innerHTML =
             "☁️ 서버 저장 완료 " +
             timeStr +
             ' <span style="color:#52c41a">✓</span>';
         }
+        if (isManual) {
+          this.showToast("프로젝트가 서버에 안전하게 저장되었습니다.");
+        }
       })
       .catch(() => {
         const autoSaveBadge = document.getElementById("auto-save-status");
         if (autoSaveBadge) {
-          const now = new Date();
-          const timeStr = now.toTimeString().split(" ")[0];
           autoSaveBadge.innerHTML =
             "💾 로컬 저장 완료 " +
             timeStr +
             ' <span style="color:#52c41a">✓</span>';
+        }
+        if (isManual) {
+          this.showToast(
+            "프로젝트가 브라우저에 저장되었습니다. (" + timeStr + ")",
+          );
         }
       });
   }
@@ -3537,8 +3549,8 @@ class SLDEditor {
   scheduleAutoSave() {
     clearTimeout(this.autoSaveTimer);
     this.autoSaveTimer = setTimeout(() => {
-      this.saveDiagram();
-    }, 5000);
+      this.saveDiagram(false);
+    }, 4000);
   }
 
   initMinimap() {
