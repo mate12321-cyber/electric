@@ -8,7 +8,7 @@
   if (typeof joint !== "undefined" && joint.dia && joint.dia.ElementView) {
     joint.dia.ElementView.prototype.drag = function (evt, x, y) {
       const paper = this.paper;
-      const gridSize = (paper && paper.options.gridSize) || 10;
+      const gridSize = (paper && paper.options.gridSize) || 5;
       const model = this.model;
       const eventData = this.eventData(evt);
       const pointerOffset = eventData.pointerOffset || { x: 0, y: 0 };
@@ -78,7 +78,7 @@ class SLDEditor {
     this.options = Object.assign(
       {
         diagramId: "default-154kv-substation",
-        gridSize: 10,
+        gridSize: 5,
         snapToGrid: true,
         readOnly: false,
       },
@@ -108,6 +108,7 @@ class SLDEditor {
     this.paletteManager = new PaletteManager(this);
     this.toolbarManager = new ToolbarManager(this);
     this.keyboardManager = new KeyboardManager(this);
+    this.batchRenameManager = new BatchRenameManager(this);
 
     this.init();
   }
@@ -160,12 +161,13 @@ class SLDEditor {
       model: this.graph,
       width: paperWidth,
       height: paperHeight,
-      async: false,
+      async: true,
+      sorting: joint.dia.Paper.sorting.APPROX,
       gridSize: this.options.gridSize,
       drawGrid: { name: "dot", args: { color: "#cbd5e1", thickness: 1 } },
       snapLinks: { radius: 20 },
       linkPinning: false,
-      markAvailable: true,
+      markAvailable: false,
       defaultLink: (cellView) => {
         let strokeColor = "#377DFF";
         if (cellView && cellView.model && this.topologyTracker) {
@@ -214,6 +216,7 @@ class SLDEditor {
     this.propertiesPanel.setup();
     this.toolbarManager.setupToolbar();
     this.keyboardManager.setupKeyboardShortcuts();
+    if (this.batchRenameManager) this.batchRenameManager.setup();
     this.setupVoltageColorsModal();
 
     // 3. Load Diagram Data from Server or Seed Data
@@ -226,16 +229,16 @@ class SLDEditor {
   setupCanvasEvents() {
     const paperEl = this.paper.el;
 
+    // Space Key Down -> Enable Pan Mode
     window.addEventListener("keydown", (e) => {
       if (
         e.code === "Space" &&
-        e.target.tagName !== "INPUT" &&
-        e.target.tagName !== "TEXTAREA"
+        !this.isSpacePressed &&
+        !this.isTextInputFocused()
       ) {
-        if (!this.selectedCells || this.selectedCells.length === 0) {
-          this.isSpacePressed = true;
-          paperEl.style.cursor = "grab";
-        }
+        this.isSpacePressed = true;
+        paperEl.style.cursor = "grab";
+        e.preventDefault();
       }
     });
 
@@ -249,56 +252,8 @@ class SLDEditor {
     });
 
     // Mouse Move -> Status Coordinates & Pan Drag & Area Selection Drag & T-Branch Live Preview
+    let mouseMoveThrottle = false;
     paperEl.addEventListener("mousemove", (e) => {
-      const p = this.paper.clientToLocalPoint({ x: e.clientX, y: e.clientY });
-
-      const coordEl = document.getElementById("status-coord");
-      if (coordEl) {
-        coordEl.innerText = "X: " + Math.round(p.x) + ", Y: " + Math.round(p.y);
-      }
-
-      // Live T-Branch Preview when dragging a wire or using Wire Tool
-      const drawingSrc =
-        (this._activeDrawingLink && this._activeDrawingLink.get("source")) ||
-        (this.activeTool === "wire" ? this._wireSource : null);
-
-      if (drawingSrc && drawingSrc.id) {
-        const found = this.tJunctionManager.findTBranchTarget(
-          p,
-          drawingSrc,
-          50,
-        );
-
-        if (found) {
-          const jx = found.projection.x;
-          const jy = found.projection.y;
-          const srcEl = this.graph.getCell(drawingSrc.id);
-
-          if (this._activeDrawingLink) {
-            this._activeDrawingLink.set({
-              target: { x: jx, y: jy },
-              vertices: [],
-            });
-          }
-
-          const wireColor =
-            this.topologyTracker.getElementVoltageColor(srcEl) || "#377DFF";
-          this.tJunctionManager.showTBranchPreview({ x: jx, y: jy }, wireColor);
-          this._snappedTBranch = {
-            link: found.link,
-            projection: { x: jx, y: jy },
-            source: drawingSrc,
-          };
-        } else {
-          this.tJunctionManager.hideTBranchPreview();
-          this._snappedTBranch = null;
-        }
-      } else {
-        this.tJunctionManager.hideTBranchPreview();
-        this._snappedTBranch = null;
-      }
-
-      // Pan drag handling
       if (this.isPanning) {
         const dx = e.clientX - this.panStart.x;
         const dy = e.clientY - this.panStart.y;
@@ -306,10 +261,71 @@ class SLDEditor {
         this.origin.y += dy;
         this.panStart = { x: e.clientX, y: e.clientY };
         this.paper.setOrigin(this.origin.x, this.origin.y);
-        this.updateMinimap();
-      } else if (this.selectionManager.isAreaSelecting) {
-        this.selectionManager.updateAreaSelection(e.clientX, e.clientY);
+        this.requestMinimapUpdate();
+        return;
       }
+
+      if (this.selectionManager.isAreaSelecting) {
+        this.selectionManager.updateAreaSelection(e.clientX, e.clientY);
+        return;
+      }
+
+      if (mouseMoveThrottle) return;
+      mouseMoveThrottle = true;
+      requestAnimationFrame(() => {
+        mouseMoveThrottle = false;
+        const p = this.paper.clientToLocalPoint({ x: e.clientX, y: e.clientY });
+
+        const coordEl = document.getElementById("status-coord");
+        if (coordEl) {
+          coordEl.innerText =
+            "X: " + Math.round(p.x) + ", Y: " + Math.round(p.y);
+        }
+
+        // Live T-Branch Preview when dragging a wire or using Wire Tool
+        const drawingSrc =
+          (this._activeDrawingLink && this._activeDrawingLink.get("source")) ||
+          (this.activeTool === "wire" ? this._wireSource : null);
+
+        if (drawingSrc && drawingSrc.id) {
+          const found = this.tJunctionManager.findTBranchTarget(
+            p,
+            drawingSrc,
+            50,
+          );
+
+          if (found) {
+            const jx = found.projection.x;
+            const jy = found.projection.y;
+            const srcEl = this.graph.getCell(drawingSrc.id);
+
+            if (this._activeDrawingLink) {
+              this._activeDrawingLink.set({
+                target: { x: jx, y: jy },
+                vertices: [],
+              });
+            }
+
+            const wireColor =
+              this.topologyTracker.getElementVoltageColor(srcEl) || "#377DFF";
+            this.tJunctionManager.showTBranchPreview(
+              { x: jx, y: jy },
+              wireColor,
+            );
+            this._snappedTBranch = {
+              link: found.link,
+              projection: { x: jx, y: jy },
+              source: drawingSrc,
+            };
+          } else {
+            this.tJunctionManager.hideTBranchPreview();
+            this._snappedTBranch = null;
+          }
+        } else {
+          this.tJunctionManager.hideTBranchPreview();
+          this._snappedTBranch = null;
+        }
+      });
     });
 
     // Mousedown -> Pan Start or Area Selection Start
@@ -1144,7 +1160,7 @@ class SLDEditor {
 
   getPaperPoint(clientX, clientY) {
     const p = this.paper.clientToLocalPoint({ x: clientX, y: clientY });
-    const gridSize = this.options.gridSize || 10;
+    const gridSize = this.options.gridSize || 5;
     return {
       x: Math.round(p.x / gridSize) * gridSize,
       y: Math.round(p.y / gridSize) * gridSize,
@@ -1698,6 +1714,12 @@ class SLDEditor {
     this.topologyTracker.applyStyles(this.paper);
     this.updateMinimap();
     this.scheduleAutoSave();
+  }
+
+  openBatchRenameModal(cells = null) {
+    if (this.batchRenameManager) {
+      this.batchRenameManager.openModal(cells);
+    }
   }
 }
 

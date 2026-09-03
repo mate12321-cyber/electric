@@ -231,9 +231,8 @@ class PaletteManager {
         height = 40;
     }
 
-    // Snap connection point (primary port) to grid (10px)
-    const gridSize =
-      (this.editor.options && this.editor.options.gridSize) || 10;
+    // Snap connection point (primary port) to grid
+    const gridSize = (this.editor.options && this.editor.options.gridSize) || 5;
     const snapOffset = this.getPrimaryPortOffset(
       type,
       width,

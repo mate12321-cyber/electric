@@ -8,7 +8,7 @@ class HistoryManager {
     this.history = [];
     this.historyIndex = -1;
     this.isHistoryTracking = true;
-    this.maxHistory = 50;
+    this.maxHistory = 20;
   }
 
   pushHistory() {

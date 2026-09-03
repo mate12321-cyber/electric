@@ -166,6 +166,21 @@ class KeyboardManager {
         return;
       }
 
+      // 11. Batch Rename / Find & Replace: Ctrl/Cmd + H (or ㅗ) or F2
+      if (
+        (isCtrlOrMeta && isKey("KeyH", "h", ["ㅗ"])) ||
+        code === "F2" ||
+        e.key === "F2"
+      ) {
+        e.preventDefault();
+        if (this.editor.batchRenameManager) {
+          this.editor.batchRenameManager.openModal();
+        } else if (typeof this.editor.openBatchRenameModal === "function") {
+          this.editor.openBatchRenameModal();
+        }
+        return;
+      }
+
       // 11. Arrow Keys: Nudge selected symbols (10px or Shift+50px)
       if (
         code === "ArrowUp" ||

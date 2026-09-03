@@ -27,6 +27,20 @@ class ToolbarManager {
       });
     });
 
+    // Toolbar Batch Rename button
+    const btnBatchRenameToolbar = document.getElementById(
+      "btn-batch-rename-toolbar",
+    );
+    if (btnBatchRenameToolbar) {
+      btnBatchRenameToolbar.addEventListener("click", () => {
+        if (this.editor.batchRenameManager) {
+          this.editor.batchRenameManager.openModal();
+        } else if (typeof this.editor.openBatchRenameModal === "function") {
+          this.editor.openBatchRenameModal();
+        }
+      });
+    }
+
     // Toolbar Delete button
     const btnDeleteToolbar = document.getElementById("btn-delete-toolbar");
     if (btnDeleteToolbar) {

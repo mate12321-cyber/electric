@@ -131,7 +131,7 @@
         },
         nameLabel: {
           text: "154kV DS",
-          refX: 34,
+          refX: 28,
           refY: "25%",
           textAnchor: "start",
           textVerticalAnchor: "middle",
@@ -141,7 +141,7 @@
         },
         specLabel: {
           text: "2000A",
-          refX: 34,
+          refX: 28,
           refY: "65%",
           textAnchor: "start",
           textVerticalAnchor: "middle",
@@ -177,26 +177,42 @@
         this.on("change:sldData", this.updateContactVisual, this);
         this.on("change:size", this.updateContactVisual, this);
       },
-      updateContactVisual: function () {
+      updateContactVisual: function (
+        effectiveState,
+        topologyState,
+        activeVoltageColor,
+      ) {
         const data = this.get("sldData") || {};
-        const state = (data.state || "LIVE").toUpperCase();
-        const color = data.color || "#7A3E9D";
+        const contactState = (
+          effectiveState ||
+          data.state ||
+          "CLOSED"
+        ).toUpperCase();
+        const topState = (
+          topologyState || (contactState === "OPEN" ? "DEAD" : "LIVE")
+        ).toUpperCase();
 
-        const isLive = state === "LIVE" || state === "CLOSED";
+        const isContactClosed =
+          contactState === "CLOSED" ||
+          contactState === "LIVE" ||
+          contactState === "ON";
         const isGrounded =
-          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
+          topState === "GROUNDED" ||
+          contactState === "GROUNDED" ||
+          contactState === "GROUND" ||
+          contactState === "EARTH";
+        const isDead = topState === "DEAD" || !isContactClosed;
 
-        let strokeColor = color;
-        let bladeD = "M 18.5 6 L 18.5 34";
-        let showGround = "none";
-
-        if (isGrounded) {
-          strokeColor = "#84CC16";
-          showGround = "block";
-        } else if (!isLive) {
-          strokeColor = "#94a3b8";
-          bladeD = "M 18.5 6 L 26 30";
-        }
+        const baseColor = activeVoltageColor || data.color || "#7A3E9D";
+        let strokeColor = isGrounded
+          ? "#84CC16"
+          : isDead
+            ? "#94a3b8"
+            : baseColor;
+        let bladeD = isContactClosed
+          ? "M 18.5 6 L 18.5 34"
+          : "M 18.5 6 L 26 30";
+        let showGround = isGrounded ? "block" : "none";
 
         this.attr({
           inLine: { stroke: strokeColor },
@@ -207,6 +223,11 @@
           groundSymbol: { display: showGround, fill: "#84CC16" },
           nameLabel: { text: data.name || "DS" },
           specLabel: { text: data.current ? data.current + "A" : "" },
+        });
+
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", strokeColor);
         });
       },
     },

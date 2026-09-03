@@ -52,8 +52,7 @@ class BusbarManager {
 
     if (!sourceCell || !targetCell) return;
 
-    const gridSize =
-      (this.editor.options && this.editor.options.gridSize) || 10;
+    const gridSize = (this.editor.options && this.editor.options.gridSize) || 5;
     const allLinks = this.editor.graph.getLinks();
 
     // Case 1: Target is Busbar
@@ -110,6 +109,12 @@ class BusbarManager {
         busbar.portProp(currentPortId, "args/x", portX);
         busbar.portProp(currentPortId, "args/y", busSize.height / 2);
       }
+
+      link.set("vertices", []);
+      const linkView = this.editor.paper
+        ? this.editor.paper.findViewByModel(link)
+        : null;
+      if (linkView && typeof linkView.update === "function") linkView.update();
     }
 
     // Case 2: Source is Busbar
@@ -165,7 +170,15 @@ class BusbarManager {
         busbar.portProp(currentPortId, "args/x", portX);
         busbar.portProp(currentPortId, "args/y", busSize.height / 2);
       }
+
+      link.set("vertices", []);
+      const linkView = this.editor.paper
+        ? this.editor.paper.findViewByModel(link)
+        : null;
+      if (linkView && typeof linkView.update === "function") linkView.update();
     }
+
+    this.cleanupUnusedBusbarPorts();
   }
 
   cleanupUnusedBusbarPorts() {
@@ -200,8 +213,7 @@ class BusbarManager {
 
   syncConnectedBusbarPorts(element) {
     if (!element || !element.isElement || !element.isElement()) return;
-    const gridSize =
-      (this.editor.options && this.editor.options.gridSize) || 10;
+    const gridSize = (this.editor.options && this.editor.options.gridSize) || 5;
     const isBus =
       element.get("type") === "sld.Busbar" ||
       element.get("sldData")?.type === "BUSBAR";

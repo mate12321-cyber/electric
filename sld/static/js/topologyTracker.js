@@ -759,7 +759,11 @@ class PowerSystemTopologyTracker {
 
       // If it is a switch/breaker, update visual contact state
       if (typeof el.updateContactVisual === "function") {
-        el.updateContactVisual(sldData.state, status.state);
+        el.updateContactVisual(
+          sldData.state,
+          status.state,
+          status.voltageColor,
+        );
       }
       // If it is a transformer, update visual based on topological state
       if (
@@ -792,6 +796,16 @@ class PowerSystemTopologyTracker {
       ) {
         el.updateVisual(status.state || sldData.state || "LIVE");
       }
+      // If it is a load or motor, update visual based on topological state
+      if (
+        typeof el.updateVisual === "function" &&
+        (sldData.type === "LOAD" ||
+          sldData.type === "MOTOR" ||
+          el.get("type") === "sld.Load" ||
+          el.get("type") === "sld.Motor")
+      ) {
+        el.updateVisual(status.state, status.voltageColor);
+      }
       // If it is a junction node, update visual based on topological state
       if (sldData.type === "JUNCTION" || el.get("type") === "sld.Junction") {
         const fillColor = status.isConflict
@@ -805,6 +819,24 @@ class PowerSystemTopologyTracker {
         if (typeof el.updateVisual === "function") {
           el.updateVisual(status.state, status.voltageColor);
         }
+      }
+
+      // Sync non-busbar port circle stroke colors to match element state
+      if (
+        typeof el.getPorts === "function" &&
+        el.get("type") !== "sld.Busbar" &&
+        sldData.type !== "BUSBAR"
+      ) {
+        const ports = el.getPorts() || [];
+        const portStroke =
+          status.state === "GROUNDED"
+            ? "#84CC16"
+            : status.state === "LIVE" && sldData.state !== "OPEN"
+              ? status.voltageColor || sldData.color || "#377DFF"
+              : "#94a3b8";
+        ports.forEach((p) => {
+          el.portProp(p.id, "attrs/circle/stroke", portStroke);
+        });
       }
     });
 

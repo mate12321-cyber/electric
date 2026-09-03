@@ -102,6 +102,27 @@ class TJunctionManager {
       }
     }
 
+    // If hovering directly over or near a busbar, do not trigger wire T-branch preview
+    const busbars = this.editor.graph
+      .getElements()
+      .filter(
+        (el) =>
+          el.get("type") === "sld.Busbar" ||
+          el.get("sldData")?.type === "BUSBAR",
+      );
+    for (const bus of busbars) {
+      const bPos = bus.position();
+      const bSize = bus.size();
+      if (
+        paperPoint.x >= bPos.x - 5 &&
+        paperPoint.x <= bPos.x + bSize.width + 5 &&
+        paperPoint.y >= bPos.y - 10 &&
+        paperPoint.y <= bPos.y + bSize.height + 10
+      ) {
+        return null;
+      }
+    }
+
     const links = this.editor.graph.getLinks();
     let bestMatch = null;
     let bestDist = maxDist;

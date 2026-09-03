@@ -66,7 +66,7 @@ def get_default_sld_schema():
         'groups': {
             'bus-ports': {
                 'position': {'name': 'absolute'},
-                'attrs': {'circle': {'r': 3.5, 'magnet': True, 'fill': '#ffffff', 'stroke': '#9C27B0', 'strokeWidth': 1.5}}
+                'attrs': {'circle': {'r': 3.5, 'magnet': False, 'fill': '#ffffff', 'stroke': '#9C27B0', 'strokeWidth': 1.5}}
             }
         },
         'items': [
@@ -95,7 +95,7 @@ def get_default_sld_schema():
     ))
 
     bus04a_ports = {
-        'groups': {'bus-ports': {'position': {'name': 'absolute'}, 'attrs': {'circle': {'r': 3.5, 'magnet': True, 'fill': '#fff', 'stroke': '#059669', 'strokeWidth': 1.5}}}},
+        'groups': {'bus-ports': {'position': {'name': 'absolute'}, 'attrs': {'circle': {'r': 3.5, 'magnet': False, 'fill': '#fff', 'stroke': '#059669', 'strokeWidth': 1.5}}}},
         'items': [
             {'id': 'p1', 'group': 'bus-ports', 'args': {'x': 40, 'y': 5}},
             {'id': 'p_tr', 'group': 'bus-ports', 'args': {'x': 100, 'y': 5}},
@@ -140,7 +140,7 @@ def get_default_sld_schema():
     ))
 
     bus04b_ports = {
-        'groups': {'bus-ports': {'position': {'name': 'absolute'}, 'attrs': {'circle': {'r': 3.5, 'magnet': True, 'fill': '#fff', 'stroke': '#059669', 'strokeWidth': 1.5}}}},
+        'groups': {'bus-ports': {'position': {'name': 'absolute'}, 'attrs': {'circle': {'r': 3.5, 'magnet': False, 'fill': '#fff', 'stroke': '#059669', 'strokeWidth': 1.5}}}},
         'items': [
             {'id': 'p1', 'group': 'bus-ports', 'args': {'x': 40, 'y': 5}},
             {'id': 'p_tr', 'group': 'bus-ports', 'args': {'x': 100, 'y': 5}},
@@ -185,7 +185,7 @@ def get_default_sld_schema():
     ))
 
     bus04c_ports = {
-        'groups': {'bus-ports': {'position': {'name': 'absolute'}, 'attrs': {'circle': {'r': 3.5, 'magnet': True, 'fill': '#fff', 'stroke': '#059669', 'strokeWidth': 1.5}}}},
+        'groups': {'bus-ports': {'position': {'name': 'absolute'}, 'attrs': {'circle': {'r': 3.5, 'magnet': False, 'fill': '#fff', 'stroke': '#059669', 'strokeWidth': 1.5}}}},
         'items': [
             {'id': 'p1', 'group': 'bus-ports', 'args': {'x': 40, 'y': 5}},
             {'id': 'p_tr', 'group': 'bus-ports', 'args': {'x': 100, 'y': 5}},
@@ -261,7 +261,7 @@ def get_default_sld_schema():
 
     # 0.4kV UPS Busbar
     bus_ups_ports = {
-        'groups': {'bus-ports': {'position': {'name': 'absolute'}, 'attrs': {'circle': {'r': 3.5, 'magnet': True, 'fill': '#fff', 'stroke': '#059669', 'strokeWidth': 1.5}}}},
+        'groups': {'bus-ports': {'position': {'name': 'absolute'}, 'attrs': {'circle': {'r': 3.5, 'magnet': False, 'fill': '#fff', 'stroke': '#059669', 'strokeWidth': 1.5}}}},
         'items': [
             {'id': 'p_in', 'group': 'bus-ports', 'args': {'x': 0, 'y': 4}},
             {'id': 'p1', 'group': 'bus-ports', 'args': {'x': 50, 'y': 8}},
@@ -309,7 +309,7 @@ def get_default_sld_schema():
         'version': '2.0',
         'meta': {
             'title': '프로젝트 01 - 154kV 수전 단선도',
-            'gridSize': 10,
+            'gridSize': 5,
             'viewport': {'zoom': 1.0, 'x': 0, 'y': 0}
         },
         'elements': elements,

@@ -2,7 +2,7 @@
   "version": "2.0",
   "meta": {
     "title": "프로젝트 01 - 154kV 수전 단선도",
-    "gridSize": 10,
+    "gridSize": 5,
     "viewport": {
       "zoom": 1.0,
       "x": 0,

@@ -163,7 +163,7 @@
 
       if (isTgtJunction) {
         if (srcDir === "BOTTOM") {
-          if (sy <= ty) return sx === tx ? [] : [{ x: sx, y: ty }];
+          if (sy <= ty) return Math.abs(sx - tx) <= 5 ? [] : [{ x: sx, y: ty }];
           const safeY = snapCeil(
             (srcBBox ? srcBBox.y + srcBBox.height : sy) + 20,
           );
@@ -173,7 +173,7 @@
           ];
         }
         if (srcDir === "TOP") {
-          if (sy >= ty) return sx === tx ? [] : [{ x: sx, y: ty }];
+          if (sy >= ty) return Math.abs(sx - tx) <= 5 ? [] : [{ x: sx, y: ty }];
           const safeY = snapFloor((srcBBox ? srcBBox.y : sy) - 20);
           return [
             { x: sx, y: safeY },
@@ -181,7 +181,7 @@
           ];
         }
         if (srcDir === "LEFT") {
-          if (sx >= tx) return sy === ty ? [] : [{ x: tx, y: sy }];
+          if (sx >= tx) return Math.abs(sy - ty) <= 5 ? [] : [{ x: tx, y: sy }];
           const safeX = snapFloor((srcBBox ? srcBBox.x : sx) - 20);
           return [
             { x: safeX, y: sy },
@@ -189,7 +189,7 @@
           ];
         }
         if (srcDir === "RIGHT") {
-          if (sx <= tx) return sy === ty ? [] : [{ x: tx, y: sy }];
+          if (sx <= tx) return Math.abs(sy - ty) <= 5 ? [] : [{ x: tx, y: sy }];
           const safeX = snapCeil(
             (srcBBox ? srcBBox.x + srcBBox.width : sx) + 20,
           );
@@ -198,12 +198,14 @@
             { x: safeX, y: ty },
           ];
         }
-        return sx === tx || sy === ty ? [] : [{ x: sx, y: ty }];
+        return Math.abs(sx - tx) <= 5 || Math.abs(sy - ty) <= 5
+          ? []
+          : [{ x: sx, y: ty }];
       }
 
       if (isSrcJunction) {
         if (tgtDir === "TOP") {
-          if (sy <= ty) return sx === tx ? [] : [{ x: tx, y: sy }];
+          if (sy <= ty) return Math.abs(sx - tx) <= 5 ? [] : [{ x: tx, y: sy }];
           const safeY = snapFloor((tgtBBox ? tgtBBox.y : ty) - 20);
           return [
             { x: sx, y: safeY },
@@ -211,7 +213,7 @@
           ];
         }
         if (tgtDir === "BOTTOM") {
-          if (sy >= ty) return sx === tx ? [] : [{ x: tx, y: sy }];
+          if (sy >= ty) return Math.abs(sx - tx) <= 5 ? [] : [{ x: tx, y: sy }];
           const safeY = snapCeil(
             (tgtBBox ? tgtBBox.y + tgtBBox.height : ty) + 20,
           );
@@ -221,7 +223,7 @@
           ];
         }
         if (tgtDir === "LEFT") {
-          if (sx <= tx) return sy === ty ? [] : [{ x: sx, y: ty }];
+          if (sx <= tx) return Math.abs(sy - ty) <= 5 ? [] : [{ x: sx, y: ty }];
           const safeX = snapFloor((tgtBBox ? tgtBBox.x : tx) - 20);
           return [
             { x: safeX, y: sy },
@@ -229,7 +231,7 @@
           ];
         }
         if (tgtDir === "RIGHT") {
-          if (sx >= tx) return sy === ty ? [] : [{ x: sx, y: ty }];
+          if (sx >= tx) return Math.abs(sy - ty) <= 5 ? [] : [{ x: sx, y: ty }];
           const safeX = snapCeil(
             (tgtBBox ? tgtBBox.x + tgtBBox.width : tx) + 20,
           );
@@ -238,7 +240,9 @@
             { x: safeX, y: ty },
           ];
         }
-        return sx === tx || sy === ty ? [] : [{ x: tx, y: sy }];
+        return Math.abs(sx - tx) <= 5 || Math.abs(sy - ty) <= 5
+          ? []
+          : [{ x: tx, y: sy }];
       }
 
       // 2. Same direction connections ('ㄷ' shape bypass)

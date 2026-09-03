@@ -93,28 +93,38 @@
         this.on("change:sldData", this.updateContactVisual, this);
         this.on("change:size", this.updateContactVisual, this);
       },
-      updateContactVisual: function () {
+      updateContactVisual: function (
+        effectiveState,
+        topologyState,
+        activeVoltageColor,
+      ) {
         const data = this.get("sldData") || {};
-        const state = (data.state || "LIVE").toUpperCase();
-        const color = data.color || "#377DFF";
+        const contactState = (
+          effectiveState ||
+          data.state ||
+          "CLOSED"
+        ).toUpperCase();
+        const topState = (
+          topologyState || (contactState === "OPEN" ? "DEAD" : "LIVE")
+        ).toUpperCase();
+
+        const isContactClosed =
+          contactState === "CLOSED" ||
+          contactState === "LIVE" ||
+          contactState === "ON";
+        const isGrounded =
+          topState === "GROUNDED" ||
+          contactState === "GROUNDED" ||
+          contactState === "GROUND" ||
+          contactState === "EARTH";
+        const isDead = topState === "DEAD" || !isContactClosed;
+
+        const baseColor = activeVoltageColor || data.color || "#377DFF";
         const sz = this.get("size") || { width: 28, height: 40 };
 
-        const isLive = state === "LIVE" || state === "CLOSED";
-        const isGrounded =
-          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
-
-        let boxFill = "#000000";
-        let boxStroke = color;
-        let showGround = "none";
-
-        if (isGrounded) {
-          boxFill = "#84CC16";
-          boxStroke = "#84CC16";
-          showGround = "block";
-        } else if (!isLive) {
-          boxFill = "#94a3b8";
-          boxStroke = "#94a3b8";
-        }
+        let boxFill = isGrounded ? "#84CC16" : isDead ? "#94a3b8" : "#000000";
+        let boxStroke = isGrounded ? "#84CC16" : isDead ? "#94a3b8" : baseColor;
+        let showGround = isGrounded ? "block" : "none";
 
         this.attr({
           box: {
@@ -126,6 +136,11 @@
           groundSymbol: { display: showGround, fill: "#ffffff" },
           nameLabel: { text: data.name || "CB" },
           specLabel: { text: data.current ? data.current + "A" : "" },
+        });
+
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", boxStroke);
         });
       },
     },
@@ -226,27 +241,40 @@
         this.on("change:sldData", this.updateContactVisual, this);
         this.on("change:size", this.updateContactVisual, this);
       },
-      updateContactVisual: function () {
+      updateContactVisual: function (
+        effectiveState,
+        topologyState,
+        activeVoltageColor,
+      ) {
         const data = this.get("sldData") || {};
-        const state = (data.state || "LIVE").toUpperCase();
-        const color = data.color || "#377DFF";
+        const contactState = (
+          effectiveState ||
+          data.state ||
+          "CLOSED"
+        ).toUpperCase();
+        const topState = (
+          topologyState || (contactState === "OPEN" ? "DEAD" : "LIVE")
+        ).toUpperCase();
 
-        const isLive = state === "LIVE" || state === "CLOSED";
+        const isContactClosed =
+          contactState === "CLOSED" ||
+          contactState === "LIVE" ||
+          contactState === "ON";
         const isGrounded =
-          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
+          topState === "GROUNDED" ||
+          contactState === "GROUNDED" ||
+          contactState === "GROUND" ||
+          contactState === "EARTH";
+        const isDead = topState === "DEAD" || !isContactClosed;
 
-        let fillColor = "#000000";
-        let strokeColor = color;
-        let showGround = "none";
-
-        if (isGrounded) {
-          fillColor = "#84CC16";
-          strokeColor = "#84CC16";
-          showGround = "block";
-        } else if (!isLive) {
-          fillColor = "#94a3b8";
-          strokeColor = "#94a3b8";
-        }
+        const baseColor = activeVoltageColor || data.color || "#377DFF";
+        let fillColor = isGrounded ? "#84CC16" : isDead ? "#94a3b8" : "#000000";
+        let strokeColor = isGrounded
+          ? "#84CC16"
+          : isDead
+            ? "#94a3b8"
+            : baseColor;
+        let showGround = isGrounded ? "block" : "none";
 
         this.attr({
           crescent: { fill: fillColor, stroke: strokeColor },
@@ -255,6 +283,11 @@
           groundSymbol: { display: showGround, fill: "#ffffff" },
           nameLabel: { text: data.name || "ACB" },
           specLabel: { text: data.current ? data.current + "A" : "" },
+        });
+
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", strokeColor);
         });
       },
     },
@@ -351,27 +384,40 @@
         this.on("change:sldData", this.updateContactVisual, this);
         this.on("change:size", this.updateContactVisual, this);
       },
-      updateContactVisual: function () {
+      updateContactVisual: function (
+        effectiveState,
+        topologyState,
+        activeVoltageColor,
+      ) {
         const data = this.get("sldData") || {};
-        const state = (data.state || "LIVE").toUpperCase();
-        const color = data.color || "#377DFF";
+        const contactState = (
+          effectiveState ||
+          data.state ||
+          "CLOSED"
+        ).toUpperCase();
+        const topState = (
+          topologyState || (contactState === "OPEN" ? "DEAD" : "LIVE")
+        ).toUpperCase();
 
-        const isLive = state === "LIVE" || state === "CLOSED";
+        const isContactClosed =
+          contactState === "CLOSED" ||
+          contactState === "LIVE" ||
+          contactState === "ON";
         const isGrounded =
-          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
+          topState === "GROUNDED" ||
+          contactState === "GROUNDED" ||
+          contactState === "GROUND" ||
+          contactState === "EARTH";
+        const isDead = topState === "DEAD" || !isContactClosed;
 
-        let fillColor = "#000000";
-        let strokeColor = color;
-        let showGround = "none";
-
-        if (isGrounded) {
-          fillColor = "#84CC16";
-          strokeColor = "#84CC16";
-          showGround = "block";
-        } else if (!isLive) {
-          fillColor = "#94a3b8";
-          strokeColor = "#94a3b8";
-        }
+        const baseColor = activeVoltageColor || data.color || "#377DFF";
+        let fillColor = isGrounded ? "#84CC16" : isDead ? "#94a3b8" : "#000000";
+        let strokeColor = isGrounded
+          ? "#84CC16"
+          : isDead
+            ? "#94a3b8"
+            : baseColor;
+        let showGround = isGrounded ? "block" : "none";
 
         this.attr({
           topLead: { stroke: strokeColor },
@@ -380,6 +426,11 @@
           groundSymbol: { display: showGround, fill: "#ffffff" },
           nameLabel: { text: data.name || "MCCB" },
           specLabel: { text: data.current ? data.current + "A" : "" },
+        });
+
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", strokeColor);
         });
       },
     },

@@ -48,15 +48,58 @@
           >
         </div>
         <div
-          style="font-size: 11px; color: #475569; line-height: 1.4"
+          style="
+            font-size: 11px;
+            color: #475569;
+            line-height: 1.4;
+            margin-bottom: 8px;
+          "
           id="prop-multi-summary-text"
         >
-          선택된 심볼들의 상태 변경(투입/개방/접지) 및 일괄 삭제가 가능합니다.
+          선택된 심볼들의 이름 일괄 치환, 상태 변경(투입/개방/접지) 및 일괄
+          삭제가 가능합니다.
         </div>
+        <button
+          type="button"
+          class="sld-btn sld-btn-primary"
+          id="btn-prop-batch-rename"
+          style="
+            width: 100%;
+            justify-content: center;
+            font-size: 11px;
+            padding: 5px 8px;
+            font-weight: 600;
+          "
+        >
+          <span>🏷️</span>
+          <span>선택 설비 이름 일괄 변경 (Batch Rename)</span>
+        </button>
       </div>
 
       <div class="sld-form-group" id="group-prop-name">
-        <label class="sld-form-label">이름</label>
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+          "
+        >
+          <label class="sld-form-label" style="margin-bottom: 0">이름</label>
+          <a
+            href="javascript:void(0)"
+            id="btn-prop-open-rename"
+            style="
+              font-size: 11px;
+              color: #2563eb;
+              text-decoration: none;
+              font-weight: 600;
+            "
+            title="일괄 치환 / 이름 변경 창 열기 (Ctrl+H)"
+          >
+            일괄 치환 ➜
+          </a>
+        </div>
         <input
           type="text"
           class="sld-input"

@@ -174,6 +174,29 @@ class PropertiesPanel {
       });
     }
 
+    // Batch Rename Triggers
+    const btnPropBatchRename = document.getElementById("btn-prop-batch-rename");
+    if (btnPropBatchRename) {
+      btnPropBatchRename.addEventListener("click", () => {
+        if (this.editor.batchRenameManager) {
+          this.editor.batchRenameManager.openModal();
+        } else if (typeof this.editor.openBatchRenameModal === "function") {
+          this.editor.openBatchRenameModal();
+        }
+      });
+    }
+
+    const btnPropOpenRename = document.getElementById("btn-prop-open-rename");
+    if (btnPropOpenRename) {
+      btnPropOpenRename.addEventListener("click", () => {
+        if (this.editor.batchRenameManager) {
+          this.editor.batchRenameManager.openModal();
+        } else if (typeof this.editor.openBatchRenameModal === "function") {
+          this.editor.openBatchRenameModal();
+        }
+      });
+    }
+
     // Color Quick Palette in Property Style Tab
     const paletteColors = document.querySelectorAll(".prop-color-picker");
     paletteColors.forEach((cp) => {

@@ -57,6 +57,13 @@ class SLDSerializer {
         ? rawType.replace("sld.", "")
         : rawType;
 
+      const cleanData = {};
+      for (const [k, v] of Object.entries(sldData)) {
+        if (v !== undefined && v !== null && v !== "" && k !== "lineColor") {
+          cleanData[k] = v;
+        }
+      }
+
       const elObj = {
         id: el.id,
         type: typeName,
@@ -64,24 +71,27 @@ class SLDSerializer {
         y: Math.round(pos.y),
         w: Math.round(sz.width),
         h: Math.round(sz.height),
-        data: sldData,
+        data: cleanData,
       };
 
-      // Busbar or dynamic ports
-      const ports = el.get("ports");
-      if (
-        ports &&
-        ports.items &&
-        Array.isArray(ports.items) &&
-        ports.items.length > 0
-      ) {
-        elObj.ports = ports.items.map((p) => ({
-          id: p.id,
-          group: p.group || "bus-ports",
-          args: p.args
-            ? { x: Math.round(p.args.x || 0), y: Math.round(p.args.y || 0) }
-            : undefined,
-        }));
+      // Only serialize dynamic ports for Busbars (static equipment use symbol definition ports)
+      const isBusbar = typeName === "Busbar" || sldData.type === "BUSBAR";
+      if (isBusbar) {
+        const ports = el.get("ports");
+        if (
+          ports &&
+          ports.items &&
+          Array.isArray(ports.items) &&
+          ports.items.length > 0
+        ) {
+          elObj.ports = ports.items.map((p) => ({
+            id: p.id,
+            group: p.group || "bus-ports",
+            args: p.args
+              ? { x: Math.round(p.args.x || 0), y: Math.round(p.args.y || 0) }
+              : undefined,
+          }));
+        }
       }
 
       elements.push(elObj);

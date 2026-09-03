@@ -108,6 +108,7 @@ class SLDEditor {
     this.paletteManager = new PaletteManager(this);
     this.toolbarManager = new ToolbarManager(this);
     this.keyboardManager = new KeyboardManager(this);
+    this.batchRenameManager = new BatchRenameManager(this);
 
     this.init();
   }
@@ -214,6 +215,7 @@ class SLDEditor {
     this.propertiesPanel.setup();
     this.toolbarManager.setupToolbar();
     this.keyboardManager.setupKeyboardShortcuts();
+    if (this.batchRenameManager) this.batchRenameManager.setup();
     this.setupVoltageColorsModal();
 
     // 3. Load Diagram Data from Server or Seed Data
@@ -1698,6 +1700,12 @@ class SLDEditor {
     this.topologyTracker.applyStyles(this.paper);
     this.updateMinimap();
     this.scheduleAutoSave();
+  }
+
+  openBatchRenameModal(cells = null) {
+    if (this.batchRenameManager) {
+      this.batchRenameManager.openModal(cells);
+    }
   }
 }
 

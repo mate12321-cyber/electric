@@ -247,10 +247,27 @@
         this.updateVisual();
         this.on("change:sldData", this.updateVisual, this);
       },
-      updateVisual: function () {
+      updateVisual: function (effectiveState, voltageColor) {
         const data = this.get("sldData") || {};
+        const state = (effectiveState || data.state || "LIVE").toUpperCase();
+        const isLive = state === "LIVE" || state === "CLOSED";
+        const isGrounded =
+          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
+        const strokeColor = isGrounded
+          ? "#84CC16"
+          : isLive
+            ? voltageColor || data.color || "#64748b"
+            : "#94a3b8";
+
         this.attr({
+          lead: { stroke: strokeColor },
+          box: { stroke: strokeColor },
           nameLabel: { text: data.name || "부하" },
+        });
+
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", strokeColor);
         });
       },
     },
