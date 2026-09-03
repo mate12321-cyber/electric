@@ -77,7 +77,11 @@ class SelectionManager {
   }
 
   _onSelectedCellTransform() {
-    this.updateSelectionOverlay();
+    if (this._overlayRafId) return;
+    this._overlayRafId = requestAnimationFrame(() => {
+      this._overlayRafId = null;
+      this.updateSelectionOverlay();
+    });
   }
 
   updateSelectionOverlay() {
@@ -278,6 +282,10 @@ class SelectionManager {
   }
 
   removeSelectionOverlay() {
+    if (this._overlayRafId) {
+      cancelAnimationFrame(this._overlayRafId);
+      this._overlayRafId = null;
+    }
     const overlays = document.querySelectorAll(
       "#sld-selection-overlay, .sld-selection-overlay",
     );

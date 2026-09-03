@@ -151,15 +151,19 @@
       const isSrcJunction =
         srcCell &&
         (srcCell.get("type") === "sld.Junction" ||
-          srcCell.get("sldData")?.type === "JUNCTION");
+          srcCell.get("type") === "sld.Busbar" ||
+          srcCell.get("sldData")?.type === "JUNCTION" ||
+          srcCell.get("sldData")?.type === "BUSBAR");
       const isTgtJunction =
         tgtCell &&
         (tgtCell.get("type") === "sld.Junction" ||
-          tgtCell.get("sldData")?.type === "JUNCTION");
+          tgtCell.get("type") === "sld.Busbar" ||
+          tgtCell.get("sldData")?.type === "JUNCTION" ||
+          tgtCell.get("sldData")?.type === "BUSBAR");
 
       if (isTgtJunction) {
         if (srcDir === "BOTTOM") {
-          if (sy <= ty) return [{ x: sx, y: ty }];
+          if (sy <= ty) return sx === tx ? [] : [{ x: sx, y: ty }];
           const safeY = snapCeil(
             (srcBBox ? srcBBox.y + srcBBox.height : sy) + 20,
           );
@@ -169,7 +173,7 @@
           ];
         }
         if (srcDir === "TOP") {
-          if (sy >= ty) return [{ x: sx, y: ty }];
+          if (sy >= ty) return sx === tx ? [] : [{ x: sx, y: ty }];
           const safeY = snapFloor((srcBBox ? srcBBox.y : sy) - 20);
           return [
             { x: sx, y: safeY },
@@ -177,7 +181,7 @@
           ];
         }
         if (srcDir === "LEFT") {
-          if (sx >= tx) return [{ x: tx, y: sy }];
+          if (sx >= tx) return sy === ty ? [] : [{ x: tx, y: sy }];
           const safeX = snapFloor((srcBBox ? srcBBox.x : sx) - 20);
           return [
             { x: safeX, y: sy },
@@ -185,7 +189,7 @@
           ];
         }
         if (srcDir === "RIGHT") {
-          if (sx <= tx) return [{ x: tx, y: sy }];
+          if (sx <= tx) return sy === ty ? [] : [{ x: tx, y: sy }];
           const safeX = snapCeil(
             (srcBBox ? srcBBox.x + srcBBox.width : sx) + 20,
           );
@@ -194,12 +198,12 @@
             { x: safeX, y: ty },
           ];
         }
-        return [{ x: sx, y: ty }];
+        return sx === tx || sy === ty ? [] : [{ x: sx, y: ty }];
       }
 
       if (isSrcJunction) {
         if (tgtDir === "TOP") {
-          if (sy <= ty) return [{ x: tx, y: sy }];
+          if (sy <= ty) return sx === tx ? [] : [{ x: tx, y: sy }];
           const safeY = snapFloor((tgtBBox ? tgtBBox.y : ty) - 20);
           return [
             { x: sx, y: safeY },
@@ -207,7 +211,7 @@
           ];
         }
         if (tgtDir === "BOTTOM") {
-          if (sy >= ty) return [{ x: tx, y: sy }];
+          if (sy >= ty) return sx === tx ? [] : [{ x: tx, y: sy }];
           const safeY = snapCeil(
             (tgtBBox ? tgtBBox.y + tgtBBox.height : ty) + 20,
           );
@@ -217,7 +221,7 @@
           ];
         }
         if (tgtDir === "LEFT") {
-          if (sx <= tx) return [{ x: sx, y: ty }];
+          if (sx <= tx) return sy === ty ? [] : [{ x: sx, y: ty }];
           const safeX = snapFloor((tgtBBox ? tgtBBox.x : tx) - 20);
           return [
             { x: safeX, y: sy },
@@ -225,7 +229,7 @@
           ];
         }
         if (tgtDir === "RIGHT") {
-          if (sx >= tx) return [{ x: sx, y: ty }];
+          if (sx >= tx) return sy === ty ? [] : [{ x: sx, y: ty }];
           const safeX = snapCeil(
             (tgtBBox ? tgtBBox.x + tgtBBox.width : tx) + 20,
           );
@@ -234,7 +238,7 @@
             { x: safeX, y: ty },
           ];
         }
-        return [{ x: tx, y: sy }];
+        return sx === tx || sy === ty ? [] : [{ x: tx, y: sy }];
       }
 
       // 2. Same direction connections ('ㄷ' shape bypass)
@@ -711,6 +715,11 @@
         }
       }
 
+      // Straight aligned connections
+      if (sx === tx || sy === ty) {
+        return [];
+      }
+
       // Default Clean Step: Midpoint Y
       const midY = snap((sy + ty) / 2);
       return [
@@ -720,10 +729,40 @@
     };
   }
 
+  // Helper: Merge adjacent collinear segments into a single segment
+  function simplifyCollinearPoints(rawPts) {
+    if (!rawPts || rawPts.length <= 2) return rawPts || [];
+    const validPts = rawPts.filter(Boolean);
+    if (validPts.length <= 2) return validPts;
+
+    const result = [validPts[0]];
+    for (let i = 1; i < validPts.length - 1; i++) {
+      const prev = result[result.length - 1];
+      const curr = validPts[i];
+      const next = validPts[i + 1];
+
+      const isVert =
+        Math.abs(prev.x - curr.x) < 2 && Math.abs(curr.x - next.x) < 2;
+      const isHoriz =
+        Math.abs(prev.y - curr.y) < 2 && Math.abs(curr.y - next.y) < 2;
+      const isDup =
+        Math.abs(prev.x - curr.x) < 2 && Math.abs(prev.y - curr.y) < 2;
+
+      if (!isVert && !isHoriz && !isDup) {
+        result.push(curr);
+      }
+    }
+    result.push(validPts[validPts.length - 1]);
+    return result;
+  }
+
   // Helper: Retrieve all polyline points for a given link model
   function getLinkPolyline(link, paper) {
     if (!link) return null;
     const linkView = paper ? paper.findViewByModel(link) : null;
+    if (linkView && linkView._polyPoints && linkView._polyPoints.length >= 2) {
+      return linkView._polyPoints;
+    }
     let src = linkView && (linkView.sourceAnchor || linkView.sourcePoint);
     let tgt = linkView && (linkView.targetAnchor || linkView.targetPoint);
     let route = linkView && (linkView.route || linkView._route);
@@ -811,7 +850,15 @@
       }
     }
 
-    return [src, ...(route || []).filter(Boolean), tgt];
+    const calculatedPts = simplifyCollinearPoints([
+      src,
+      ...(route || []).filter(Boolean),
+      tgt,
+    ]);
+    if (linkView) {
+      linkView._polyPoints = calculatedPts;
+    }
+    return calculatedPts;
   }
 
   // 2. CAD Crossover Connector (Jumpover Arc on Crossings with Busbars & Other Links)
@@ -823,14 +870,38 @@
       opt,
       linkView,
     ) {
-      const pts = [
+      const rawPts = [
         sourcePoint,
         ...((routePoints && routePoints.filter(Boolean)) || []),
         targetPoint,
       ];
+      const pts = simplifyCollinearPoints(rawPts);
+      if (linkView) {
+        linkView._polyPoints = pts;
+      }
       if (pts.length < 2) {
         return `M ${sourcePoint.x} ${sourcePoint.y} L ${targetPoint.x} ${targetPoint.y}`;
       }
+
+      // Compute bounding box for current link (with allowance for arc bulge)
+      let linkMinX = Infinity,
+        linkMaxX = -Infinity,
+        linkMinY = Infinity,
+        linkMaxY = -Infinity;
+      for (let i = 0; i < pts.length; i++) {
+        const p = pts[i];
+        if (p.x < linkMinX) linkMinX = p.x;
+        if (p.x > linkMaxX) linkMaxX = p.x;
+        if (p.y < linkMinY) linkMinY = p.y;
+        if (p.y > linkMaxY) linkMaxY = p.y;
+      }
+      const pad = 15;
+      const linkBox = {
+        minX: linkMinX - pad,
+        maxX: linkMaxX + pad,
+        minY: linkMinY - pad,
+        maxY: linkMaxY + pad,
+      };
 
       const link = linkView && linkView.model;
       const paper = linkView && linkView.paper;
@@ -846,7 +917,7 @@
         const srcPort = link.get("source")?.port;
         const tgtPort = link.get("target")?.port;
 
-        // 1. Busbars
+        // 1. Busbars (with AABB pre-filtering)
         const elements =
           typeof graph.getElements === "function" ? graph.getElements() : [];
         elements.forEach((el) => {
@@ -858,55 +929,63 @@
           ) {
             const pos = el.position();
             const sz = el.size();
+            const bMinX = pos.x;
+            const bMaxX = pos.x + sz.width;
+            const bMinY = pos.y;
+            const bMaxY = pos.y + sz.height;
+
+            // Fast AABB check: skip if busbar box and link box do not overlap
+            if (
+              linkBox.maxX < bMinX ||
+              linkBox.minX > bMaxX ||
+              linkBox.maxY < bMinY ||
+              linkBox.minY > bMaxY
+            ) {
+              return;
+            }
+
             crossingBusbars.push({
               id: el.id,
-              x1: pos.x,
-              x2: pos.x + sz.width,
-              y1: pos.y,
-              y2: pos.y + sz.height,
+              x1: bMinX,
+              x2: bMaxX,
+              y1: bMinY,
+              y2: bMaxY,
               centerX: pos.x + sz.width / 2,
               centerY: pos.y + sz.height / 2,
             });
           }
         });
 
-        // 2. Other Links (Wires)
+        // 2. Other Links (Wires, with AABB pre-filtering)
         const allLinks =
           typeof graph.getLinks === "function" ? graph.getLinks() : [];
         allLinks.forEach((otherLink) => {
           if (!otherLink || otherLink.id === link.id) return;
 
-          // If links share an exact connection point (e.g. at a junction dot), ignore
-          const oSrc = otherLink.get("source") || {};
-          const oTgt = otherLink.get("target") || {};
-
-          const shareSrcSrc =
-            srcId &&
-            oSrc.id &&
-            srcId === oSrc.id &&
-            (!srcPort || srcPort === oSrc.port);
-          const shareSrcTgt =
-            srcId &&
-            oTgt.id &&
-            srcId === oTgt.id &&
-            (!srcPort || srcPort === oTgt.port);
-          const shareTgtSrc =
-            tgtId &&
-            oSrc.id &&
-            tgtId === oSrc.id &&
-            (!tgtPort || tgtPort === oSrc.port);
-          const shareTgtTgt =
-            tgtId &&
-            oTgt.id &&
-            tgtId === oTgt.id &&
-            (!tgtPort || tgtPort === oTgt.port);
-
-          if (shareSrcSrc || shareSrcTgt || shareTgtSrc || shareTgtTgt) {
-            return;
-          }
-
           const otherPts = getLinkPolyline(otherLink, paper);
           if (otherPts && otherPts.length >= 2) {
+            // Fast AABB check: skip other link if its bounding box does not overlap
+            let oMinX = Infinity,
+              oMaxX = -Infinity,
+              oMinY = Infinity,
+              oMaxY = -Infinity;
+            for (let k = 0; k < otherPts.length; k++) {
+              const op = otherPts[k];
+              if (op.x < oMinX) oMinX = op.x;
+              if (op.x > oMaxX) oMaxX = op.x;
+              if (op.y < oMinY) oMinY = op.y;
+              if (op.y > oMaxY) oMaxY = op.y;
+            }
+
+            if (
+              linkBox.maxX < oMinX ||
+              linkBox.minX > oMaxX ||
+              linkBox.maxY < oMinY ||
+              linkBox.minY > oMaxY
+            ) {
+              return;
+            }
+
             crossingLinks.push({
               id: otherLink.id,
               pts: otherPts,
@@ -936,18 +1015,29 @@
           if (crossingBusbars.length > 0) {
             crossingBusbars.forEach((bus) => {
               if (segX >= bus.x1 - 2 && segX <= bus.x2 + 2) {
-                if (bus.centerY > minY + 8 && bus.centerY < maxY - 8) {
-                  jumps.push({
-                    type: "bus",
-                    busY1: bus.y1,
-                    busY2: bus.y2,
-                    pos: bus.centerY,
-                    startY: isDown ? bus.y1 - 4 : bus.y2 + 4,
-                    endY: isDown ? bus.y2 + 4 : bus.y1 - 4,
-                    bulgeX: segX + 13,
-                    isDown,
-                    segX,
-                  });
+                if (bus.y2 >= minY && bus.y1 <= maxY) {
+                  const rawStartY = isDown ? bus.y1 - 3 : bus.y2 + 3;
+                  const rawEndY = isDown ? bus.y2 + 3 : bus.y1 - 3;
+                  const startY = isDown
+                    ? Math.max(minY, rawStartY)
+                    : Math.min(maxY, rawStartY);
+                  const endY = isDown
+                    ? Math.min(maxY, rawEndY)
+                    : Math.max(minY, rawEndY);
+
+                  if (isDown ? startY + 4 <= endY : startY - 4 >= endY) {
+                    jumps.push({
+                      type: "bus",
+                      busY1: bus.y1,
+                      busY2: bus.y2,
+                      pos: bus.centerY,
+                      startY: startY,
+                      endY: endY,
+                      bulgeX: segX + 13,
+                      isDown,
+                      segX,
+                    });
+                  }
                 }
               }
             });
@@ -966,25 +1056,37 @@
                   const oMinX = Math.min(q1.x, q2.x);
                   const oMaxX = Math.max(q1.x, q2.x);
 
+                  // True crossing occurs when the vertical segment strictly passes through the horizontal segment
                   if (
-                    segX > oMinX + 6 &&
-                    segX < oMaxX - 6 &&
-                    oY > minY + 6 &&
-                    oY < maxY - 6
+                    segX > oMinX + 3 &&
+                    segX < oMaxX - 3 &&
+                    oY > minY + 3 &&
+                    oY < maxY - 3
                   ) {
                     const alreadyExists = jumps.some(
                       (j) => Math.abs(j.pos - oY) < 10,
                     );
                     if (!alreadyExists) {
-                      jumps.push({
-                        type: "wire",
-                        pos: oY,
-                        startY: isDown ? oY - 6 : oY + 6,
-                        endY: isDown ? oY + 6 : oY - 6,
-                        bulgeX: segX + 11,
-                        isDown,
-                        segX,
-                      });
+                      const rawStartY = isDown ? oY - 6 : oY + 6;
+                      const rawEndY = isDown ? oY + 6 : oY - 6;
+                      const startY = isDown
+                        ? Math.max(minY, rawStartY)
+                        : Math.min(maxY, rawStartY);
+                      const endY = isDown
+                        ? Math.min(maxY, rawEndY)
+                        : Math.max(minY, rawEndY);
+
+                      if (isDown ? startY + 4 <= endY : startY - 4 >= endY) {
+                        jumps.push({
+                          type: "wire",
+                          pos: oY,
+                          startY: startY,
+                          endY: endY,
+                          bulgeX: segX + 11,
+                          isDown,
+                          segX,
+                        });
+                      }
                     }
                   }
                 }
@@ -1001,18 +1103,29 @@
           if (crossingBusbars.length > 0) {
             crossingBusbars.forEach((bus) => {
               if (segY >= bus.y1 - 2 && segY <= bus.y2 + 2) {
-                if (bus.centerX > minX + 8 && bus.centerX < maxX - 8) {
-                  jumps.push({
-                    type: "bus",
-                    busX1: bus.x1,
-                    busX2: bus.x2,
-                    pos: bus.centerX,
-                    startX: isRight ? bus.x1 - 4 : bus.x2 + 4,
-                    endX: isRight ? bus.x2 + 4 : bus.x1 - 4,
-                    bulgeY: segY - 13,
-                    isRight,
-                    segY,
-                  });
+                if (bus.x2 >= minX && bus.x1 <= maxX) {
+                  const rawStartX = isRight ? bus.x1 - 3 : bus.x2 + 3;
+                  const rawEndX = isRight ? bus.x2 + 3 : bus.x1 - 3;
+                  const startX = isRight
+                    ? Math.max(minX, rawStartX)
+                    : Math.min(maxX, rawStartX);
+                  const endX = isRight
+                    ? Math.min(maxX, rawEndX)
+                    : Math.max(minX, rawEndX);
+
+                  if (isRight ? startX + 4 <= endX : startX - 4 >= endX) {
+                    jumps.push({
+                      type: "bus",
+                      busX1: bus.x1,
+                      busX2: bus.x2,
+                      pos: bus.centerX,
+                      startX: startX,
+                      endX: endX,
+                      bulgeY: segY - 13,
+                      isRight,
+                      segY,
+                    });
+                  }
                 }
               }
             });
@@ -1023,15 +1136,17 @@
           d += ` L ${Math.round(p2.x)} ${Math.round(p2.y)}`;
         } else {
           if (isVert) {
-            if (p1.y < p2.y) {
+            const isDown = p1.y < p2.y;
+            if (isDown) {
               jumps.sort((a, b) => a.pos - b.pos);
             } else {
               jumps.sort((a, b) => b.pos - a.pos);
             }
 
+            const resolvedJumps = resolveOverlappingJumps(jumps, isDown, true);
             const segX = Math.round(p1.x);
 
-            jumps.forEach((j) => {
+            resolvedJumps.forEach((j) => {
               const startY = Math.round(j.startY);
               const endY = Math.round(j.endY);
               const cp1Y = Math.round((startY * 2 + endY) / 3);
@@ -1043,15 +1158,21 @@
               allHaloD += `M ${segX} ${startY} C ${bulgeX} ${cp1Y}, ${bulgeX} ${cp2Y}, ${segX} ${endY} `;
             });
           } else if (isHoriz) {
-            if (p1.x < p2.x) {
+            const isRight = p1.x < p2.x;
+            if (isRight) {
               jumps.sort((a, b) => a.pos - b.pos);
             } else {
               jumps.sort((a, b) => b.pos - a.pos);
             }
 
+            const resolvedJumps = resolveOverlappingJumps(
+              jumps,
+              isRight,
+              false,
+            );
             const segY = Math.round(p1.y);
 
-            jumps.forEach((j) => {
+            resolvedJumps.forEach((j) => {
               const startX = Math.round(j.startX);
               const endX = Math.round(j.endX);
               const cp1X = Math.round((startX * 2 + endX) / 3);
@@ -1093,6 +1214,14 @@
           }
           halo.setAttribute("d", allHaloD);
           halo.style.display = "block";
+
+          // Ensure the jumping link (with its white halo) renders on top in SVG DOM
+          if (
+            linkView.el.parentNode &&
+            linkView.el.parentNode.lastChild !== linkView.el
+          ) {
+            linkView.el.parentNode.appendChild(linkView.el);
+          }
         } else if (halo) {
           halo.setAttribute("d", "");
           halo.style.display = "none";
@@ -1101,6 +1230,51 @@
 
       return d;
     };
+
+    function resolveOverlappingJumps(jumps, isForward, isVert) {
+      if (!jumps || jumps.length <= 1) return jumps;
+      const resolved = [Object.assign({}, jumps[0])];
+      for (let i = 1; i < jumps.length; i++) {
+        const prev = resolved[resolved.length - 1];
+        const curr = jumps[i];
+
+        if (isVert) {
+          if (isForward) {
+            if (curr.startY <= prev.endY + 2) {
+              prev.endY = Math.max(prev.endY, curr.endY);
+              prev.pos = (prev.pos + curr.pos) / 2;
+            } else {
+              resolved.push(Object.assign({}, curr));
+            }
+          } else {
+            if (curr.startY >= prev.endY - 2) {
+              prev.endY = Math.min(prev.endY, curr.endY);
+              prev.pos = (prev.pos + curr.pos) / 2;
+            } else {
+              resolved.push(Object.assign({}, curr));
+            }
+          }
+        } else {
+          if (isForward) {
+            if (curr.startX <= prev.endX + 2) {
+              prev.endX = Math.max(prev.endX, curr.endX);
+              prev.pos = (prev.pos + curr.pos) / 2;
+            } else {
+              resolved.push(Object.assign({}, curr));
+            }
+          } else {
+            if (curr.startX >= prev.endX - 2) {
+              prev.endX = Math.min(prev.endX, curr.endX);
+              prev.pos = (prev.pos + curr.pos) / 2;
+            } else {
+              resolved.push(Object.assign({}, curr));
+            }
+          }
+        }
+      }
+      return resolved;
+    }
+
     joint.connectors.normal = joint.connectors.sldJumpover;
   }
 })();

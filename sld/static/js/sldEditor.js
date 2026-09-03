@@ -469,11 +469,13 @@ class SLDEditor {
       { passive: false },
     );
 
-    // Graph Real-time Transform -> Update Topology Tracker & Minimap & Link Crossover Jumpovers
-    this.graph.on("change:position change:size", () => {
-      this.refreshAllLinks();
-      this.topologyTracker.applyStyles(this.paper);
-      this.updateMinimap();
+    // Graph Real-time Transform -> Update Connected & Cross-Intersected Links & Throttled Minimap
+    this.graph.on("change:position change:size", (element) => {
+      if (element && element.isElement && element.isElement()) {
+        this.busbarManager.syncConnectedBusbarPorts(element);
+        this.updateAffectedLinks(element);
+      }
+      this.requestMinimapUpdate();
       this.scheduleAutoSave();
     });
 
@@ -484,9 +486,87 @@ class SLDEditor {
     this.graph.on("add remove change:sldData", () => {
       this.refreshAllLinks();
       this.topologyTracker.applyStyles(this.paper);
-      this.updateMinimap();
+      this.requestMinimapUpdate();
       this.pushHistory();
       this.scheduleAutoSave();
+    });
+  }
+
+  updateAffectedLinks(element) {
+    if (!this.paper || !this.graph || !element) return;
+    const connected = this.graph.getConnectedLinks(element);
+    const linksToUpdate = new Set(connected);
+
+    // Compute bounding box of moving element + its connected links
+    const elPos = element.position ? element.position() : { x: 0, y: 0 };
+    const elSize = element.size ? element.size() : { width: 0, height: 0 };
+    let minX = elPos.x - 20;
+    let maxX = elPos.x + elSize.width + 20;
+    let minY = elPos.y - 20;
+    let maxY = elPos.y + elSize.height + 20;
+
+    connected.forEach((link) => {
+      const view = this.paper.findViewByModel(link);
+      const pts = (view && view._polyPoints) || null;
+      if (pts) {
+        for (let i = 0; i < pts.length; i++) {
+          const p = pts[i];
+          if (p.x - 20 < minX) minX = p.x - 20;
+          if (p.x + 20 > maxX) maxX = p.x + 20;
+          if (p.y - 20 < minY) minY = p.y - 20;
+          if (p.y + 20 > maxY) maxY = p.y + 20;
+        }
+      }
+    });
+
+    const currentBBox = { minX, maxX, minY, maxY };
+    const checkBBox = element._prevMoveBBox
+      ? {
+          minX: Math.min(minX, element._prevMoveBBox.minX),
+          maxX: Math.max(maxX, element._prevMoveBBox.maxX),
+          minY: Math.min(minY, element._prevMoveBBox.minY),
+          maxY: Math.max(maxY, element._prevMoveBBox.maxY),
+        }
+      : currentBBox;
+    element._prevMoveBBox = currentBBox;
+
+    // Find all stationary links in the graph whose AABB intersects with the moving zone
+    const allLinks = this.graph.getLinks();
+    allLinks.forEach((otherLink) => {
+      if (linksToUpdate.has(otherLink)) return;
+      const oView = this.paper.findViewByModel(otherLink);
+      const oPts = oView && oView._polyPoints;
+      if (oPts && oPts.length >= 2) {
+        let oMinX = Infinity,
+          oMaxX = -Infinity,
+          oMinY = Infinity,
+          oMaxY = -Infinity;
+        for (let k = 0; k < oPts.length; k++) {
+          const op = oPts[k];
+          if (op.x < oMinX) oMinX = op.x;
+          if (op.x > oMaxX) oMaxX = op.x;
+          if (op.y < oMinY) oMinY = op.y;
+          if (op.y > oMaxY) oMaxY = op.y;
+        }
+
+        if (
+          !(
+            checkBBox.maxX < oMinX ||
+            checkBBox.minX > oMaxX ||
+            checkBBox.maxY < oMinY ||
+            checkBBox.minY > oMaxY
+          )
+        ) {
+          linksToUpdate.add(otherLink);
+        }
+      }
+    });
+
+    linksToUpdate.forEach((link) => {
+      const view = this.paper.findViewByModel(link);
+      if (view && typeof view.update === "function") {
+        view.update();
+      }
     });
   }
 
@@ -687,7 +767,16 @@ class SLDEditor {
       }
 
       this._isDraggingElement = false;
+      if (elementView && elementView.model) {
+        elementView.model._prevMoveBBox = null;
+      }
+      this.selectedCells.forEach((c) => {
+        if (c && c.isElement && c.isElement()) {
+          c._prevMoveBBox = null;
+        }
+      });
 
+      this.refreshAllLinks();
       this.topologyTracker.applyStyles(this.paper);
       this.updateSelectionOverlay();
       this.updateMinimap();
@@ -882,13 +971,6 @@ class SLDEditor {
       if (link.isLink && link.isLink()) {
         this.busbarManager.autoCreateBusbarPort(link);
         this.busbarManager.cleanupUnusedBusbarPorts();
-      }
-    });
-
-    this.graph.on("change:position change:size", (element) => {
-      if (element && element.isElement && element.isElement()) {
-        this.busbarManager.syncConnectedBusbarPorts(element);
-        this.refreshAllLinks();
       }
     });
 
@@ -1367,6 +1449,14 @@ class SLDEditor {
     });
 
     this.updateMinimap();
+  }
+
+  requestMinimapUpdate() {
+    if (this._minimapRafId) return;
+    this._minimapRafId = requestAnimationFrame(() => {
+      this._minimapRafId = null;
+      this.updateMinimap();
+    });
   }
 
   updateMinimap() {
