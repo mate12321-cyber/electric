@@ -74,8 +74,9 @@ function resolveVoltageInfo(valOrKey) {
 }
 
 class PowerSystemTopologyTracker {
-  constructor(graph) {
+  constructor(graph, editor = null) {
     this.graph = graph;
+    this.editor = editor;
   }
 
   /**
@@ -130,7 +131,13 @@ class PowerSystemTopologyTracker {
    * @returns {Object} { nodeStatus: Map, linkStatus: Map, summary: Object }
    */
   evaluate() {
-    if (!this.graph) return { nodeStatus: new Map(), linkStatus: new Map() };
+    if (!this.graph)
+      return {
+        nodeStatus: new Map(),
+        linkStatus: new Map(),
+        conflicts: [],
+        nodeVoltages: new Map(),
+      };
 
     const elements = this.graph.getElements();
     const links = this.graph.getLinks();
@@ -374,31 +381,26 @@ class PowerSystemTopologyTracker {
             nextVoltage =
               neighborSldData.secVoltage !== undefined
                 ? neighborSldData.secVoltage
-                : currentVoltage;
-            nextColor = currentColor;
+                : currentVoltage === 154
+                  ? 22.9
+                  : 0.4;
+            const vInfo = resolveVoltageInfo(nextVoltage);
+            nextColor = neighborSldData.secColor || vInfo.color;
           } else if (edge.portTo === "tert") {
             nextVoltage =
               neighborSldData.tertVoltage !== undefined
                 ? neighborSldData.tertVoltage
-                : currentVoltage;
-            nextColor = currentColor;
+                : 6.6;
+            const vInfo = resolveVoltageInfo(nextVoltage);
+            nextColor = neighborSldData.tertColor || vInfo.color;
           } else {
             // portTo === "pri"
-            nextVoltage =
-              neighborSldData.priVoltage !== undefined
-                ? neighborSldData.priVoltage
-                : currentVoltage;
+            nextVoltage = currentVoltage;
             nextColor = currentColor;
           }
-        } else if (
-          neighborSldData.type === "BUSBAR" ||
-          neighborEl.get("type") === "sld.Busbar"
-        ) {
-          if (neighborSldData.color) nextColor = neighborSldData.color;
-          if (neighborSldData.voltage) nextVoltage = neighborSldData.voltage;
         } else {
-          // Pass-through equipment (JUNCTION, CB, DS, MCCB, ACB, FUSE, CT, PT, LOAD, etc.):
-          // PRESERVE incoming voltage and color!
+          // Pass-through equipment (BUSBAR, JUNCTION, CB, DS, MCCB, ACB, FUSE, CT, PT, LOAD, MOTOR, SWITCHGEAR, PANELBOARD, etc.):
+          // PRESERVE incoming grid voltage and color!
           nextVoltage = currentVoltage;
           nextColor = currentColor;
         }
@@ -554,14 +556,14 @@ class PowerSystemTopologyTracker {
       }
     });
 
-    return { nodeStatus, linkStatus, conflicts };
+    return { nodeStatus, linkStatus, conflicts, nodeVoltages };
   }
 
   /**
    * Apply the evaluated styles and classes directly to JointJS views
    */
   applyStyles(paper) {
-    const { nodeStatus, linkStatus, conflicts } = this.evaluate();
+    const { nodeStatus, linkStatus, conflicts, nodeVoltages } = this.evaluate();
 
     // Update Links
     linkStatus.forEach((status, linkId) => {
@@ -636,7 +638,9 @@ class PowerSystemTopologyTracker {
       }
     });
 
-    // Update Elements (Status styling & Open/Close contact arm update & Transformer visual)
+    // Update Elements (Status styling & Open/Close contact arm update & Transformer visual & Auto-sync Voltage)
+    let selectedCellChanged = false;
+
     nodeStatus.forEach((status, elId) => {
       const el = this.graph.getCell(elId);
       if (!el || !el.isElement()) return;
@@ -647,6 +651,110 @@ class PowerSystemTopologyTracker {
       if (view && view.el) {
         view.el.dataset.topologyState = status.state;
         view.el.classList.toggle("node-voltage-conflict", !!status.isConflict);
+      }
+
+      // Auto-update element voltage and color to match connected grid voltage
+      if (status.state === "LIVE" && !status.isConflict) {
+        const vInfo = (nodeVoltages && nodeVoltages.get(elId)) || null;
+        if (vInfo && vInfo.voltage !== undefined) {
+          const newVoltage = vInfo.voltage;
+          const newColor = vInfo.color;
+
+          if (
+            sldData.type === "TR_2W" ||
+            sldData.type === "TR_3W" ||
+            el.get("type") === "sld.Transformer2W" ||
+            el.get("type") === "sld.Transformer3W"
+          ) {
+            if (sldData.priVoltage !== newVoltage) {
+              sldData.priVoltage = newVoltage;
+              sldData.priColor = newColor;
+              el.set("sldData", Object.assign({}, sldData), { silent: true });
+              if (
+                this.editor &&
+                this.editor.selectedCell &&
+                this.editor.selectedCell.id === elId
+              ) {
+                selectedCellChanged = true;
+              }
+            }
+          } else if (
+            sldData.type !== "TRANSMISSION_TOWER" &&
+            sldData.type !== "GENERATOR" &&
+            sldData.type !== "BATTERY"
+          ) {
+            let changed = false;
+            if (sldData.voltage !== newVoltage) {
+              sldData.voltage = newVoltage;
+              changed = true;
+            }
+            if (sldData.color !== newColor) {
+              sldData.color = newColor;
+              sldData.lineColor = newColor;
+              changed = true;
+            }
+
+            // Auto-update equipment name if it has a default voltage prefix
+            if (sldData.name) {
+              const vStr =
+                newVoltage >= 1
+                  ? `${newVoltage}kV`
+                  : newVoltage === 0.4 || newVoltage === 0.38
+                    ? "380V"
+                    : newVoltage === 0.22
+                      ? "220V"
+                      : `${Math.round(newVoltage * 1000)}V`;
+
+              const oldName = sldData.name.trim();
+              let newName = oldName;
+
+              // Busbar name: e.g. "22.9kV 모선", "154kV 모선", "모선", "0.4kV 모선", "380V 모선"
+              if (/^(\d+(\.\d+)?\s*(kV|V)?\s*)?모선$/i.test(oldName)) {
+                newName = `${vStr} 모선`;
+              }
+              // DS name: e.g. "154kV DS", "DS", "단로기"
+              else if (
+                /^(\d+(\.\d+)?\s*(kV|V)?\s*)?(DS|단로기)$/i.test(oldName)
+              ) {
+                newName = `${vStr} DS`;
+              }
+              // Breaker name: e.g. "154kV CB", "22.9kV VCB", "VCB", "CB", "ACB", "MCCB"
+              else if (
+                /^(\d+(\.\d+)?\s*(kV|V)?\s*)?(CB|VCB|GCB|ACB|MCCB)$/i.test(
+                  oldName,
+                )
+              ) {
+                const bType =
+                  sldData.type === "CB_ACB"
+                    ? "ACB"
+                    : sldData.type === "CB_MCCB"
+                      ? "MCCB"
+                      : sldData.type === "CB_VCB"
+                        ? "VCB"
+                        : sldData.type === "CB_GCB"
+                          ? "GCB"
+                          : "CB";
+                newName = `${vStr} ${bType}`;
+              }
+
+              if (newName !== oldName) {
+                sldData.name = newName;
+                changed = true;
+              }
+            }
+
+            if (changed) {
+              el.set("sldData", Object.assign({}, sldData), { silent: true });
+              if (
+                this.editor &&
+                this.editor.selectedCell &&
+                this.editor.selectedCell.id === elId
+              ) {
+                selectedCellChanged = true;
+              }
+            }
+          }
+        }
       }
 
       // If it is a switch/breaker, update visual contact state
@@ -677,6 +785,13 @@ class PowerSystemTopologyTracker {
       ) {
         el.updateVisual(sldData.state || "DEAD");
       }
+      // If it is a UPS, update visual based on its state
+      if (
+        typeof el.updateVisual === "function" &&
+        (sldData.type === "UPS" || el.get("type") === "sld.UPS")
+      ) {
+        el.updateVisual(status.state || sldData.state || "LIVE");
+      }
       // If it is a junction node, update visual based on topological state
       if (sldData.type === "JUNCTION" || el.get("type") === "sld.Junction") {
         const fillColor = status.isConflict
@@ -692,6 +807,15 @@ class PowerSystemTopologyTracker {
         }
       }
     });
+
+    if (
+      selectedCellChanged &&
+      this.editor &&
+      this.editor.selectedCell &&
+      this.editor.propertiesPanel
+    ) {
+      this.editor.propertiesPanel.populate(this.editor.selectedCell);
+    }
 
     // Update Canvas Alert Banner for Voltage Conflicts
     if (paper && paper.el) {

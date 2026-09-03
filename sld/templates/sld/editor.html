@@ -255,6 +255,193 @@
         }
       });
     });
+
+    // 11. Python Power System Analysis Modal
+    const analyzeBtn = document.getElementById("btn-analyze-modal");
+    const analyzeModal = document.getElementById("modal-analyze");
+    const closeAnalyzeBtn = document.getElementById("btn-close-analyze-modal");
+    const closeAnalyzeBtn2 = document.getElementById("btn-close-analyze");
+    const reAnalyzeBtn = document.getElementById("btn-re-analyze");
+
+    const runPythonAnalysis = () => {
+      const loadingDiv = document.getElementById("analyze-loading");
+      const resultsDiv = document.getElementById("analyze-results");
+      if (loadingDiv) loadingDiv.style.display = "block";
+      if (resultsDiv) resultsDiv.style.display = "none";
+
+      const schemaData =
+        window.sldEditor && window.sldEditor.graph
+          ? window.sldEditor.graph.toJSON()
+          : null;
+
+      fetch("/api/sld/{{ active_diagram.diagram_id }}/analyze/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ schema_data: schemaData }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (loadingDiv) loadingDiv.style.display = "none";
+          if (resultsDiv) resultsDiv.style.display = "block";
+
+          if (data.status !== "success") {
+            alert("계통 해석 중 오류가 발생했습니다: " + (data.message || ""));
+            return;
+          }
+
+          // 1. KPI Stats
+          const summary = data.summary || {};
+          document.getElementById("kpi-total-elements").innerText =
+            `${summary.total_elements || 0} / ${summary.total_links || 0}`;
+          document.getElementById("kpi-live-elements").innerText =
+            summary.live_nodes_count || 0;
+          document.getElementById("kpi-ground-elements").innerText =
+            summary.grounded_nodes_count || 0;
+          document.getElementById("kpi-faults-count").innerText =
+            `${summary.critical_faults || 0} (주의: ${summary.warnings || 0})`;
+
+          // 2. Issues List
+          const issuesContainer = document.getElementById(
+            "analyze-issues-list",
+          );
+          issuesContainer.innerHTML = "";
+
+          const issues = data.issues || [];
+          if (issues.length === 0) {
+            issuesContainer.innerHTML = `
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 12px; color: #166534; font-size: 12px; display: flex; align-items: center; gap: 8px;">
+              <span>✅</span>
+              <span>단락, 지락, 전압 불일치 등의 결함이 감지되지 않았습니다. 계통 연결 상태가 정상입니다.</span>
+            </div>
+          `;
+          } else {
+            issues.forEach((issue) => {
+              const isCritical = issue.severity === "CRITICAL";
+              const isWarning = issue.severity === "WARNING";
+              const bg = isCritical
+                ? "#fef2f2"
+                : isWarning
+                  ? "#fffbeb"
+                  : "#eff6ff";
+              const border = isCritical
+                ? "#fecaca"
+                : isWarning
+                  ? "#fde68a"
+                  : "#bfdbfe";
+              const badgeBg = isCritical
+                ? "#ef4444"
+                : isWarning
+                  ? "#f59e0b"
+                  : "#3b82f6";
+              const badgeText = isCritical
+                ? "위험 (CRITICAL)"
+                : isWarning
+                  ? "경고 (WARNING)"
+                  : "알림 (INFO)";
+
+              const itemDiv = document.createElement("div");
+              itemDiv.style.cssText = `background: ${bg}; border: 1px solid ${border}; border-radius: 6px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;`;
+              itemDiv.innerHTML = `
+              <div style="display: flex; align-items: flex-start; gap: 8px;">
+                <span style="background: ${badgeBg}; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; white-space: nowrap; margin-top: 1px;">${badgeText}</span>
+                <span style="font-size: 12px; color: #1e293b; font-weight: 500;">${issue.message}</span>
+              </div>
+              <button class="sld-btn" style="background: #fff; border: 1px solid ${border}; font-size: 11px; padding: 4px 8px; white-space: nowrap;">설비 확인</button>
+            `;
+
+              itemDiv.addEventListener("click", () => {
+                if (
+                  issue.element_ids &&
+                  issue.element_ids.length > 0 &&
+                  window.sldEditor
+                ) {
+                  const targetId = issue.element_ids[0];
+                  const cell = window.sldEditor.graph.getCell(targetId);
+                  if (cell) {
+                    analyzeModal.classList.remove("active");
+                    window.sldEditor.selectCell(cell);
+                  }
+                }
+              });
+
+              issuesContainer.appendChild(itemDiv);
+            });
+          }
+
+          // 3. Transformers Loading Table
+          const trTbody = document.getElementById("analyze-tr-tbody");
+          trTbody.innerHTML = "";
+
+          const transformers = data.transformers || [];
+          if (transformers.length === 0) {
+            trTbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="padding: 16px; text-align: center; color: #94a3b8;">등록된 변압기(TR)가 없습니다.</td>
+            </tr>
+          `;
+          } else {
+            transformers.forEach((tr) => {
+              const isOverload = tr.status === "OVERLOAD";
+              const isWarn = tr.status === "WARNING";
+              const badgeBg = isOverload
+                ? "#ef4444"
+                : isWarn
+                  ? "#f59e0b"
+                  : "#10b981";
+              const statusLabel = isOverload
+                ? "과부하"
+                : isWarn
+                  ? "부하주의"
+                  : "정상";
+
+              const row = document.createElement("tr");
+              row.style.borderBottom = "1px solid #f1f5f9";
+              row.innerHTML = `
+              <td style="padding: 10px 12px; font-weight: 600; color: #1e293b;">${tr.name}</td>
+              <td style="padding: 10px 12px; color: #64748b;">${tr.pri_voltage}kV / ${tr.sec_voltage}kV</td>
+              <td style="padding: 10px 12px; color: #1e293b;">${tr.capacity_kva} kVA</td>
+              <td style="padding: 10px 12px; font-weight: 600; color: #1e293b;">${tr.connected_load_kw} kW</td>
+              <td style="padding: 10px 12px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <div style="flex: 1; min-width: 60px; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
+                    <div style="width: ${Math.min(tr.loading_percent, 100)}%; height: 100%; background: ${badgeBg};"></div>
+                  </div>
+                  <span style="font-weight: 700; font-size: 11px; min-width: 38px; color: ${isOverload ? "#dc2626" : "#1e293b"};">${tr.loading_percent}%</span>
+                </div>
+              </td>
+              <td style="padding: 10px 12px;">
+                <span style="background: ${badgeBg}; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">${statusLabel}</span>
+              </td>
+            `;
+              trTbody.appendChild(row);
+            });
+          }
+        })
+        .catch((err) => {
+          if (loadingDiv) loadingDiv.style.display = "none";
+          alert("계통 해석 요청 중 오류가 발생했습니다: " + err);
+        });
+    };
+
+    if (analyzeBtn && analyzeModal) {
+      analyzeBtn.addEventListener("click", () => {
+        analyzeModal.classList.add("active");
+        runPythonAnalysis();
+      });
+      if (closeAnalyzeBtn) {
+        closeAnalyzeBtn.addEventListener("click", () =>
+          analyzeModal.classList.remove("active"),
+        );
+      }
+      if (closeAnalyzeBtn2) {
+        closeAnalyzeBtn2.addEventListener("click", () =>
+          analyzeModal.classList.remove("active"),
+        );
+      }
+      if (reAnalyzeBtn) {
+        reAnalyzeBtn.addEventListener("click", runPythonAnalysis);
+      }
+    }
   });
 </script>
 {% endblock %}

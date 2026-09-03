@@ -136,3 +136,40 @@ def create_project_api(request):
         )
         return JsonResponse({'status': 'ok', 'diagram_id': diag.diagram_id, 'redirect_url': f'/?id={diag.diagram_id}'})
     return JsonResponse({'status': 'invalid method'}, status=405)
+
+
+@csrf_exempt
+def analyze_diagram_api(request, diagram_id):
+    """Run Python Power System Topology & Electrical Analysis."""
+    from .services.topology_engine import PowerSystemTopologyEngine
+
+    schema_data = None
+    if request.method == 'POST':
+        try:
+            if request.body:
+                body = json.loads(request.body.decode('utf-8'))
+                schema_data = body.get('schema_data')
+        except Exception:
+            pass
+
+    if schema_data is None:
+        diag = SingleLineDiagram.objects.filter(diagram_id=diagram_id).first()
+        if diag and diag.schema_data:
+            schema_data = diag.schema_data
+        else:
+            schema_data = get_default_sld_schema()
+
+    try:
+        engine = PowerSystemTopologyEngine(schema_data)
+        analysis_result = engine.analyze()
+        return JsonResponse({
+            'status': 'success',
+            'diagram_id': diagram_id,
+            **analysis_result
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+

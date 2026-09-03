@@ -27,12 +27,30 @@
     <script src="{% static 'js/vendor/joint.min.js' %}?v=20260903_03"></script>
     <script src="{% static 'js/vendor/htmx.min.js' %}?v=20260903_03"></script>
 
-    <!-- SLD Core Modules -->
-    <script src="{% static 'js/equipmentRegistry.js' %}?v=20260903_03"></script>
-    <script src="{% static 'js/topologyTracker.js' %}?v=20260903_03"></script>
-    <script src="{% static 'js/sldSymbols.js' %}?v=20260903_03"></script>
-    <script src="{% static 'js/sldExport.js' %}?v=20260903_03"></script>
-    <script src="{% static 'js/sldEditor.js' %}?v=20260903_03"></script>
+    <!-- SLD Core Modules & Symbols -->
+    <script src="{% static 'js/equipmentRegistry.js' %}?v=20260903_05"></script>
+    <script src="{% static 'js/topologyTracker.js' %}?v=20260903_05"></script>
+    <script src="{% static 'js/sldSymbols.js' %}?v=20260903_05"></script>
+    <script src="{% static 'js/symbols/substation.js' %}?v=20260903_05"></script>
+    <script src="{% static 'js/symbols/breakers.js' %}?v=20260903_05"></script>
+    <script src="{% static 'js/symbols/powerSources.js' %}?v=20260903_05"></script>
+    <script src="{% static 'js/symbols/distribution.js' %}?v=20260903_05"></script>
+    <script src="{% static 'js/symbols/router.js' %}?v=20260903_05"></script>
+    <script src="{% static 'js/sldExport.js' %}?v=20260903_05"></script>
+
+    <!-- Sub-Managers -->
+    <script src="{% static 'js/core/HistoryManager.js' %}?v=20260903_04"></script>
+    <script src="{% static 'js/core/ClipboardManager.js' %}?v=20260903_04"></script>
+    <script src="{% static 'js/core/SelectionManager.js' %}?v=20260903_04"></script>
+    <script src="{% static 'js/wiring/TJunctionManager.js' %}?v=20260903_04"></script>
+    <script src="{% static 'js/wiring/BusbarManager.js' %}?v=20260903_04"></script>
+    <script src="{% static 'js/ui/PropertiesPanel.js' %}?v=20260903_04"></script>
+    <script src="{% static 'js/ui/PaletteManager.js' %}?v=20260903_04"></script>
+    <script src="{% static 'js/ui/ToolbarManager.js' %}?v=20260903_04"></script>
+    <script src="{% static 'js/ui/KeyboardManager.js' %}?v=20260903_04"></script>
+
+    <!-- Main Orchestrator -->
+    <script src="{% static 'js/sldEditor.js' %}?v=20260903_04"></script>
 
     {% block scripts %}{% endblock %}
   </body>
