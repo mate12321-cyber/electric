@@ -2948,7 +2948,7 @@ class SLDEditor {
       if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
         return;
 
-      // Tool shortcut keys
+      // Tool shortcut keys & Ground state shortcut
       if (!e.ctrlKey && !e.metaKey && !e.altKey) {
         if (e.key === "v" || e.key === "V") {
           this.setActiveTool("select");
@@ -2962,6 +2962,23 @@ class SLDEditor {
           this.setActiveTool("wire");
           this.showToast("직교 배선 도구 (W)");
           return;
+        } else if (e.key === "g" || e.key === "G") {
+          if (this.selectedCells && this.selectedCells.length > 0) {
+            e.preventDefault();
+            e.stopPropagation();
+            const primaryCell = this.selectedCells.find(
+              (c) => c.isElement && c.isElement(),
+            );
+            const curState = (
+              primaryCell?.get("sldData")?.state || ""
+            ).toUpperCase();
+            const nextGState =
+              curState === "GROUNDED" || curState === "GROUND"
+                ? "DEAD"
+                : "GROUNDED";
+            this.toggleSelectedEquipmentState(nextGState);
+            return;
+          }
         }
       }
 
@@ -3195,13 +3212,9 @@ class SLDEditor {
               ? "GROUNDED"
               : curState;
 
-      // Cycle: LIVE (활선) -> DEAD (사선) -> GROUNDED (접지) -> LIVE (활선)
-      nextState =
-        normState === "LIVE"
-          ? "DEAD"
-          : normState === "DEAD"
-            ? "GROUNDED"
-            : "LIVE";
+      // Spacebar Toggle: Only toggle between LIVE (활선) <-> DEAD (사선)
+      // If currently GROUNDED, toggle back to LIVE
+      nextState = normState === "LIVE" ? "DEAD" : "LIVE";
     }
 
     targets.forEach((cell) => {

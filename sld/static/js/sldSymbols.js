@@ -2420,25 +2420,44 @@
       if (!cell || (typeof cell.isElement === "function" && !cell.isElement()))
         return null;
       const type = cell.get("type");
-      if (type === "sld.Junction" || cell.get("sldData")?.type === "JUNCTION") {
+      if (
+        type === "sld.Junction" ||
+        cell.get("sldData")?.type === "JUNCTION"
+      ) {
         return null; // Junctions are omnidirectional
       }
 
-      if (portId === "out" || portId === "bottom" || portId === "p2") {
-        return "BOTTOM";
+      // 1. Check physical port position relative to element bounding box FIRST!
+      if (bbox && pt) {
+        if (pt.y <= bbox.y + bbox.height * 0.35) return "TOP";
+        if (pt.y >= bbox.y + bbox.height * 0.65) return "BOTTOM";
+        if (pt.x <= bbox.x + bbox.width * 0.35) return "LEFT";
+        if (pt.x >= bbox.x + bbox.width * 0.65) return "RIGHT";
       }
-      if (portId === "in" || portId === "top") {
-        return "TOP";
+
+      // 2. Check port definition in element ports.items
+      if (typeof cell.getPort === "function" && portId) {
+        const portObj = cell.getPort(portId);
+        if (portObj && portObj.args && bbox) {
+          if (portObj.args.y !== undefined) {
+            if (portObj.args.y <= bbox.height * 0.35) return "TOP";
+            if (portObj.args.y >= bbox.height * 0.65) return "BOTTOM";
+          }
+          if (portObj.args.x !== undefined) {
+            if (portObj.args.x <= bbox.width * 0.35) return "LEFT";
+            if (portObj.args.x >= bbox.width * 0.65) return "RIGHT";
+          }
+        }
       }
+
+      // 3. Fallback to common port ID conventions
+      if (portId === "bottom" || portId === "p2") return "BOTTOM";
+      if (portId === "top" || portId === "p1") return "TOP";
+      if (portId === "out") return "BOTTOM";
+      if (portId === "in") return "TOP";
       if (portId === "left") return "LEFT";
       if (portId === "right") return "RIGHT";
 
-      if (bbox && pt) {
-        if (pt.y >= bbox.y + bbox.height * 0.7) return "BOTTOM";
-        if (pt.y <= bbox.y + bbox.height * 0.3) return "TOP";
-        if (pt.x <= bbox.x + bbox.width * 0.3) return "LEFT";
-        if (pt.x >= bbox.x + bbox.width * 0.7) return "RIGHT";
-      }
       return "BOTTOM";
     }
 
