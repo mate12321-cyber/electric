@@ -3079,7 +3079,69 @@ class SLDEditor {
         this.saveDiagram(true);
         return;
       }
+
+      // 11. Arrow Keys: Nudge selected symbols (10px or Shift+50px)
+      if (
+        code === "ArrowUp" ||
+        code === "ArrowDown" ||
+        code === "ArrowLeft" ||
+        code === "ArrowRight" ||
+        e.key === "ArrowUp" ||
+        e.key === "ArrowDown" ||
+        e.key === "ArrowLeft" ||
+        e.key === "ArrowRight"
+      ) {
+        if (
+          (this.selectedCells && this.selectedCells.length > 0) ||
+          this.selectedCell
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const step = e.shiftKey ? 50 : 10;
+          let dx = 0;
+          let dy = 0;
+
+          if (code === "ArrowUp" || e.key === "ArrowUp") dy = -step;
+          else if (code === "ArrowDown" || e.key === "ArrowDown") dy = step;
+          else if (code === "ArrowLeft" || e.key === "ArrowLeft") dx = -step;
+          else if (code === "ArrowRight" || e.key === "ArrowRight") dx = step;
+
+          this.nudgeSelected(dx, dy);
+          return;
+        }
+      }
     });
+  }
+
+  nudgeSelected(dx, dy) {
+    if (!this.selectedCells || this.selectedCells.length === 0) {
+      if (this.selectedCell) {
+        this.selectedCells = [this.selectedCell];
+      } else {
+        return;
+      }
+    }
+
+    const selectedElements = this.selectedCells.filter(
+      (c) => c && c.isElement && c.isElement(),
+    );
+    if (selectedElements.length === 0) return;
+
+    selectedElements.forEach((el) => {
+      const pos = el.position();
+      el.position(pos.x + dx, pos.y + dy);
+    });
+
+    this.topologyTracker.applyStyles(this.paper);
+    this.updateMinimap();
+    this.populateProperties();
+
+    clearTimeout(this._nudgeDebounceTimer);
+    this._nudgeDebounceTimer = setTimeout(() => {
+      this.pushHistory();
+      this.scheduleAutoSave();
+    }, 400);
   }
 
   copySelected() {
