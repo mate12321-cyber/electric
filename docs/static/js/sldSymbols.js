@@ -2585,7 +2585,7 @@
         if (sy <= ty) {
           const bottomOfSrc = srcBBox ? srcBBox.y + srcBBox.height : sy;
           const topOfTgt = tgtBBox ? tgtBBox.y : ty;
-          let midY = Math.round(((bottomOfSrc + topOfTgt) / 2) / 10) * 10;
+          let midY = Math.round((bottomOfSrc + topOfTgt) / 2 / 10) * 10;
           if (midY <= bottomOfSrc)
             midY = Math.ceil((bottomOfSrc + 10) / 10) * 10;
           if (midY >= topOfTgt) midY = Math.floor((topOfTgt - 10) / 10) * 10;
@@ -2632,7 +2632,7 @@
         if (sy >= ty) {
           const topOfSrc = srcBBox ? srcBBox.y : sy;
           const bottomOfTgt = tgtBBox ? tgtBBox.y + tgtBBox.height : ty;
-          let midY = Math.round(((topOfSrc + bottomOfTgt) / 2) / 10) * 10;
+          let midY = Math.round((topOfSrc + bottomOfTgt) / 2 / 10) * 10;
           if (midY >= topOfSrc) midY = Math.floor((topOfSrc - 10) / 10) * 10;
           if (midY <= bottomOfTgt)
             midY = Math.ceil((bottomOfTgt + 10) / 10) * 10;
@@ -2674,7 +2674,7 @@
       }
 
       // Default Clean Step: Midpoint Y
-      const midY = Math.round(((sy + ty) / 2) / 10) * 10;
+      const midY = Math.round((sy + ty) / 2 / 10) * 10;
       return [
         { x: sx, y: midY },
         { x: tx, y: midY },

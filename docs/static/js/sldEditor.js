@@ -2945,24 +2945,43 @@ class SLDEditor {
 
   setupKeyboardShortcuts() {
     window.addEventListener("keydown", (e) => {
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
+      if (
+        e.target.tagName === "INPUT" ||
+        e.target.tagName === "TEXTAREA" ||
+        e.target.isContentEditable
+      ) {
         return;
+      }
 
-      // Tool shortcut keys & Ground state shortcut
-      if (!e.ctrlKey && !e.metaKey && !e.altKey) {
-        if (e.key === "v" || e.key === "V") {
+      const code = e.code;
+      const key = (e.key || "").toLowerCase();
+      const isCtrlOrMeta = e.ctrlKey || e.metaKey;
+
+      // Helper matchers for English & Korean layouts (Hangul IME compatible)
+      const isKey = (codeName, engChar, korChars = []) => {
+        return (
+          code === codeName ||
+          key === engChar ||
+          korChars.includes(e.key) ||
+          korChars.includes(key)
+        );
+      };
+
+      // 1. Tool shortcut keys & Ground state shortcut (without modifier keys)
+      if (!isCtrlOrMeta && !e.altKey) {
+        if (isKey("KeyV", "v", ["ㅍ"])) {
           this.setActiveTool("select");
           this.showToast("선택 도구 (V)");
           return;
-        } else if (e.key === "l" || e.key === "L") {
+        } else if (isKey("KeyL", "l", ["ㅣ"])) {
           this.setActiveTool("lasso");
           this.showToast("영역 선택 도구 (L)");
           return;
-        } else if (e.key === "w" || e.key === "W") {
+        } else if (isKey("KeyW", "w", ["ㅈ", "ㅉ"])) {
           this.setActiveTool("wire");
           this.showToast("직교 배선 도구 (W)");
           return;
-        } else if (e.key === "g" || e.key === "G") {
+        } else if (isKey("KeyG", "g", ["ㅎ"])) {
           if (this.selectedCells && this.selectedCells.length > 0) {
             e.preventDefault();
             e.stopPropagation();
@@ -2982,7 +3001,8 @@ class SLDEditor {
         }
       }
 
-      if ((e.ctrlKey || e.metaKey) && (e.key === "a" || e.key === "A")) {
+      // 2. Select All: Ctrl/Cmd + A (or ㅁ)
+      if (isCtrlOrMeta && isKey("KeyA", "a", ["ㅁ"])) {
         e.preventDefault();
         const allElements = this.graph.getElements();
         if (allElements.length > 0) {
@@ -2992,26 +3012,30 @@ class SLDEditor {
         return;
       }
 
-      if ((e.ctrlKey || e.metaKey) && (e.key === "c" || e.key === "C")) {
+      // 3. Copy: Ctrl/Cmd + C (or ㅊ)
+      if (isCtrlOrMeta && isKey("KeyC", "c", ["ㅊ"])) {
         e.preventDefault();
         this.copySelected();
         return;
       }
 
-      if ((e.ctrlKey || e.metaKey) && (e.key === "v" || e.key === "V")) {
+      // 4. Paste: Ctrl/Cmd + V (or ㅍ)
+      if (isCtrlOrMeta && isKey("KeyV", "v", ["ㅍ"])) {
         e.preventDefault();
         this.pasteCopied();
         return;
       }
 
-      if ((e.ctrlKey || e.metaKey) && (e.key === "d" || e.key === "D")) {
+      // 5. Duplicate: Ctrl/Cmd + D (or ㅇ)
+      if (isCtrlOrMeta && isKey("KeyD", "d", ["ㅇ"])) {
         e.preventDefault();
         this.copySelected();
         this.pasteCopied();
         return;
       }
 
-      if (e.code === "Space") {
+      // 6. Spacebar Toggle: Live <-> Dead
+      if (code === "Space" || e.key === " " || e.key === "Spacebar") {
         if (this.selectedCells && this.selectedCells.length > 0) {
           e.preventDefault();
           e.stopPropagation();
@@ -3020,20 +3044,40 @@ class SLDEditor {
         }
       }
 
-      if (e.key === "Delete" || e.key === "Backspace") {
+      // 7. Delete: Delete / Backspace
+      if (
+        code === "Delete" ||
+        code === "Backspace" ||
+        e.key === "Delete" ||
+        e.key === "Backspace"
+      ) {
         this.deleteSelected();
-      } else if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+        return;
+      }
+
+      // 8. Undo: Ctrl/Cmd + Z (or ㅋ)
+      if (isCtrlOrMeta && isKey("KeyZ", "z", ["ㅋ"]) && !e.shiftKey) {
         e.preventDefault();
         this.undo();
-      } else if (
-        (e.ctrlKey || e.metaKey) &&
-        (e.key === "y" || (e.shiftKey && e.key === "Z"))
+        return;
+      }
+
+      // 9. Redo: Ctrl/Cmd + Y (or ㅛ) or Ctrl/Cmd + Shift + Z (or ㅋ)
+      if (
+        isCtrlOrMeta &&
+        (isKey("KeyY", "y", ["ㅛ"]) ||
+          (e.shiftKey && isKey("KeyZ", "z", ["ㅋ"])))
       ) {
         e.preventDefault();
         this.redo();
-      } else if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        return;
+      }
+
+      // 10. Save: Ctrl/Cmd + S (or ㄴ)
+      if (isCtrlOrMeta && isKey("KeyS", "s", ["ㄴ"])) {
         e.preventDefault();
         this.saveDiagram(true);
+        return;
       }
     });
   }
