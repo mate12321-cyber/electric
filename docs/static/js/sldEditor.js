@@ -292,7 +292,9 @@ class SLDEditor {
 
     const btnCollapseLeft = document.getElementById("btn-collapse-left-panel");
     const btnExpandLeft = document.getElementById("btn-expand-left-panel");
-    const btnCollapseRight = document.getElementById("btn-collapse-right-panel");
+    const btnCollapseRight = document.getElementById(
+      "btn-collapse-right-panel",
+    );
     const btnExpandRight = document.getElementById("btn-expand-right-panel");
 
     // Restore saved widths and collapsed states
@@ -392,7 +394,10 @@ class SLDEditor {
         const dx = e.clientX - startX;
         const minW = 180;
         const maxW = Math.min(650, Math.floor(window.innerWidth * 0.45));
-        const newW = Math.max(minW, Math.min(maxW, Math.round(startWidth + dx)));
+        const newW = Math.max(
+          minW,
+          Math.min(maxW, Math.round(startWidth + dx)),
+        );
         leftSidebar.style.width = newW + "px";
       });
 
@@ -432,7 +437,10 @@ class SLDEditor {
         const dx = startX - e.clientX;
         const minW = 220;
         const maxW = Math.min(750, Math.floor(window.innerWidth * 0.5));
-        const newW = Math.max(minW, Math.min(maxW, Math.round(startWidth + dx)));
+        const newW = Math.max(
+          minW,
+          Math.min(maxW, Math.round(startWidth + dx)),
+        );
         rightSidebar.style.width = newW + "px";
       });
 
