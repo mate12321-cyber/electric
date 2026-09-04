@@ -487,6 +487,8 @@ class SLDEditor {
 
     // Graph Real-time Transform -> Update Connected & Cross-Intersected Links & Throttled Minimap
     this.graph.on("change:position change:size", (element) => {
+      if (this._isBatchOperation || !this.historyManager?.isHistoryTracking)
+        return;
       if (element && element.isElement && element.isElement()) {
         this.busbarManager.syncConnectedBusbarPorts(element);
         this.updateAffectedLinks(element);
@@ -496,11 +498,13 @@ class SLDEditor {
     });
 
     this.graph.on("change:vertices change:source change:target", () => {
+      if (this._isBatchOperation || !this.historyManager?.isHistoryTracking)
+        return;
       this.refreshAllLinks();
     });
 
     this.graph.on("add remove change:sldData", () => {
-      if (this._isBatchOperation || !this.historyManager.isHistoryTracking)
+      if (this._isBatchOperation || !this.historyManager?.isHistoryTracking)
         return;
       this.refreshAllLinks();
       this.topologyTracker.applyStyles(this.paper);
@@ -958,6 +962,8 @@ class SLDEditor {
     });
 
     this.graph.on("add", (cell) => {
+      if (this._isBatchOperation || !this.historyManager?.isHistoryTracking)
+        return;
       if (cell.isLink && cell.isLink()) {
         const src = cell.get("source");
         const tgt = cell.get("target");
@@ -970,6 +976,8 @@ class SLDEditor {
     });
 
     this.graph.on("remove", (cell) => {
+      if (this._isBatchOperation || !this.historyManager?.isHistoryTracking)
+        return;
       if (cell.isLink && cell.isLink()) {
         if (this._activeDrawingLink === cell) {
           const src = cell.get("source");
@@ -986,6 +994,8 @@ class SLDEditor {
     });
 
     this.graph.on("change:source change:target", (link) => {
+      if (this._isBatchOperation || !this.historyManager?.isHistoryTracking)
+        return;
       if (link.isLink && link.isLink()) {
         this.busbarManager.autoCreateBusbarPort(link);
         this.busbarManager.cleanupUnusedBusbarPorts();
@@ -993,6 +1003,8 @@ class SLDEditor {
     });
 
     this.graph.on("remove", (cell) => {
+      if (this._isBatchOperation || !this.historyManager?.isHistoryTracking)
+        return;
       if (cell) {
         this.busbarManager.cleanupUnusedBusbarPorts();
         this.tJunctionManager.cleanupOrphanedJunctions();

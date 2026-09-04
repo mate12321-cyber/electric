@@ -46,10 +46,6 @@ class HistoryManager {
       this.editor.graph.clear();
       this.editor.graph.addCells([...elements, ...links]);
 
-      this.editor.busbarManager?.cleanupUnusedBusbarPorts();
-      this.editor.tJunctionManager?.cleanupOrphanedJunctions();
-      this.editor.refreshAllLinks();
-
       if (this.editor.topologyTracker) {
         this.editor.topologyTracker.applyStyles(this.editor.paper);
       }
@@ -67,7 +63,7 @@ class HistoryManager {
         this.editor.deselectAll();
       }
 
-      this.editor.updateMinimap();
+      this.editor.requestMinimapUpdate();
       this.editor.scheduleAutoSave();
       this.editor._isBatchOperation = false;
       this.isHistoryTracking = true;
@@ -91,10 +87,6 @@ class HistoryManager {
       this.editor.graph.clear();
       this.editor.graph.addCells([...elements, ...links]);
 
-      this.editor.busbarManager?.cleanupUnusedBusbarPorts();
-      this.editor.tJunctionManager?.cleanupOrphanedJunctions();
-      this.editor.refreshAllLinks();
-
       if (this.editor.topologyTracker) {
         this.editor.topologyTracker.applyStyles(this.editor.paper);
       }
@@ -112,7 +104,7 @@ class HistoryManager {
         this.editor.deselectAll();
       }
 
-      this.editor.updateMinimap();
+      this.editor.requestMinimapUpdate();
       this.editor.scheduleAutoSave();
       this.editor._isBatchOperation = false;
       this.isHistoryTracking = true;
