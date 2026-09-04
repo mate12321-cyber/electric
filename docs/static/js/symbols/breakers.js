@@ -587,7 +587,7 @@
         const nameLines = formattedName
           ? String(formattedName).split("\n").length
           : 1;
-        const nameRefY = -10 - (nameLines - 1) * 12;
+        const nameY = -10 - (nameLines - 1) * 12;
 
         this.attr({
           box: {
@@ -597,8 +597,22 @@
             height: sz.height,
           },
           groundSymbol: { display: showGround, fill: "#ffffff" },
-          nameLabel: { text: formattedName, refY: nameRefY },
-          specLabel: { text: data.current ? data.current + "A" : "" },
+          nameLabel: {
+            text: formattedName,
+            x: sz.width / 2,
+            y: nameY,
+            refX: null,
+            refY: null,
+            textAnchor: "middle",
+          },
+          specLabel: {
+            text: data.current ? data.current + "A" : "",
+            x: sz.width / 2,
+            y: 34,
+            refX: null,
+            refY: null,
+            textAnchor: "middle",
+          },
         });
       },
     },
@@ -725,15 +739,29 @@
         const nameLines = formattedName
           ? String(formattedName).split("\n").length
           : 1;
-        const nameRefY = -10 - (nameLines - 1) * 12;
+        const nameY = -10 - (nameLines - 1) * 12;
 
         this.attr({
           crescent: { fill: fillColor, stroke: strokeColor },
           leftNode: { stroke: strokeColor, fill: fillColor },
           rightNode: { stroke: strokeColor, fill: fillColor },
           groundSymbol: { display: showGround, fill: "#ffffff" },
-          nameLabel: { text: formattedName, refY: nameRefY },
-          specLabel: { text: data.current ? data.current + "A" : "" },
+          nameLabel: {
+            text: formattedName,
+            x: 20,
+            y: nameY,
+            refX: null,
+            refY: null,
+            textAnchor: "middle",
+          },
+          specLabel: {
+            text: data.current ? data.current + "A" : "",
+            x: 20,
+            y: 34,
+            refX: null,
+            refY: null,
+            textAnchor: "middle",
+          },
         });
       },
     },

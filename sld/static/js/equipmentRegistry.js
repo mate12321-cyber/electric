@@ -181,19 +181,24 @@ function formatSymbolLabel(str, maxLen = 5) {
       .join("\n");
   }
 
-  const rawChunks = str.split(/[\s_]+/).filter(Boolean);
-  const tokens = [];
-
-  rawChunks.forEach((chunk) => {
-    if (chunk.includes("-")) {
-      const parts = chunk.split("-").filter(Boolean);
-      tokens.push(...parts);
-    } else if (chunk.includes("#") && !chunk.startsWith("#")) {
-      const parts = chunk.split(/(?=#)/).filter(Boolean);
-      tokens.push(...parts);
-    } else {
-      tokens.push(chunk);
+  const spaceChunks = str.split(/\s+/).filter(Boolean);
+  const rawTokens = [];
+  for (let i = 0; i < spaceChunks.length; i++) {
+    let chunk = spaceChunks[i];
+    if (
+      (chunk === "-" || chunk === "_" || chunk === "#") &&
+      i + 1 < spaceChunks.length
+    ) {
+      spaceChunks[i + 1] = chunk + spaceChunks[i + 1];
+      continue;
     }
+    rawTokens.push(chunk);
+  }
+
+  const tokens = [];
+  rawTokens.forEach((chunk) => {
+    const subTokens = chunk.split(/(?=[-#_])/).filter(Boolean);
+    tokens.push(...subTokens);
   });
 
   const lines = [];
@@ -319,19 +324,19 @@ function getSymbolLabelAttrs(options) {
 
     nameAttrs = {
       text: nameText,
-      refX: leftRefX,
-      refY: nameRefY,
-      x: null,
-      y: null,
+      refX: null,
+      refY: null,
+      x: leftRefX,
+      y: nameRefY,
       textAnchor: "end",
       transform: "",
     };
     specAttrs = {
       text: specText,
-      refX: leftRefX,
-      refY: specRefY,
-      x: null,
-      y: null,
+      refX: null,
+      refY: null,
+      x: leftRefX,
+      y: specRefY,
       textAnchor: "end",
       transform: "",
     };
@@ -348,19 +353,19 @@ function getSymbolLabelAttrs(options) {
 
     nameAttrs = {
       text: nameText,
-      refX: rightRefX,
-      refY: nameRefY,
-      x: null,
-      y: null,
+      refX: null,
+      refY: null,
+      x: rightRefX,
+      y: nameRefY,
       textAnchor: "start",
       transform: "",
     };
     specAttrs = {
       text: specText,
-      refX: rightRefX,
-      refY: specRefY,
-      x: null,
-      y: null,
+      refX: null,
+      refY: null,
+      x: rightRefX,
+      y: specRefY,
       textAnchor: "start",
       transform: "",
     };
