@@ -77,7 +77,7 @@ class SelectionManager {
   }
 
   _onSelectedCellTransform() {
-    if (this.editor._isMultiDragging) return;
+    if (this.editor._isDraggingElement || this.editor._isMultiDragging) return;
     if (this._overlayRafId) return;
     this._overlayRafId = requestAnimationFrame(() => {
       this._overlayRafId = null;
@@ -552,8 +552,7 @@ class SelectionManager {
         targetAngle = (((curAngle + deltaAngle) % 360) + 360) % 360;
       }
 
-      const physicalAngle =
-        targetAngle === 90 || targetAngle === 270 ? 90 : 0;
+      const physicalAngle = targetAngle === 90 || targetAngle === 270 ? 90 : 0;
 
       if (typeof el.rotate === "function") {
         el.rotate(physicalAngle, true);

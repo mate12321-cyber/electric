@@ -698,6 +698,9 @@ class SLDEditor {
         this.selectCell(el);
       }
 
+      // Hide/remove selection overlay during drag for zero overhead & cleaner UX
+      this.removeSelectionOverlay();
+
       // Record starting positions for multi-drag
       if (this.selectedCells.length > 1) {
         this._multiDragStarts = this.selectedCells.map((c) => ({
