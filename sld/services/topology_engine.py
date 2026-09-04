@@ -64,14 +64,43 @@ def parse_voltage_value(val: Any) -> float:
     return 0.4
 
 
+def classify_voltage_level(voltage_kv: float) -> str:
+    """
+    전압 등급 분류 기준:
+    - 초고압(UHV): 100kV 이상 (예: 154kV, 345kV)
+    - 특고압(EHV): 21.9kV 이상 ~ 100kV 미만 (예: 22.9kV, 66kV)
+    - 고압(HV): 1.0kV 초과 ~ 21.9kV 미만 (예: 6.6kV, 3.3kV)
+    - 저압(LV): 1.0kV 이하 (예: 0.4kV / 380V, 0.22kV / 220V)
+    """
+    if voltage_kv >= 100.0:
+        return "UHV"  # 초고압 (100kV 이상)
+    elif voltage_kv >= 21.9:
+        return "EHV"  # 특고압 (21.9kV 이상)
+    elif voltage_kv > 1.0:
+        return "HV"   # 고압 (6.6kV, 3.3kV 등)
+    else:
+        return "LV"   # 저압 (0.4kV 이하)
+
+
 def parse_capacity_kva(val: Any) -> float:
-    """Parse capacity string (e.g. '20MVA', '1000kVA', 500) to kVA float."""
+    """Parse capacity string (e.g. '80/100MVA', '20MVA', '1000kVA', 500) to kVA float (returns base rating)."""
     if val is None:
         return 0.0
     if isinstance(val, (int, float)):
         return float(val)
 
     s = str(val).strip().upper()
+    if "/" in s:
+        # e.g. "80/100MVA" -> base is "80MVA"
+        parts = s.split("/")
+        first_part = parts[0].strip()
+        second_part = parts[1].strip()
+        unit_match = re.search(r"(MVA|MW|KVA|KW|VA|W)", second_part)
+        unit = unit_match.group(1) if unit_match else "MVA"
+        if not re.search(r"(MVA|MW|KVA|KW|VA|W)", first_part):
+            first_part += unit
+        s = first_part
+
     m = re.search(r"([0-9]+(?:\.[0-9]+)?)", s)
     if not m:
         return 0.0
@@ -83,6 +112,37 @@ def parse_capacity_kva(val: Any) -> float:
     if "W" in s or "VA" in s:
         return num / 1000.0
     return num
+
+
+def parse_transformer_capacity(val: Any) -> dict:
+    """
+    변압기 용량 파싱:
+    - 단일 용량: '3MVA' -> base_kva: 3000.0, forced_kva: 3000.0, is_dual: False
+    - 듀얼 용량(OA/FA): '80/100MVA' -> base_kva: 80000.0, forced_kva: 100000.0, is_dual: True
+    """
+    if val is None:
+        return {"base_kva": 0.0, "forced_kva": 0.0, "is_dual": False}
+    if isinstance(val, (int, float)):
+        f = float(val)
+        return {"base_kva": f, "forced_kva": f, "is_dual": False}
+
+    s = str(val).strip().upper()
+    if "/" in s:
+        parts = s.split("/")
+        if len(parts) >= 2:
+            p1 = parts[0].strip()
+            p2 = parts[1].strip()
+            unit_match = re.search(r"(MVA|MW|KVA|KW|VA|W)", p2)
+            unit_str = unit_match.group(1) if unit_match else "MVA"
+            if not re.search(r"(MVA|MW|KVA|KW|VA|W)", p1):
+                p1 = p1 + unit_str
+
+            cap1 = parse_capacity_kva(p1)
+            cap2 = parse_capacity_kva(p2)
+            return {"base_kva": cap1, "forced_kva": cap2, "is_dual": True}
+
+    cap = parse_capacity_kva(val)
+    return {"base_kva": cap, "forced_kva": cap, "is_dual": False}
 
 
 class PowerSystemTopologyEngine:
@@ -415,7 +475,11 @@ class PowerSystemTopologyEngine:
             sld_data = el.get("sldData", {})
             el_type = (sld_data.get("type") or el.get("type") or "").upper()
             if any(t in el_type for t in self.TRANSFORMER_TYPES):
-                cap_kva = parse_capacity_kva(sld_data.get("capacity", "1000kVA"))
+                raw_cap = sld_data.get("capacity", "1000kVA")
+                cap_info = parse_transformer_capacity(raw_cap)
+                base_cap_kva = cap_info["base_kva"]
+                forced_cap_kva = cap_info["forced_kva"]
+                is_dual = cap_info["is_dual"]
                 tr_name = sld_data.get("name") or el_id
 
                 # Aggregate downstream connected loads (DFS/BFS through sec port)
@@ -449,14 +513,34 @@ class PowerSystemTopologyEngine:
                             if nxt_edge["target_id"] not in visited_downstream:
                                 ds_queue.append(nxt_edge["target_id"])
 
-                loading_percent = round((connected_load_kw / cap_kva * 100.0), 1) if cap_kva > 0 else 0.0
+                base_loading_percent = round((connected_load_kw / base_cap_kva * 100.0), 1) if base_cap_kva > 0 else 0.0
+                forced_loading_percent = round((connected_load_kw / forced_cap_kva * 100.0), 1) if forced_cap_kva > 0 else 0.0
+                effective_cap_kva = forced_cap_kva if is_dual else base_cap_kva
+                loading_percent = round((connected_load_kw / effective_cap_kva * 100.0), 1) if effective_cap_kva > 0 else 0.0
+
                 status = "NORMAL"
-                if loading_percent >= 100.0:
+                if is_dual and connected_load_kw > forced_cap_kva:
                     status = "OVERLOAD"
                     issues.append({
                         "severity": "CRITICAL",
                         "code": "TRANSFORMER_OVERLOAD",
-                        "message": f"변압기 과부하 경고: '{tr_name}' 정격({cap_kva}kVA) 대비 연결 부하({connected_load_kw}kW, {loading_percent}%)가 초과되었습니다.",
+                        "message": f"변압기 과부하 경고: '{tr_name}' 풍랭 최대정격({forced_cap_kva/1000:g}MVA) 대비 연결 부하({connected_load_kw/1000:.2f}MW, {forced_loading_percent}%)가 초과되었습니다.",
+                        "element_ids": [el_id]
+                    })
+                elif is_dual and connected_load_kw > base_cap_kva:
+                    status = "FAN_REQUIRED"
+                    issues.append({
+                        "severity": "WARNING",
+                        "code": "TRANSFORMER_FAN_REQUIRED",
+                        "message": f"변압기 냉각팬 가동 권장: '{tr_name}' 자냉 정격({base_cap_kva/1000:g}MVA)을 초과({connected_load_kw/1000:.2f}MW, 자냉 부하율 {base_loading_percent}%)하여 냉각팬(FA) 가동이 요구됩니다. (풍랭 부하율: {forced_loading_percent}%)",
+                        "element_ids": [el_id]
+                    })
+                elif not is_dual and loading_percent >= 100.0:
+                    status = "OVERLOAD"
+                    issues.append({
+                        "severity": "CRITICAL",
+                        "code": "TRANSFORMER_OVERLOAD",
+                        "message": f"변압기 과부하 경고: '{tr_name}' 정격({base_cap_kva}kVA) 대비 연결 부하({connected_load_kw}kW, {loading_percent}%)가 초과되었습니다.",
                         "element_ids": [el_id]
                     })
                 elif loading_percent >= 80.0:
@@ -464,19 +548,27 @@ class PowerSystemTopologyEngine:
                     issues.append({
                         "severity": "WARNING",
                         "code": "TRANSFORMER_HIGH_LOAD",
-                        "message": f"변압기 부하율 주의: '{tr_name}' 부하율이 {loading_percent}% ({connected_load_kw}kW/{cap_kva}kVA)에 도달했습니다.",
+                        "message": f"변압기 부하율 주의: '{tr_name}' 부하율이 {loading_percent}% ({connected_load_kw}kW/{effective_cap_kva}kVA)에 도달했습니다.",
                         "element_ids": [el_id]
                     })
+
+                pri_v = parse_voltage_value(sld_data.get("priVoltage", 154))
+                sec_v = parse_voltage_value(sld_data.get("secVoltage", 22.9))
 
                 tr_reports.append({
                     "id": el_id,
                     "name": tr_name,
-                    "capacity_kva": cap_kva,
+                    "capacity_kva": base_cap_kva,
+                    "forced_capacity_kva": forced_cap_kva if is_dual else None,
+                    "is_dual_rating": is_dual,
                     "connected_load_kw": round(connected_load_kw, 1),
                     "loading_percent": loading_percent,
+                    "base_loading_percent": base_loading_percent,
                     "status": status,
-                    "pri_voltage": parse_voltage_value(sld_data.get("priVoltage", 154)),
-                    "sec_voltage": parse_voltage_value(sld_data.get("secVoltage", 22.9)),
+                    "pri_voltage": pri_v,
+                    "sec_voltage": sec_v,
+                    "pri_voltage_level": classify_voltage_level(pri_v),
+                    "sec_voltage_level": classify_voltage_level(sec_v),
                 })
 
         # ----------------------------------------------------

@@ -14,6 +14,19 @@
   if (typeof joint === "undefined") return;
   joint.shapes.sld = joint.shapes.sld || {};
 
+  const fmtName = (str) =>
+    typeof window.formatSymbolLabel === "function"
+      ? window.formatSymbolLabel(str)
+      : str;
+
+  const getLblAttrs = (opts) =>
+    typeof window.getSymbolLabelAttrs === "function"
+      ? window.getSymbolLabelAttrs(opts)
+      : {
+          nameAttrs: { text: opts.nameText },
+          specAttrs: { text: opts.specText },
+        };
+
   // 1. Circuit Breaker (표준 차단기 - VCB, GCB)
   joint.shapes.sld.Breaker = joint.dia.Element.define(
     "sld.Breaker",
@@ -93,28 +106,48 @@
         this.on("change:sldData", this.updateContactVisual, this);
         this.on("change:size", this.updateContactVisual, this);
       },
-      updateContactVisual: function () {
+      updateContactVisual: function (
+        effectiveState,
+        topologyState,
+        activeVoltageColor,
+      ) {
         const data = this.get("sldData") || {};
-        const state = (data.state || "LIVE").toUpperCase();
-        const color = data.color || "#377DFF";
+        const contactState = (
+          effectiveState ||
+          data.state ||
+          "CLOSED"
+        ).toUpperCase();
+        const topState = (
+          topologyState || (contactState === "OPEN" ? "DEAD" : "LIVE")
+        ).toUpperCase();
+
+        const isContactClosed =
+          contactState === "CLOSED" ||
+          contactState === "LIVE" ||
+          contactState === "ON";
+        const isGrounded =
+          topState === "GROUNDED" ||
+          contactState === "GROUNDED" ||
+          contactState === "GROUND" ||
+          contactState === "EARTH";
+        const isDead = topState === "DEAD" || !isContactClosed;
+
+        const baseColor = activeVoltageColor || data.color || "#377DFF";
         const sz = this.get("size") || { width: 28, height: 40 };
 
-        const isLive = state === "LIVE" || state === "CLOSED";
-        const isGrounded =
-          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
+        let boxFill = isGrounded ? "#84CC16" : isDead ? "#94a3b8" : "#000000";
+        let boxStroke = isGrounded ? "#84CC16" : isDead ? "#94a3b8" : baseColor;
+        let showGround = isGrounded ? "block" : "none";
 
-        let boxFill = "#000000";
-        let boxStroke = color;
-        let showGround = "none";
-
-        if (isGrounded) {
-          boxFill = "#84CC16";
-          boxStroke = "#84CC16";
-          showGround = "block";
-        } else if (!isLive) {
-          boxFill = "#94a3b8";
-          boxStroke = "#94a3b8";
-        }
+        const formattedName = fmtName(data.name || "CB");
+        const specText = data.current ? data.current + "A" : "";
+        const lbls = getLblAttrs({
+          angle: data.angle,
+          width: sz.width,
+          height: sz.height,
+          nameText: formattedName,
+          specText: specText,
+        });
 
         this.attr({
           box: {
@@ -124,8 +157,13 @@
             height: sz.height,
           },
           groundSymbol: { display: showGround, fill: "#ffffff" },
-          nameLabel: { text: data.name || "CB" },
-          specLabel: { text: data.current ? data.current + "A" : "" },
+          nameLabel: lbls.nameAttrs,
+          specLabel: lbls.specAttrs,
+        });
+
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", boxStroke);
         });
       },
     },
@@ -226,35 +264,64 @@
         this.on("change:sldData", this.updateContactVisual, this);
         this.on("change:size", this.updateContactVisual, this);
       },
-      updateContactVisual: function () {
+      updateContactVisual: function (
+        effectiveState,
+        topologyState,
+        activeVoltageColor,
+      ) {
         const data = this.get("sldData") || {};
-        const state = (data.state || "LIVE").toUpperCase();
-        const color = data.color || "#377DFF";
+        const contactState = (
+          effectiveState ||
+          data.state ||
+          "CLOSED"
+        ).toUpperCase();
+        const topState = (
+          topologyState || (contactState === "OPEN" ? "DEAD" : "LIVE")
+        ).toUpperCase();
 
-        const isLive = state === "LIVE" || state === "CLOSED";
+        const isContactClosed =
+          contactState === "CLOSED" ||
+          contactState === "LIVE" ||
+          contactState === "ON";
         const isGrounded =
-          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
+          topState === "GROUNDED" ||
+          contactState === "GROUNDED" ||
+          contactState === "GROUND" ||
+          contactState === "EARTH";
+        const isDead = topState === "DEAD" || !isContactClosed;
 
-        let fillColor = "#000000";
-        let strokeColor = color;
-        let showGround = "none";
+        const baseColor = activeVoltageColor || data.color || "#377DFF";
+        let fillColor = isGrounded ? "#84CC16" : isDead ? "#94a3b8" : "#000000";
+        let strokeColor = isGrounded
+          ? "#84CC16"
+          : isDead
+            ? "#94a3b8"
+            : baseColor;
+        let showGround = isGrounded ? "block" : "none";
 
-        if (isGrounded) {
-          fillColor = "#84CC16";
-          strokeColor = "#84CC16";
-          showGround = "block";
-        } else if (!isLive) {
-          fillColor = "#94a3b8";
-          strokeColor = "#94a3b8";
-        }
+        const formattedName = fmtName(data.name || "ACB");
+        const specText = data.current ? data.current + "A" : "";
+        const sz = this.get("size") || { width: 28, height: 40 };
+        const lbls = getLblAttrs({
+          angle: data.angle,
+          width: sz.width,
+          height: sz.height,
+          nameText: formattedName,
+          specText: specText,
+        });
 
         this.attr({
           crescent: { fill: fillColor, stroke: strokeColor },
           topNode: { stroke: strokeColor, fill: fillColor },
           botNode: { stroke: strokeColor, fill: fillColor },
           groundSymbol: { display: showGround, fill: "#ffffff" },
-          nameLabel: { text: data.name || "ACB" },
-          specLabel: { text: data.current ? data.current + "A" : "" },
+          nameLabel: lbls.nameAttrs,
+          specLabel: lbls.specAttrs,
+        });
+
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", strokeColor);
         });
       },
     },
@@ -351,35 +418,64 @@
         this.on("change:sldData", this.updateContactVisual, this);
         this.on("change:size", this.updateContactVisual, this);
       },
-      updateContactVisual: function () {
+      updateContactVisual: function (
+        effectiveState,
+        topologyState,
+        activeVoltageColor,
+      ) {
         const data = this.get("sldData") || {};
-        const state = (data.state || "LIVE").toUpperCase();
-        const color = data.color || "#377DFF";
+        const contactState = (
+          effectiveState ||
+          data.state ||
+          "CLOSED"
+        ).toUpperCase();
+        const topState = (
+          topologyState || (contactState === "OPEN" ? "DEAD" : "LIVE")
+        ).toUpperCase();
 
-        const isLive = state === "LIVE" || state === "CLOSED";
+        const isContactClosed =
+          contactState === "CLOSED" ||
+          contactState === "LIVE" ||
+          contactState === "ON";
         const isGrounded =
-          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
+          topState === "GROUNDED" ||
+          contactState === "GROUNDED" ||
+          contactState === "GROUND" ||
+          contactState === "EARTH";
+        const isDead = topState === "DEAD" || !isContactClosed;
 
-        let fillColor = "#000000";
-        let strokeColor = color;
-        let showGround = "none";
+        const baseColor = activeVoltageColor || data.color || "#377DFF";
+        const sz = this.get("size") || { width: 28, height: 40 };
+        let fillColor = isGrounded ? "#84CC16" : isDead ? "#94a3b8" : "#000000";
+        let strokeColor = isGrounded
+          ? "#84CC16"
+          : isDead
+            ? "#94a3b8"
+            : baseColor;
+        let showGround = isGrounded ? "block" : "none";
 
-        if (isGrounded) {
-          fillColor = "#84CC16";
-          strokeColor = "#84CC16";
-          showGround = "block";
-        } else if (!isLive) {
-          fillColor = "#94a3b8";
-          strokeColor = "#94a3b8";
-        }
+        const formattedName = fmtName(data.name || "MCCB");
+        const specText = data.current ? data.current + "A" : "";
+        const lbls = getLblAttrs({
+          angle: data.angle,
+          width: sz.width,
+          height: sz.height,
+          nameText: formattedName,
+          specText: specText,
+        });
 
         this.attr({
           topLead: { stroke: strokeColor },
           botLead: { stroke: strokeColor },
           crescent: { fill: fillColor, stroke: strokeColor },
           groundSymbol: { display: showGround, fill: "#ffffff" },
-          nameLabel: { text: data.name || "MCCB" },
-          specLabel: { text: data.current ? data.current + "A" : "" },
+          nameLabel: lbls.nameAttrs,
+          specLabel: lbls.specAttrs,
+        });
+
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", strokeColor);
         });
       },
     },
@@ -487,6 +583,12 @@
           boxStroke = "#94a3b8";
         }
 
+        const formattedName = fmtName(data.name || "TIE CB");
+        const nameLines = formattedName
+          ? String(formattedName).split("\n").length
+          : 1;
+        const nameRefY = -10 - (nameLines - 1) * 12;
+
         this.attr({
           box: {
             fill: boxFill,
@@ -495,7 +597,7 @@
             height: sz.height,
           },
           groundSymbol: { display: showGround, fill: "#ffffff" },
-          nameLabel: { text: data.name || "TIE CB" },
+          nameLabel: { text: formattedName, refY: nameRefY },
           specLabel: { text: data.current ? data.current + "A" : "" },
         });
       },
@@ -619,12 +721,18 @@
           strokeColor = "#94a3b8";
         }
 
+        const formattedName = fmtName(data.name || "LV TIE");
+        const nameLines = formattedName
+          ? String(formattedName).split("\n").length
+          : 1;
+        const nameRefY = -10 - (nameLines - 1) * 12;
+
         this.attr({
           crescent: { fill: fillColor, stroke: strokeColor },
           leftNode: { stroke: strokeColor, fill: fillColor },
           rightNode: { stroke: strokeColor, fill: fillColor },
           groundSymbol: { display: showGround, fill: "#ffffff" },
-          nameLabel: { text: data.name || "LV TIE" },
+          nameLabel: { text: formattedName, refY: nameRefY },
           specLabel: { text: data.current ? data.current + "A" : "" },
         });
       },
@@ -632,241 +740,337 @@
   );
 
   // 6. Power Fuse (PF - 퓨즈)
-  joint.shapes.sld.Fuse = joint.dia.Element.define("sld.Fuse", {
-    size: { width: 32, height: 44 },
-    markup: [
-      { tagName: "rect", selector: "body" },
-      { tagName: "path", selector: "line" },
-      { tagName: "text", selector: "nameLabel" },
-    ],
-    attrs: {
-      body: {
-        width: 14,
-        height: 32,
-        x: 9,
-        y: 6,
-        rx: 1,
-        ry: 1,
-        stroke: "#377DFF",
-        strokeWidth: 2,
-        fill: "#ffffff",
+  joint.shapes.sld.Fuse = joint.dia.Element.define(
+    "sld.Fuse",
+    {
+      size: { width: 32, height: 44 },
+      markup: [
+        { tagName: "rect", selector: "body" },
+        { tagName: "path", selector: "line" },
+        { tagName: "text", selector: "nameLabel" },
+      ],
+      attrs: {
+        body: {
+          width: 14,
+          height: 32,
+          x: 9,
+          y: 6,
+          rx: 1,
+          ry: 1,
+          stroke: "#377DFF",
+          strokeWidth: 2,
+          fill: "#ffffff",
+        },
+        line: {
+          d: "M 16 0 L 16 44",
+          stroke: "#377DFF",
+          strokeWidth: 2,
+        },
+        nameLabel: {
+          text: "PF",
+          refX: 34,
+          refY: "50%",
+          textAnchor: "start",
+          fontSize: 11,
+          fontWeight: "600",
+          fill: "#377DFF",
+        },
       },
-      line: {
-        d: "M 16 0 L 16 44",
-        stroke: "#377DFF",
-        strokeWidth: 2,
-      },
-      nameLabel: {
-        text: "PF",
-        refX: 34,
-        refY: "50%",
-        textAnchor: "start",
-        fontSize: 11,
-        fontWeight: "600",
-        fill: "#377DFF",
-      },
-    },
-    ports: {
-      groups: {
-        ports: {
-          position: { name: "absolute" },
-          attrs: {
-            circle: {
-              r: 3.5,
-              magnet: true,
-              fill: "#fff",
-              stroke: "#377DFF",
-              strokeWidth: 1.5,
+      ports: {
+        groups: {
+          ports: {
+            position: { name: "absolute" },
+            attrs: {
+              circle: {
+                r: 3.5,
+                magnet: true,
+                fill: "#fff",
+                stroke: "#377DFF",
+                strokeWidth: 1.5,
+              },
             },
           },
         },
+        items: [
+          { id: "in", group: "ports", args: { x: 16, y: 0 } },
+          { id: "out", group: "ports", args: { x: 16, y: 44 } },
+        ],
       },
-      items: [
-        { id: "in", group: "ports", args: { x: 16, y: 0 } },
-        { id: "out", group: "ports", args: { x: 16, y: 44 } },
-      ],
     },
-  });
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateVisual();
+        this.on("change:sldData", this.updateVisual, this);
+        this.on("change:size", this.updateVisual, this);
+      },
+      updateVisual: function () {
+        const data = this.get("sldData") || {};
+        const sz = this.get("size") || { width: 32, height: 44 };
+        const lbls = getLblAttrs({
+          angle: data.angle,
+          width: sz.width,
+          height: sz.height,
+          nameText: fmtName(data.name || "PF"),
+        });
+        this.attr({
+          nameLabel: lbls.nameAttrs,
+        });
+      },
+    },
+  );
 
   // 7. Protective Relay (OCR/UVR - 보호계전기)
-  joint.shapes.sld.Relay = joint.dia.Element.define("sld.Relay", {
-    size: { width: 38, height: 38 },
-    markup: [
-      { tagName: "circle", selector: "body" },
-      { tagName: "text", selector: "label" },
-      { tagName: "text", selector: "nameLabel" },
-    ],
-    attrs: {
-      body: {
-        cx: 19,
-        cy: 19,
-        r: 17,
-        stroke: "#E53935",
-        strokeWidth: 2,
-        fill: "#ffffff",
+  joint.shapes.sld.Relay = joint.dia.Element.define(
+    "sld.Relay",
+    {
+      size: { width: 38, height: 38 },
+      markup: [
+        { tagName: "circle", selector: "body" },
+        { tagName: "text", selector: "label" },
+        { tagName: "text", selector: "nameLabel" },
+      ],
+      attrs: {
+        body: {
+          cx: 19,
+          cy: 19,
+          r: 17,
+          stroke: "#E53935",
+          strokeWidth: 2,
+          fill: "#ffffff",
+        },
+        label: {
+          text: "51",
+          x: 19,
+          y: 19,
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          fontSize: 12,
+          fontWeight: "bold",
+          fill: "#E53935",
+          fontFamily: "Pretendard, -apple-system, sans-serif",
+        },
+        nameLabel: {
+          text: "OCR",
+          refX: 42,
+          refY: "50%",
+          textAnchor: "start",
+          fontSize: 11,
+          fontWeight: "600",
+          fill: "#E53935",
+        },
       },
-      label: {
-        text: "51",
-        x: 19,
-        y: 19,
-        textAnchor: "middle",
-        textVerticalAnchor: "middle",
-        fontSize: 12,
-        fontWeight: "bold",
-        fill: "#E53935",
-        fontFamily: "Pretendard, -apple-system, sans-serif",
-      },
-      nameLabel: {
-        text: "OCR",
-        refX: 42,
-        refY: "50%",
-        textAnchor: "start",
-        fontSize: 11,
-        fontWeight: "600",
-        fill: "#E53935",
-      },
-    },
-    ports: {
-      groups: {
-        ports: {
-          position: { name: "absolute" },
-          attrs: {
-            circle: {
-              r: 3.5,
-              magnet: true,
-              fill: "#fff",
-              stroke: "#E53935",
-              strokeWidth: 1.5,
+      ports: {
+        groups: {
+          ports: {
+            position: { name: "absolute" },
+            attrs: {
+              circle: {
+                r: 3.5,
+                magnet: true,
+                fill: "#fff",
+                stroke: "#E53935",
+                strokeWidth: 1.5,
+              },
             },
           },
         },
+        items: [
+          { id: "in", group: "ports", args: { x: 19, y: 0 } },
+          { id: "out", group: "ports", args: { x: 19, y: 38 } },
+        ],
       },
-      items: [
-        { id: "in", group: "ports", args: { x: 19, y: 0 } },
-        { id: "out", group: "ports", args: { x: 19, y: 38 } },
-      ],
     },
-  });
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateVisual();
+        this.on("change:sldData", this.updateVisual, this);
+        this.on("change:size", this.updateVisual, this);
+      },
+      updateVisual: function () {
+        const data = this.get("sldData") || {};
+        const sz = this.get("size") || { width: 38, height: 38 };
+        const lbls = getLblAttrs({
+          angle: data.angle,
+          width: sz.width,
+          height: sz.height,
+          nameText: fmtName(data.name || "OCR"),
+        });
+        this.attr({
+          nameLabel: lbls.nameAttrs,
+        });
+      },
+    },
+  );
 
   // 8. Current Transformer (CT - 변류기)
-  joint.shapes.sld.CT = joint.dia.Element.define("sld.CT", {
-    size: { width: 34, height: 38 },
-    markup: [
-      { tagName: "circle", selector: "topCircle" },
-      { tagName: "circle", selector: "botCircle" },
-      { tagName: "path", selector: "lead" },
-      { tagName: "text", selector: "nameLabel" },
-    ],
-    attrs: {
-      lead: { d: "M 17 0 L 17 38", stroke: "#00897B", strokeWidth: 2 },
-      topCircle: {
-        cx: 17,
-        cy: 14,
-        r: 7,
-        stroke: "#00897B",
-        strokeWidth: 2,
-        fill: "none",
+  joint.shapes.sld.CT = joint.dia.Element.define(
+    "sld.CT",
+    {
+      size: { width: 34, height: 38 },
+      markup: [
+        { tagName: "circle", selector: "topCircle" },
+        { tagName: "circle", selector: "botCircle" },
+        { tagName: "path", selector: "lead" },
+        { tagName: "text", selector: "nameLabel" },
+      ],
+      attrs: {
+        lead: { d: "M 17 0 L 17 38", stroke: "#00897B", strokeWidth: 2 },
+        topCircle: {
+          cx: 17,
+          cy: 14,
+          r: 7,
+          stroke: "#00897B",
+          strokeWidth: 2,
+          fill: "none",
+        },
+        botCircle: {
+          cx: 17,
+          cy: 24,
+          r: 7,
+          stroke: "#00897B",
+          strokeWidth: 2,
+          fill: "none",
+        },
+        nameLabel: {
+          text: "CT",
+          refX: 38,
+          refY: "50%",
+          textAnchor: "start",
+          fontSize: 11,
+          fontWeight: "600",
+          fill: "#00897B",
+        },
       },
-      botCircle: {
-        cx: 17,
-        cy: 24,
-        r: 7,
-        stroke: "#00897B",
-        strokeWidth: 2,
-        fill: "none",
-      },
-      nameLabel: {
-        text: "CT",
-        refX: 38,
-        refY: "50%",
-        textAnchor: "start",
-        fontSize: 11,
-        fontWeight: "600",
-        fill: "#00897B",
-      },
-    },
-    ports: {
-      groups: {
-        ports: {
-          position: { name: "absolute" },
-          attrs: {
-            circle: {
-              r: 3.5,
-              magnet: true,
-              fill: "#fff",
-              stroke: "#00897B",
-              strokeWidth: 1.5,
+      ports: {
+        groups: {
+          ports: {
+            position: { name: "absolute" },
+            attrs: {
+              circle: {
+                r: 3.5,
+                magnet: true,
+                fill: "#fff",
+                stroke: "#00897B",
+                strokeWidth: 1.5,
+              },
             },
           },
         },
+        items: [
+          { id: "in", group: "ports", args: { x: 17, y: 0 } },
+          { id: "out", group: "ports", args: { x: 17, y: 38 } },
+        ],
       },
-      items: [
-        { id: "in", group: "ports", args: { x: 17, y: 0 } },
-        { id: "out", group: "ports", args: { x: 17, y: 38 } },
-      ],
     },
-  });
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateVisual();
+        this.on("change:sldData", this.updateVisual, this);
+        this.on("change:size", this.updateVisual, this);
+      },
+      updateVisual: function () {
+        const data = this.get("sldData") || {};
+        const sz = this.get("size") || { width: 34, height: 38 };
+        const lbls = getLblAttrs({
+          angle: data.angle,
+          width: sz.width,
+          height: sz.height,
+          nameText: fmtName(data.name || "CT"),
+        });
+        this.attr({
+          nameLabel: lbls.nameAttrs,
+        });
+      },
+    },
+  );
 
   // 9. Potential Transformer (PT - 계기용변압기)
-  joint.shapes.sld.PT = joint.dia.Element.define("sld.PT", {
-    size: { width: 34, height: 44 },
-    markup: [
-      { tagName: "circle", selector: "c1" },
-      { tagName: "circle", selector: "c2" },
-      { tagName: "path", selector: "topLead" },
-      { tagName: "path", selector: "botLead" },
-      { tagName: "text", selector: "nameLabel" },
-    ],
-    attrs: {
-      topLead: { d: "M 17 0 L 17 8", stroke: "#00897B", strokeWidth: 2 },
-      botLead: { d: "M 17 36 L 17 44", stroke: "#00897B", strokeWidth: 2 },
-      c1: {
-        cx: 17,
-        cy: 16,
-        r: 8,
-        stroke: "#00897B",
-        strokeWidth: 2,
-        fill: "#ffffff",
+  joint.shapes.sld.PT = joint.dia.Element.define(
+    "sld.PT",
+    {
+      size: { width: 34, height: 44 },
+      markup: [
+        { tagName: "circle", selector: "c1" },
+        { tagName: "circle", selector: "c2" },
+        { tagName: "path", selector: "topLead" },
+        { tagName: "path", selector: "botLead" },
+        { tagName: "text", selector: "nameLabel" },
+      ],
+      attrs: {
+        topLead: { d: "M 17 0 L 17 8", stroke: "#00897B", strokeWidth: 2 },
+        botLead: { d: "M 17 36 L 17 44", stroke: "#00897B", strokeWidth: 2 },
+        c1: {
+          cx: 17,
+          cy: 16,
+          r: 8,
+          stroke: "#00897B",
+          strokeWidth: 2,
+          fill: "#ffffff",
+        },
+        c2: {
+          cx: 17,
+          cy: 28,
+          r: 8,
+          stroke: "#00897B",
+          strokeWidth: 2,
+          fill: "#ffffff",
+        },
+        nameLabel: {
+          text: "PT",
+          refX: 38,
+          refY: "50%",
+          textAnchor: "start",
+          fontSize: 11,
+          fontWeight: "600",
+          fill: "#00897B",
+        },
       },
-      c2: {
-        cx: 17,
-        cy: 28,
-        r: 8,
-        stroke: "#00897B",
-        strokeWidth: 2,
-        fill: "#ffffff",
-      },
-      nameLabel: {
-        text: "PT",
-        refX: 38,
-        refY: "50%",
-        textAnchor: "start",
-        fontSize: 11,
-        fontWeight: "600",
-        fill: "#00897B",
-      },
-    },
-    ports: {
-      groups: {
-        ports: {
-          position: { name: "absolute" },
-          attrs: {
-            circle: {
-              r: 3.5,
-              magnet: true,
-              fill: "#fff",
-              stroke: "#00897B",
-              strokeWidth: 1.5,
+      ports: {
+        groups: {
+          ports: {
+            position: { name: "absolute" },
+            attrs: {
+              circle: {
+                r: 3.5,
+                magnet: true,
+                fill: "#fff",
+                stroke: "#00897B",
+                strokeWidth: 1.5,
+              },
             },
           },
         },
+        items: [
+          { id: "in", group: "ports", args: { x: 17, y: 0 } },
+          { id: "ground", group: "ports", args: { x: 17, y: 44 } },
+        ],
       },
-      items: [
-        { id: "in", group: "ports", args: { x: 17, y: 0 } },
-        { id: "ground", group: "ports", args: { x: 17, y: 44 } },
-      ],
     },
-  });
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateVisual();
+        this.on("change:sldData", this.updateVisual, this);
+        this.on("change:size", this.updateVisual, this);
+      },
+      updateVisual: function () {
+        const data = this.get("sldData") || {};
+        const sz = this.get("size") || { width: 34, height: 44 };
+        const lbls = getLblAttrs({
+          angle: data.angle,
+          width: sz.width,
+          height: sz.height,
+          nameText: fmtName(data.name || "PT"),
+        });
+        this.attr({
+          nameLabel: lbls.nameAttrs,
+        });
+      },
+    },
+  );
 
   // 10. Ground Switch (ES - 접지단로기)
   joint.shapes.sld.GroundSwitch = joint.dia.Element.define(
@@ -944,13 +1148,21 @@
         const isOpen = state === "OPEN" || state === "DEAD" || state === "LIVE";
         const contactD = isOpen ? "M 16 12 L 24 22" : "M 16 12 L 16 28";
         const strokeColor = isOpen ? "#94a3b8" : "#84CC16";
+        const sz = this.get("size") || { width: 32, height: 44 };
+
+        const lbls = getLblAttrs({
+          angle: data.angle,
+          width: sz.width,
+          height: sz.height,
+          nameText: fmtName(data.name || "ES"),
+        });
 
         this.attr({
           contact: { d: contactD, stroke: strokeColor },
           inLine: { stroke: strokeColor },
           node: { stroke: strokeColor },
           groundSymbol: { stroke: strokeColor },
-          nameLabel: { text: data.name || "ES" },
+          nameLabel: lbls.nameAttrs,
         });
       },
     },

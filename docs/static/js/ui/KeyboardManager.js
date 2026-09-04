@@ -69,6 +69,18 @@ class KeyboardManager {
             }
             return;
           }
+        } else if (isKey("KeyR", "r", ["ㄱ"])) {
+          if (
+            this.editor.selectedCells &&
+            this.editor.selectedCells.length > 0
+          ) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (this.editor.selectionManager) {
+              this.editor.selectionManager.rotateSelected(90);
+            }
+            return;
+          }
         }
       }
 

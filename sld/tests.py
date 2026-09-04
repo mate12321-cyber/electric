@@ -4,7 +4,13 @@ import json
 
 from sld.models import SingleLineDiagram
 from sld.seed_data import get_default_sld_schema
-from sld.services.topology_engine import PowerSystemTopologyEngine, parse_voltage_value, parse_capacity_kva
+from sld.services.topology_engine import (
+    PowerSystemTopologyEngine,
+    parse_voltage_value,
+    parse_capacity_kva,
+    parse_transformer_capacity,
+    classify_voltage_level,
+)
 
 
 class TopologyEngineTests(TestCase):
@@ -23,8 +29,32 @@ class TopologyEngineTests(TestCase):
         self.assertEqual(parse_voltage_value("380V"), 0.38)
         self.assertEqual(parse_voltage_value(220), 0.22)
         self.assertEqual(parse_capacity_kva("20MVA"), 20000.0)
+        self.assertEqual(parse_capacity_kva("80/100MVA"), 80000.0)
         self.assertEqual(parse_capacity_kva("1000kVA"), 1000.0)
         self.assertEqual(parse_capacity_kva("50kW"), 50.0)
+
+    def test_voltage_classification(self):
+        self.assertEqual(classify_voltage_level(154), "UHV")
+        self.assertEqual(classify_voltage_level(345), "UHV")
+        self.assertEqual(classify_voltage_level(100), "UHV")
+        self.assertEqual(classify_voltage_level(22.9), "EHV")
+        self.assertEqual(classify_voltage_level(66), "EHV")
+        self.assertEqual(classify_voltage_level(21.9), "EHV")
+        self.assertEqual(classify_voltage_level(6.6), "HV")
+        self.assertEqual(classify_voltage_level(3.3), "HV")
+        self.assertEqual(classify_voltage_level(0.4), "LV")
+        self.assertEqual(classify_voltage_level(0.22), "LV")
+
+    def test_dual_transformer_capacity(self):
+        dual = parse_transformer_capacity("80/100MVA")
+        self.assertTrue(dual["is_dual"])
+        self.assertEqual(dual["base_kva"], 80000.0)
+        self.assertEqual(dual["forced_kva"], 100000.0)
+
+        single = parse_transformer_capacity("3MVA")
+        self.assertFalse(single["is_dual"])
+        self.assertEqual(single["base_kva"], 3000.0)
+        self.assertEqual(single["forced_kva"], 3000.0)
 
     def test_default_diagram_analysis(self):
         engine = PowerSystemTopologyEngine(self.default_schema)

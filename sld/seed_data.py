@@ -53,7 +53,7 @@ def get_default_sld_schema():
 
     cells.append(make_cell(
         'tr-1', 'sld.Transformer2W', 498, 275, 44, 64,
-        {'type': 'TR_2W', 'name': '154/22.9kV TR#1', 'priVoltage': 154, 'secVoltage': 22.9, 'connection': 'Y-Δ', 'capacity': '20MVA', 'color': '#E53935', 'memo': '154kV / 22.9kV 20MVA 변압기'}
+        {'type': 'TR_2W', 'name': '154/22.9kV TR#1', 'priVoltage': 154, 'secVoltage': 22.9, 'connection': 'Y-Δ', 'capacity': '80/100MVA', 'color': '#E53935', 'memo': '154kV / 22.9kV 80/100MVA (자냉/풍랭) 변압기'}
     ))
 
     # Links 154kV (Pure Straight Vertical Line)

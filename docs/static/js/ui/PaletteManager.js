@@ -148,6 +148,10 @@ class PaletteManager {
         width = 28;
         height = 40;
         break;
+      case "DS_3P":
+        width = 44;
+        height = 48;
+        break;
       case "CB_TIE_HV":
       case "CB_TIE_LV":
         width = 40;
@@ -334,6 +338,7 @@ class PaletteManager {
       case "CB_MCCB":
       case "CB_GCB":
       case "DS":
+      case "DS_3P":
         return { x: 14, y: 0 };
       case "CB_TIE_HV":
       case "CB_TIE_LV":

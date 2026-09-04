@@ -108,6 +108,21 @@
         />
       </div>
 
+      <!-- 3로 단로기 접지 스위치 명칭 (3-Position DS 선택 시 노출) -->
+      <div
+        class="sld-form-group"
+        id="group-prop-earth-name"
+        style="display: none"
+      >
+        <label class="sld-form-label">접지 스위치 명칭 (Earth Name)</label>
+        <input
+          type="text"
+          class="sld-input"
+          id="prop-earth-name"
+          placeholder="접지 스위치명 입력 (예: 154kV ES)"
+        />
+      </div>
+
       <div class="sld-form-group" id="group-prop-desc">
         <label class="sld-form-label">설명</label>
         <input
@@ -338,8 +353,11 @@
           type="text"
           class="sld-input"
           id="prop-capacity"
-          placeholder="예: 20MVA, 1000kVA"
+          placeholder="초고압: 80/100MVA | 고압: 3MVA | 저압: 1000kVA"
         />
+        <div style="font-size: 11px; color: #64748b; margin-top: 3px">
+          * 초고압(≥100kV)은 자냉/풍랭(80/100MVA) 형식 지원
+        </div>
       </div>
 
       <div class="sld-form-group">
@@ -560,6 +578,95 @@
 
     <!-- Tab 2: 스타일 속성 -->
     <div class="tab-pane" id="tab-style" style="display: none">
+      <!-- 심볼 회전 제어 (90도 단위 회전) -->
+      <div class="sld-form-group" id="group-prop-rotation">
+        <label
+          class="sld-form-label"
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <span>심볼 회전 (Rotation)</span>
+          <span
+            style="font-size: 11px; font-weight: 700; color: #2563eb"
+            id="prop-rotation-display"
+            >0°</span
+          >
+        </label>
+        <div style="display: flex; gap: 6px; align-items: center">
+          <div style="display: flex; flex: 1; gap: 4px">
+            <button
+              type="button"
+              class="sld-btn sld-btn-sm sld-btn-secondary btn-prop-angle"
+              data-angle="0"
+              style="
+                flex: 1;
+                justify-content: center;
+                padding: 4px 0;
+                font-size: 11px;
+              "
+            >
+              0°
+            </button>
+            <button
+              type="button"
+              class="sld-btn sld-btn-sm sld-btn-secondary btn-prop-angle"
+              data-angle="90"
+              style="
+                flex: 1;
+                justify-content: center;
+                padding: 4px 0;
+                font-size: 11px;
+              "
+            >
+              90°
+            </button>
+            <button
+              type="button"
+              class="sld-btn sld-btn-sm sld-btn-secondary btn-prop-angle"
+              data-angle="180"
+              style="
+                flex: 1;
+                justify-content: center;
+                padding: 4px 0;
+                font-size: 11px;
+              "
+            >
+              180°
+            </button>
+            <button
+              type="button"
+              class="sld-btn sld-btn-sm sld-btn-secondary btn-prop-angle"
+              data-angle="270"
+              style="
+                flex: 1;
+                justify-content: center;
+                padding: 4px 0;
+                font-size: 11px;
+              "
+            >
+              270°
+            </button>
+          </div>
+          <button
+            type="button"
+            class="sld-btn sld-btn-sm sld-btn-primary"
+            id="btn-prop-rotate-90"
+            title="90도 회전 (단축키: R)"
+            style="
+              padding: 4px 8px;
+              font-size: 11px;
+              font-weight: 600;
+              white-space: nowrap;
+            "
+          >
+            <span>🔄 +90°</span>
+          </button>
+        </div>
+      </div>
+
       <div class="sld-form-group">
         <label class="sld-form-label">심볼 색상</label>
         <div class="sld-input-row" style="align-items: center">

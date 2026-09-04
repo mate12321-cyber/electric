@@ -10,6 +10,19 @@
   if (typeof joint === "undefined") return;
   joint.shapes.sld = joint.shapes.sld || {};
 
+  const fmtName = (str) =>
+    typeof window.formatSymbolLabel === "function"
+      ? window.formatSymbolLabel(str)
+      : str;
+
+  const getLblAttrs = (opts) =>
+    typeof window.getSymbolLabelAttrs === "function"
+      ? window.getSymbolLabelAttrs(opts)
+      : {
+          nameAttrs: { text: opts.nameText },
+          specAttrs: { text: opts.specText },
+        };
+
   // 1. Transmission Tower (송전철탑)
   joint.shapes.sld.TransmissionTower = joint.dia.Element.define(
     "sld.TransmissionTower",
@@ -62,6 +75,17 @@
           },
         },
         items: [{ id: "out", group: "ports", args: { x: 28, y: 56 } }],
+      },
+    },
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateVisual();
+        this.on("change:sldData", this.updateVisual, this);
+      },
+      updateVisual: function () {
+        const data = this.get("sldData") || {};
+        this.attr("nameLabel/text", fmtName(data.name || "154kV 수전"));
       },
     },
   );
@@ -214,6 +238,17 @@
           : "M 18.5 6 L 26 30";
         let showGround = isGrounded ? "block" : "none";
 
+        const formattedName = fmtName(data.name || "DS");
+        const specText = data.current ? data.current + "A" : "";
+        const sz = this.get("size") || { width: 28, height: 40 };
+        const lbls = getLblAttrs({
+          angle: data.angle,
+          width: sz.width,
+          height: sz.height,
+          nameText: formattedName,
+          specText: specText,
+        });
+
         this.attr({
           inLine: { stroke: strokeColor },
           outLine: { stroke: strokeColor },
@@ -221,13 +256,255 @@
           botNode: { stroke: strokeColor, fill: "#ffffff" },
           blade: { d: bladeD, stroke: strokeColor },
           groundSymbol: { display: showGround, fill: "#84CC16" },
-          nameLabel: { text: data.name || "DS" },
-          specLabel: { text: data.current ? data.current + "A" : "" },
+          nameLabel: lbls.nameAttrs,
+          specLabel: lbls.specAttrs,
         });
 
         const ports = this.getPorts ? this.getPorts() || [] : [];
         ports.forEach((p) => {
           this.portProp(p.id, "attrs/circle/stroke", strokeColor);
+        });
+      },
+    },
+  );
+
+  // 2-1. 3-Position Disconnector (3로 단로기: DS + 접지 ES 일체형 3위치 단로기)
+  joint.shapes.sld.Disconnector3P = joint.dia.Element.define(
+    "sld.Disconnector3P",
+    {
+      size: { width: 44, height: 48 },
+      markup: [
+        { tagName: "path", selector: "inLine" },
+        { tagName: "path", selector: "outLine" },
+        { tagName: "circle", selector: "topNode" },
+        { tagName: "circle", selector: "pivotNode" },
+        { tagName: "circle", selector: "pivotDot" },
+        { tagName: "path", selector: "blade" },
+        { tagName: "circle", selector: "earthNode" },
+        { tagName: "path", selector: "earthSymbol" },
+        { tagName: "text", selector: "nameLabel" },
+        { tagName: "text", selector: "specLabel" },
+        { tagName: "text", selector: "earthNameLabel" },
+        { tagName: "text", selector: "earthSpecLabel" },
+      ],
+      attrs: {
+        inLine: {
+          d: "M 14 34 L 14 48",
+          stroke: "#7A3E9D",
+          strokeWidth: 2,
+          strokeLinecap: "round",
+        },
+        outLine: {
+          d: "M 14 0 L 14 10",
+          stroke: "#7A3E9D",
+          strokeWidth: 2,
+          strokeLinecap: "round",
+        },
+        topNode: {
+          cx: 14,
+          cy: 10,
+          r: 4.5,
+          stroke: "#7A3E9D",
+          strokeWidth: 2,
+          fill: "#ffffff",
+        },
+        pivotNode: {
+          cx: 14,
+          cy: 34,
+          r: 4.5,
+          stroke: "#7A3E9D",
+          strokeWidth: 2,
+          fill: "#ffffff",
+        },
+        pivotDot: {
+          cx: 14,
+          cy: 34,
+          r: 2,
+          fill: "#7A3E9D",
+        },
+        blade: {
+          d: "M 18.5 34 L 18.5 10",
+          stroke: "#7A3E9D",
+          strokeWidth: 2.5,
+          strokeLinecap: "round",
+          cursor: "pointer",
+        },
+        earthNode: {
+          cx: 38,
+          cy: 34,
+          r: 4.5,
+          stroke: "#94a3b8",
+          strokeWidth: 2,
+          fill: "#ffffff",
+        },
+        earthSymbol: {
+          d: "M 38 38.5 L 38 42 M 32 42 L 44 42 M 34 44.5 L 42 44.5 M 36 47 L 40 47",
+          stroke: "#94a3b8",
+          strokeWidth: 1.5,
+          strokeLinecap: "round",
+        },
+        nameLabel: {
+          text: "154kV DS",
+          x: 4,
+          y: 16,
+          textAnchor: "end",
+          textVerticalAnchor: "middle",
+          fontSize: 9.5,
+          fontWeight: "600",
+          fill: "#1e293b",
+        },
+        specLabel: {
+          text: "2000A",
+          x: 4,
+          y: 28,
+          textAnchor: "end",
+          textVerticalAnchor: "middle",
+          fontSize: 8.5,
+          fill: "#64748b",
+        },
+        earthNameLabel: {
+          text: "154kV ES",
+          x: 48,
+          y: 30,
+          textAnchor: "start",
+          textVerticalAnchor: "middle",
+          fontSize: 9.5,
+          fontWeight: "600",
+          fill: "#64748b",
+        },
+        earthSpecLabel: {
+          text: "",
+          x: 48,
+          y: 42,
+          textAnchor: "start",
+          textVerticalAnchor: "middle",
+          fontSize: 8.5,
+          fill: "#64748b",
+        },
+      },
+      ports: {
+        groups: {
+          ports: {
+            position: { name: "absolute" },
+            attrs: {
+              circle: {
+                r: 3.5,
+                magnet: true,
+                fill: "#fff",
+                stroke: "#7A3E9D",
+                strokeWidth: 1.5,
+              },
+            },
+          },
+        },
+        items: [
+          { id: "in", group: "ports", args: { x: 14, y: 48 } },
+          { id: "out", group: "ports", args: { x: 14, y: 0 } },
+          { id: "earth", group: "ports", args: { x: 38, y: 48 } },
+        ],
+      },
+    },
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateContactVisual();
+        this.on("change:sldData", this.updateContactVisual, this);
+        this.on("change:size", this.updateContactVisual, this);
+      },
+      updateContactVisual: function (
+        effectiveState,
+        topologyState,
+        activeVoltageColor,
+      ) {
+        const data = this.get("sldData") || {};
+        const contactState = (
+          effectiveState ||
+          data.state ||
+          "CLOSED"
+        ).toUpperCase();
+
+        const isClosed =
+          contactState === "CLOSED" ||
+          contactState === "LIVE" ||
+          contactState === "ON";
+        const isEarth = contactState === "EARTH" || contactState === "GROUND";
+        const isOpen = !isClosed && !isEarth;
+
+        const baseColor = activeVoltageColor || data.color || "#7A3E9D";
+
+        // 접지 상태(EARTH)일 때 하단 인입선(in) 및 피벗 노드는 접지색(#84CC16)
+        // 상단 인출선(out) 및 상단 노드(topNode)는 반드시 절연 회색(#94a3b8) 유지
+        const isGrounded =
+          isEarth || (topologyState === "GROUNDED" && isClosed);
+        const inColor = isGrounded ? "#84CC16" : isOpen ? "#94a3b8" : baseColor;
+
+        const outColor = isClosed
+          ? topologyState === "GROUNDED"
+            ? "#84CC16"
+            : topologyState === "DEAD"
+              ? "#94a3b8"
+              : baseColor
+          : "#94a3b8"; // EARTH 또는 OPEN일 때 상단 노드는 절대 접지색으로 바뀌지 않음
+
+        const earthColor = isEarth ? "#84CC16" : "#94a3b8";
+
+        let bladeD = "M 18.5 34 L 18.5 10"; // CLOSED
+        let bladeStroke = isClosed
+          ? topologyState === "GROUNDED"
+            ? "#84CC16"
+            : baseColor
+          : "#94a3b8";
+        if (isOpen) {
+          bladeD = "M 18.5 34 L 35.5 17"; // 45 deg OPEN
+          bladeStroke = "#94a3b8";
+        } else if (isEarth) {
+          bladeD = "M 18.5 34 L 42.5 34"; // EARTH
+          bladeStroke = "#84CC16";
+        }
+
+        const formattedName = fmtName(data.name || "DS");
+        const nameLines = formattedName
+          ? String(formattedName).split("\n").length
+          : 1;
+        const nameY = 16 - (nameLines - 1) * 6;
+        const specY = nameY + (nameLines - 1) * 12 + 14;
+
+        const formattedEarthName = fmtName(data.earthName || "ES");
+        const earthNameLines = formattedEarthName
+          ? String(formattedEarthName).split("\n").length
+          : 1;
+        const earthNameY = 30 - (earthNameLines - 1) * 6;
+        const earthSpecY = earthNameY + (earthNameLines - 1) * 12 + 14;
+
+        this.attr({
+          inLine: { stroke: inColor },
+          outLine: { stroke: outColor },
+          topNode: { stroke: outColor, fill: "#ffffff" },
+          pivotNode: { stroke: inColor, fill: "#ffffff" },
+          pivotDot: { fill: inColor },
+          blade: { d: bladeD, stroke: bladeStroke },
+          earthNode: { stroke: earthColor, fill: "#ffffff" },
+          earthSymbol: { stroke: earthColor },
+          nameLabel: {
+            text: formattedName,
+            y: nameY,
+            fill: isClosed ? "#1e293b" : "#64748b",
+          },
+          specLabel: { text: data.current ? data.current + "A" : "", y: specY },
+          earthNameLabel: {
+            text: formattedEarthName,
+            y: earthNameY,
+            fill: isEarth ? "#84CC16" : "#64748b",
+          },
+          earthSpecLabel: { text: isEarth ? "접지" : "", y: earthSpecY },
+        });
+
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          let pColor = inColor;
+          if (p.id === "out") pColor = outColor;
+          else if (p.id === "earth") pColor = earthColor;
+          this.portProp(p.id, "attrs/circle/stroke", pColor);
         });
       },
     },
@@ -437,6 +714,30 @@
           const v2 = parts[1] || "Y";
           const v3 = parts[2] || "Δ";
 
+          const formattedName = fmtName(data.name || "TR-3W");
+          const defaultCap =
+            priV >= 100
+              ? "80/100MVA"
+              : priV >= 21.9
+                ? "20MVA"
+                : priV > 1.0
+                  ? "3MVA"
+                  : "1000kVA";
+          const specText =
+            data.capacity !== undefined && data.capacity !== ""
+              ? data.capacity
+              : defaultCap;
+          const lbls = getLblAttrs({
+            angle: data.angle,
+            width: 60,
+            height: 64,
+            nameText: formattedName,
+            specText: specText,
+            rightRefX: 62,
+            leftRefX: -6,
+            baseNameRefY: 20,
+          });
+
           this.attr({
             topCircle: {
               cx: 22,
@@ -516,8 +817,8 @@
               fontWeight: "bold",
               display: "block",
             },
-            nameLabel: { text: data.name || "TR-3W", refX: 64, refY: "35%" },
-            specLabel: { text: data.capacity || "", refX: 64, refY: "60%" },
+            nameLabel: lbls.nameAttrs,
+            specLabel: lbls.specAttrs,
           });
 
           const curSize = this.get("size") || {};
@@ -536,6 +837,30 @@
             priVector = priV >= 100 || priV === 154 ? "Y" : "Δ";
             secVector = priV >= 100 || priV === 154 ? "Δ" : "Y";
           }
+
+          const formattedName = fmtName(data.name || "TR");
+          const defaultCap =
+            priV >= 100
+              ? "80/100MVA"
+              : priV >= 21.9
+                ? "20MVA"
+                : priV > 1.0
+                  ? "3MVA"
+                  : "1000kVA";
+          const specText =
+            data.capacity !== undefined && data.capacity !== ""
+              ? data.capacity
+              : defaultCap;
+          const lbls = getLblAttrs({
+            angle: data.angle,
+            width: 44,
+            height: 64,
+            nameText: formattedName,
+            specText: specText,
+            rightRefX: 46,
+            leftRefX: -6,
+            baseNameRefY: 20,
+          });
 
           this.attr({
             topCircle: {
@@ -593,8 +918,8 @@
               display: "block",
             },
             tertVectorLabel: { display: "none" },
-            nameLabel: { text: data.name || "TR", refX: 46, refY: "35%" },
-            specLabel: { text: data.capacity || "", refX: 46, refY: "60%" },
+            nameLabel: lbls.nameAttrs,
+            specLabel: lbls.specAttrs,
           });
 
           const curSize = this.get("size") || {};
@@ -665,6 +990,27 @@
           { id: "in", group: "ports", args: { x: 16, y: 0 } },
           { id: "ground", group: "ports", args: { x: 16, y: 44 } },
         ],
+      },
+    },
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateVisual();
+        this.on("change:sldData", this.updateVisual, this);
+        this.on("change:size", this.updateVisual, this);
+      },
+      updateVisual: function () {
+        const data = this.get("sldData") || {};
+        const sz = this.get("size") || { width: 32, height: 44 };
+        const lbls = getLblAttrs({
+          angle: data.angle,
+          width: sz.width,
+          height: sz.height,
+          nameText: fmtName(data.name || "LA"),
+        });
+        this.attr({
+          nameLabel: lbls.nameAttrs,
+        });
       },
     },
   );

@@ -12,6 +12,12 @@
   if (typeof joint === "undefined") return;
   joint.shapes.sld = joint.shapes.sld || {};
 
+  const fmtName = (str) =>
+    typeof window !== "undefined" &&
+    typeof window.formatSymbolLabel === "function"
+      ? window.formatSymbolLabel(str, 5)
+      : str;
+
   // 1. Busbar (모선)
   joint.shapes.sld.Busbar = joint.dia.Element.define(
     "sld.Busbar",
@@ -110,125 +116,153 @@
   );
 
   // 2. Switchgear (수배전반)
-  joint.shapes.sld.Switchgear = joint.dia.Element.define("sld.Switchgear", {
-    size: { width: 44, height: 60 },
-    markup: [
-      { tagName: "rect", selector: "box" },
-      { tagName: "path", selector: "divider1" },
-      { tagName: "path", selector: "dots" },
-      { tagName: "text", selector: "label" },
-    ],
-    attrs: {
-      box: {
-        refWidth: "100%",
-        refHeight: "100%",
-        rx: 2,
-        fill: "#ffffff",
-        stroke: "#377DFF",
-        strokeWidth: 2,
+  joint.shapes.sld.Switchgear = joint.dia.Element.define(
+    "sld.Switchgear",
+    {
+      size: { width: 44, height: 60 },
+      markup: [
+        { tagName: "rect", selector: "box" },
+        { tagName: "path", selector: "divider1" },
+        { tagName: "path", selector: "dots" },
+        { tagName: "text", selector: "label" },
+      ],
+      attrs: {
+        box: {
+          refWidth: "100%",
+          refHeight: "100%",
+          rx: 2,
+          fill: "#ffffff",
+          stroke: "#377DFF",
+          strokeWidth: 2,
+        },
+        divider1: {
+          d: "M 6 18 L 38 18 M 6 30 L 38 30 M 6 42 L 38 42",
+          stroke: "#94a3b8",
+          strokeWidth: 1.2,
+        },
+        dots: {
+          d: "M 10 10 h 2 M 10 24 h 2 M 10 36 h 2 M 10 48 h 2",
+          stroke: "#377DFF",
+          strokeWidth: 3,
+          strokeLinecap: "round",
+        },
+        label: {
+          text: "배전반",
+          refX: "50%",
+          refY: -10,
+          textAnchor: "middle",
+          fontSize: 10,
+          fontWeight: "bold",
+          fill: "#1e293b",
+        },
       },
-      divider1: {
-        d: "M 6 18 L 38 18 M 6 30 L 38 30 M 6 42 L 38 42",
-        stroke: "#94a3b8",
-        strokeWidth: 1.2,
-      },
-      dots: {
-        d: "M 10 10 h 2 M 10 24 h 2 M 10 36 h 2 M 10 48 h 2",
-        stroke: "#377DFF",
-        strokeWidth: 3,
-        strokeLinecap: "round",
-      },
-      label: {
-        text: "배전반",
-        refX: "50%",
-        refY: -10,
-        textAnchor: "middle",
-        fontSize: 10,
-        fontWeight: "bold",
-        fill: "#1e293b",
-      },
-    },
-    ports: {
-      groups: {
-        ports: {
-          position: { name: "absolute" },
-          attrs: {
-            circle: {
-              r: 3.5,
-              magnet: true,
-              fill: "#fff",
-              stroke: "#377DFF",
-              strokeWidth: 1.5,
+      ports: {
+        groups: {
+          ports: {
+            position: { name: "absolute" },
+            attrs: {
+              circle: {
+                r: 3.5,
+                magnet: true,
+                fill: "#fff",
+                stroke: "#377DFF",
+                strokeWidth: 1.5,
+              },
             },
           },
         },
+        items: [
+          { id: "in", group: "ports", args: { x: 22, y: 0 } },
+          { id: "out1", group: "ports", args: { x: 12, y: 60 } },
+          { id: "out2", group: "ports", args: { x: 32, y: 60 } },
+        ],
       },
-      items: [
-        { id: "in", group: "ports", args: { x: 22, y: 0 } },
-        { id: "out1", group: "ports", args: { x: 12, y: 60 } },
-        { id: "out2", group: "ports", args: { x: 32, y: 60 } },
-      ],
     },
-  });
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateVisual();
+        this.on("change:sldData", this.updateVisual, this);
+      },
+      updateVisual: function () {
+        const data = this.get("sldData") || {};
+        this.attr("label/text", fmtName(data.name || "배전반"));
+      },
+    },
+  );
 
   // 3. Panelboard (분전반)
-  joint.shapes.sld.Panelboard = joint.dia.Element.define("sld.Panelboard", {
-    size: { width: 40, height: 50 },
-    markup: [
-      { tagName: "rect", selector: "box" },
-      { tagName: "rect", selector: "inner" },
-      { tagName: "text", selector: "label" },
-    ],
-    attrs: {
-      box: {
-        refWidth: "100%",
-        refHeight: "100%",
-        rx: 2,
-        fill: "#ffffff",
-        stroke: "#2B6CB0",
-        strokeWidth: 2,
+  joint.shapes.sld.Panelboard = joint.dia.Element.define(
+    "sld.Panelboard",
+    {
+      size: { width: 40, height: 50 },
+      markup: [
+        { tagName: "rect", selector: "box" },
+        { tagName: "rect", selector: "inner" },
+        { tagName: "text", selector: "label" },
+      ],
+      attrs: {
+        box: {
+          refWidth: "100%",
+          refHeight: "100%",
+          rx: 2,
+          fill: "#ffffff",
+          stroke: "#2B6CB0",
+          strokeWidth: 2,
+        },
+        inner: {
+          x: 6,
+          y: 6,
+          width: 28,
+          height: 38,
+          fill: "#f8fafc",
+          stroke: "#2B6CB0",
+          strokeWidth: 1,
+        },
+        label: {
+          text: "분전반",
+          refX: "50%",
+          refY: -10,
+          textAnchor: "middle",
+          fontSize: 10,
+          fontWeight: "bold",
+          fill: "#1e293b",
+        },
       },
-      inner: {
-        x: 6,
-        y: 6,
-        width: 28,
-        height: 38,
-        fill: "#f8fafc",
-        stroke: "#2B6CB0",
-        strokeWidth: 1,
-      },
-      label: {
-        text: "분전반",
-        refX: "50%",
-        refY: -10,
-        textAnchor: "middle",
-        fontSize: 10,
-        fontWeight: "bold",
-        fill: "#1e293b",
-      },
-    },
-    ports: {
-      groups: {
-        ports: {
-          position: { name: "absolute" },
-          attrs: {
-            circle: {
-              r: 3.5,
-              magnet: true,
-              fill: "#fff",
-              stroke: "#2B6CB0",
-              strokeWidth: 1.5,
+      ports: {
+        groups: {
+          ports: {
+            position: { name: "absolute" },
+            attrs: {
+              circle: {
+                r: 3.5,
+                magnet: true,
+                fill: "#fff",
+                stroke: "#2B6CB0",
+                strokeWidth: 1.5,
+              },
             },
           },
         },
+        items: [
+          { id: "in", group: "ports", args: { x: 20, y: 0 } },
+          { id: "out1", group: "ports", args: { x: 12, y: 50 } },
+          { id: "out2", group: "ports", args: { x: 28, y: 50 } },
+        ],
       },
-      items: [
-        { id: "in", group: "ports", args: { x: 20, y: 0 } },
-        { id: "out1", group: "ports", args: { x: 12, y: 50 } },
-        { id: "out2", group: "ports", args: { x: 28, y: 50 } },
-      ],
     },
-  });
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateVisual();
+        this.on("change:sldData", this.updateVisual, this);
+      },
+      updateVisual: function () {
+        const data = this.get("sldData") || {};
+        this.attr("label/text", fmtName(data.name || "분전반"));
+      },
+    },
+  );
 
   // 4. Junction Node (접속 노드 / T-분기점)
   joint.shapes.sld.Junction = joint.dia.Element.define(

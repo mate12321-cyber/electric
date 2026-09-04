@@ -67,6 +67,7 @@ class PropertiesPanel {
     };
 
     bindInput("prop-name", "name");
+    bindInput("prop-earth-name", "earthName");
     bindInput("prop-desc", "desc");
     bindInput("prop-state", "state");
     bindInput("prop-voltage", "voltage", true);
@@ -217,6 +218,75 @@ class PropertiesPanel {
         }
       });
     });
+
+    // Rotation Angle Presets (0°, 90°, 180°, 270°)
+    const angleBtns = document.querySelectorAll(".btn-prop-angle");
+    angleBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const targetAngle = parseInt(btn.getAttribute("data-angle"), 10) || 0;
+        if (typeof this.editor.rotateSelected === "function") {
+          this.editor.rotateSelected(targetAngle, true);
+        } else if (
+          this.editor.selectionManager &&
+          typeof this.editor.selectionManager.rotateSelected === "function"
+        ) {
+          this.editor.selectionManager.rotateSelected(targetAngle, true);
+        }
+        this.updateRotationUI(targetAngle);
+      });
+    });
+
+    const btnRotate90 = document.getElementById("btn-prop-rotate-90");
+    if (btnRotate90) {
+      btnRotate90.addEventListener("click", () => {
+        if (typeof this.editor.rotateSelected === "function") {
+          this.editor.rotateSelected(90, false);
+        } else if (
+          this.editor.selectionManager &&
+          typeof this.editor.selectionManager.rotateSelected === "function"
+        ) {
+          this.editor.selectionManager.rotateSelected(90, false);
+        }
+        const cell =
+          this.editor.selectedCell ||
+          (this.editor.selectionManager &&
+            this.editor.selectionManager.selectedCells &&
+            this.editor.selectionManager.selectedCells[0]);
+        if (cell) {
+          const sldData = cell.get("sldData") || {};
+          const curAngle =
+            sldData.angle !== undefined
+              ? sldData.angle
+              : cell.angle
+                ? cell.angle()
+                : 0;
+          this.updateRotationUI(curAngle);
+        }
+      });
+    }
+  }
+
+  updateRotationUI(angle) {
+    const normAngle = ((Math.round(angle || 0) % 360) + 360) % 360;
+    const disp = document.getElementById("prop-rotation-display");
+    if (disp) disp.innerText = `${normAngle}°`;
+    const angleBtns = document.querySelectorAll(".btn-prop-angle");
+    angleBtns.forEach((btn) => {
+      const bAngle = parseInt(btn.getAttribute("data-angle"), 10);
+      if (bAngle === normAngle) {
+        btn.classList.add("sld-btn-primary");
+        btn.classList.remove("sld-btn-secondary");
+      } else {
+        btn.classList.remove("sld-btn-primary");
+        btn.classList.add("sld-btn-secondary");
+      }
+    });
+  }
+
+  updateFieldsVisibility() {
+    if (this.editor.selectedCell) {
+      this.populateProperties(this.editor.selectedCell);
+    }
   }
 
   populate(cell) {
@@ -259,6 +329,16 @@ class PropertiesPanel {
 
     if (groupName) groupName.style.display = isMulti ? "none" : "block";
     if (groupDesc) groupDesc.style.display = isMulti ? "none" : "block";
+
+    const isDisconnector3P =
+      !isMulti &&
+      (sldData.type === "DS_3P" || cell.get("type") === "sld.Disconnector3P");
+    const groupEarthName = document.getElementById("group-prop-earth-name");
+    if (groupEarthName)
+      groupEarthName.style.display = isDisconnector3P ? "block" : "none";
+    if (isDisconnector3P) {
+      setValue("prop-earth-name", sldData.earthName || "154kV ES");
+    }
 
     const isBusbar =
       !isMulti &&
@@ -418,6 +498,7 @@ class PropertiesPanel {
     });
 
     setValue("prop-name", sldData.name || catalog.nameKo || "설비");
+    setValue("prop-earth-name", sldData.earthName || "154kV ES");
     setValue("prop-desc", sldData.desc || catalog.descKo || "");
     setValue("prop-state", mappedState);
     setValue("prop-voltage", sldData.voltage || sldData.priVoltage || "");
@@ -446,6 +527,14 @@ class PropertiesPanel {
       sldData.lineColor || sldData.color || "#377DFF",
     );
     setValue("prop-memo", sldData.memo || "");
+
+    const curAngle =
+      sldData.angle !== undefined
+        ? sldData.angle
+        : cell.angle
+          ? cell.angle()
+          : 0;
+    this.updateRotationUI(curAngle);
 
     // Update Tab 3 (Telemetry / Real-time data)
     const vEl = document.getElementById("telemetry-v");

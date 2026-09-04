@@ -1024,6 +1024,11 @@ class SLDEditor {
   toggleSelectedEquipmentState(forcedState) {
     this.selectionManager.toggleSelectedEquipmentState(forcedState);
   }
+  rotateSelected(deltaAngle, absolute) {
+    if (this.selectionManager) {
+      this.selectionManager.rotateSelected(deltaAngle, absolute);
+    }
+  }
   updateSelectionOverlay() {
     this.selectionManager.updateSelectionOverlay();
   }

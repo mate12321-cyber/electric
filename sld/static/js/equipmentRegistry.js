@@ -10,7 +10,7 @@ const DEFAULT_VOLTAGE_PRESETS = {
     value: 154,
     unit: "kV",
     color: "#E53935",
-    label: "154kV (초고압)",
+    label: "154kV (초고압 ≥100kV)",
   },
   "22.9kV": {
     key: "22.9kV",
@@ -18,7 +18,7 @@ const DEFAULT_VOLTAGE_PRESETS = {
     value: 22.9,
     unit: "kV",
     color: "#9C27B0",
-    label: "22.9kV (특고압)",
+    label: "22.9kV (특고압 ≥21.9kV)",
   },
   "6.6kV": {
     key: "6.6kV",
@@ -165,11 +165,217 @@ function resetVoltageColors() {
   return window.VOLTAGE_PRESETS;
 }
 
+/**
+ * 심볼 명칭 텍스트 자동 줄바꿈 포맷터:
+ * - 5글자 초과 시 줄바꿈 ('.' 문자는 글자 수 카운트에서 제외)
+ * - '-', '#', '_', 공백 기호 위치에서 구분하여 줄바꿈
+ * - 각 줄의 앞뒤 공백 및 구분 기호를 정리하여 완벽한 좌측 정렬(Left-align) 유지
+ */
+function formatSymbolLabel(str, maxLen = 5) {
+  if (!str || typeof str !== "string") return str || "";
+  if (str.includes("\n")) {
+    return str
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  const rawChunks = str.split(/[\s_]+/).filter(Boolean);
+  const tokens = [];
+
+  rawChunks.forEach((chunk) => {
+    if (chunk.includes("-")) {
+      const parts = chunk.split("-").filter(Boolean);
+      tokens.push(...parts);
+    } else if (chunk.includes("#") && !chunk.startsWith("#")) {
+      const parts = chunk.split(/(?=#)/).filter(Boolean);
+      tokens.push(...parts);
+    } else {
+      tokens.push(chunk);
+    }
+  });
+
+  const lines = [];
+  tokens.forEach((token) => {
+    token = token.trim();
+    if (!token) return;
+    const effectiveLen = token.replace(/\./g, "").length;
+    if (effectiveLen <= maxLen) {
+      lines.push(token);
+    } else {
+      let currentChunk = "";
+      let count = 0;
+      for (let i = 0; i < token.length; i++) {
+        const ch = token[i];
+        if (ch !== ".") {
+          if (count >= maxLen && currentChunk.trim().length > 0) {
+            lines.push(currentChunk.trim());
+            currentChunk = "";
+            count = 0;
+          }
+          count++;
+        }
+        currentChunk += ch;
+      }
+      if (currentChunk.trim().length > 0) {
+        lines.push(currentChunk.trim());
+      }
+    }
+  });
+
+  return lines
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
+/**
+ * 심볼의 회전 각도(0, 90, 180, 270) 및 줄 수에 따른 nameLabel / specLabel 위치 및 회전 속성 계산
+ * - 0°: 심볼 세로(0°), 텍스트 우측 (좌측 정렬 start)
+ * - 90°: 심볼 가로(90°), 텍스트 하단 (중앙 정렬 middle, transform: rotate(-90))
+ * - 180°: 심볼 세로(0°), 텍스트 좌측 (우측 정렬 end)
+ * - 270°: 심볼 가로(90°), 텍스트 상단 (중앙 정렬 middle, transform: rotate(-90))
+ *
+ * 이름의 마지막 줄 바닥과 정격(전류/용량) 사이의 행간은 1줄일 때와 여러 줄일 때 완전히 동일하게 유지됨.
+ */
+function getSymbolLabelAttrs(options) {
+  const angle = ((Math.round(options.angle || 0) % 360) + 360) % 360;
+  const w = options.width || 28;
+  const h = options.height || 40;
+  const cx = w / 2;
+  const cy = h / 2;
+  const nameText = options.nameText || "";
+  const specText = options.specText || "";
+  const nameLines = nameText ? String(nameText).split("\n").length : 1;
+
+  const lineHeight = options.lineHeight || 12;
+  const gap = options.gap || 14;
+
+  let nameAttrs = {};
+  let specAttrs = {};
+
+  if (angle === 90) {
+    // 가로 심볼 (90도 물리 회전), 텍스트 하단 (Screen Bottom)
+    const baseScreenY =
+      cy + w / 2 + (options.bottomPad !== undefined ? options.bottomPad : 10);
+    const nameX = baseScreenY - (cy - cx);
+    const specX = nameX + (nameLines - 1) * lineHeight + gap;
+
+    nameAttrs = {
+      text: nameText,
+      refX: null,
+      refY: null,
+      x: nameX,
+      y: cy,
+      textAnchor: "middle",
+      transform: `rotate(-90, ${nameX}, ${cy})`,
+    };
+    specAttrs = {
+      text: specText,
+      refX: null,
+      refY: null,
+      x: specX,
+      y: cy,
+      textAnchor: "middle",
+      transform: `rotate(-90, ${specX}, ${cy})`,
+    };
+  } else if (angle === 270) {
+    // 가로 심볼 (90도 물리 회전), 텍스트 상단 (Screen Top)
+    const topLimitScreenY =
+      cy - w / 2 - (options.topPad !== undefined ? options.topPad : 6);
+    const specScreenY = topLimitScreenY;
+    const nameScreenY = specScreenY - gap - (nameLines - 1) * lineHeight;
+    const nameX = nameScreenY - (cy - cx);
+    const specX = nameX + (nameLines - 1) * lineHeight + gap;
+
+    nameAttrs = {
+      text: nameText,
+      refX: null,
+      refY: null,
+      x: nameX,
+      y: cy,
+      textAnchor: "middle",
+      transform: `rotate(-90, ${nameX}, ${cy})`,
+    };
+    specAttrs = {
+      text: specText,
+      refX: null,
+      refY: null,
+      x: specX,
+      y: cy,
+      textAnchor: "middle",
+      transform: `rotate(-90, ${specX}, ${cy})`,
+    };
+  } else if (angle === 180) {
+    // 세로 심볼 (0도 물리 회전), 텍스트 좌측 (Screen Left)
+    const baseNameRefY =
+      options.baseNameRefY !== undefined
+        ? options.baseNameRefY
+        : Math.round(cy - 10);
+    const nameRefY = baseNameRefY - (nameLines - 1) * 6;
+    const specRefY = nameRefY + (nameLines - 1) * lineHeight + gap;
+    const leftRefX = options.leftRefX !== undefined ? options.leftRefX : -6;
+
+    nameAttrs = {
+      text: nameText,
+      refX: leftRefX,
+      refY: nameRefY,
+      x: null,
+      y: null,
+      textAnchor: "end",
+      transform: "",
+    };
+    specAttrs = {
+      text: specText,
+      refX: leftRefX,
+      refY: specRefY,
+      x: null,
+      y: null,
+      textAnchor: "end",
+      transform: "",
+    };
+  } else {
+    // 0도 (세로 심볼, 텍스트 우측 Screen Right)
+    const baseNameRefY =
+      options.baseNameRefY !== undefined
+        ? options.baseNameRefY
+        : Math.round(cy - 10);
+    const nameRefY = baseNameRefY - (nameLines - 1) * 6;
+    const specRefY = nameRefY + (nameLines - 1) * lineHeight + gap;
+    const rightRefX =
+      options.rightRefX !== undefined ? options.rightRefX : w + 6;
+
+    nameAttrs = {
+      text: nameText,
+      refX: rightRefX,
+      refY: nameRefY,
+      x: null,
+      y: null,
+      textAnchor: "start",
+      transform: "",
+    };
+    specAttrs = {
+      text: specText,
+      refX: rightRefX,
+      refY: specRefY,
+      x: null,
+      y: null,
+      textAnchor: "start",
+      transform: "",
+    };
+  }
+
+  return { nameAttrs, specAttrs, angle, nameLines };
+}
+
 window.DEFAULT_VOLTAGE_PRESETS = DEFAULT_VOLTAGE_PRESETS;
 window.VOLTAGE_PRESETS = VOLTAGE_PRESETS;
 window.getVoltageColor = getVoltageColor;
 window.saveVoltageColors = saveVoltageColors;
 window.resetVoltageColors = resetVoltageColors;
+window.formatSymbolLabel = formatSymbolLabel;
+window.getSymbolLabelAttrs = getSymbolLabelAttrs;
 
 const EQUIPMENT_CATALOG = {
   // 1. 수전 설비 (Receiving Equipment)
@@ -202,9 +408,9 @@ const EQUIPMENT_CATALOG = {
       priVoltage: 154,
       secVoltage: 22.9,
       voltageUnit: "kV",
-      capacity: "20MVA",
+      capacity: "80/100MVA",
       color: "#2E7D32",
-      memo: "154/22.9kV 20MVA 주 변압기",
+      memo: "154/22.9kV 80/100MVA (자냉/풍랭) 주 변압기",
     },
     ports: ["pri", "sec"],
     iconSvg:
@@ -222,8 +428,9 @@ const EQUIPMENT_CATALOG = {
       secVoltage: 22.9,
       tertVoltage: 6.6,
       voltageUnit: "kV",
-      capacity: "30MVA",
+      capacity: "80/100MVA",
       color: "#2E7D32",
+      memo: "154/22.9/6.6kV 80/100MVA (자냉/풍랭) 3권선 변압기",
     },
     ports: ["pri", "sec", "tert"],
     iconSvg:
@@ -268,6 +475,27 @@ const EQUIPMENT_CATALOG = {
     ports: ["in", "out"],
     iconSvg:
       '<path d="M12 2v4M12 18v4M15 6v12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="12" cy="6" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="12" cy="18" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/>',
+  },
+  DS_3P: {
+    type: "DS_3P",
+    jointType: "sld.Disconnector3P",
+    category: "RECEIVING",
+    subCategory: "SWITCH",
+    nameKo: "3로 단로기 (3-DS)",
+    descKo: "154kV 3위치 단로기 (투입/개방/접지 겸용 단로기)",
+    defaultProps: {
+      name: "154kV DS",
+      earthName: "154kV ES",
+      state: "CLOSED", // 'CLOSED' | 'OPEN' | 'EARTH'
+      voltage: 154,
+      current: 2000,
+      poles: "3P",
+      color: "#7A3E9D",
+      memo: "154kV 수전용 3위치 단로기 (투입/개방/접지)",
+    },
+    ports: ["in", "out", "earth"],
+    iconSvg:
+      '<path d="M7 2v4M7 18v4M10 6v12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="7" cy="6" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="7" cy="18" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="17" cy="18" r="2.5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M17 21v3M14 24h6M15 26h4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>',
   },
   LA: {
     type: "LA",

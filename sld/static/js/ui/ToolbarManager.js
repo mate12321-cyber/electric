@@ -27,6 +27,18 @@ class ToolbarManager {
       });
     });
 
+    // Toolbar Rotate button (90deg)
+    const btnRotateToolbar = document.getElementById("btn-rotate-toolbar");
+    if (btnRotateToolbar) {
+      btnRotateToolbar.addEventListener("click", () => {
+        if (this.editor.selectionManager) {
+          this.editor.selectionManager.rotateSelected(90);
+        } else if (typeof this.editor.rotateSelected === "function") {
+          this.editor.rotateSelected(90);
+        }
+      });
+    }
+
     // Toolbar Batch Rename button
     const btnBatchRenameToolbar = document.getElementById(
       "btn-batch-rename-toolbar",

@@ -179,6 +179,9 @@ class PowerSystemTopologyTracker {
 
       const st = (sldData.state || "LIVE").toUpperCase();
       if (st === "DEAD" || st === "OPEN") return false;
+      if (sldData.type === "DS_3P" || el.get("type") === "sld.Disconnector3P") {
+        return st === "LIVE" || st === "CLOSED";
+      }
       if (st === "GROUNDED" || st === "GROUND" || st === "EARTH") return true;
       if (catalog.subCategory === "SWITCH") {
         return st === "LIVE" || st === "CLOSED";
@@ -217,11 +220,46 @@ class PowerSystemTopologyTracker {
 
     while (groundQueue.length > 0) {
       const currentId = groundQueue.shift();
+      const currentEl = this.graph.getCell(currentId);
+      const currentSld = currentEl ? currentEl.get("sldData") || {} : {};
+      const currentSt = (currentSld.state || "").toUpperCase();
+      const isCurrentDS3P =
+        currentSld.type === "DS_3P" ||
+        (currentEl && currentEl.get("type") === "sld.Disconnector3P");
+
       const neighbors = adj.get(currentId) || [];
 
       for (const edge of neighbors) {
+        // 3로 단로기가 접지(EARTH) 상태일 때 상단 인출선(out)으로는 접지 전파를 차단
+        if (
+          isCurrentDS3P &&
+          (currentSt === "EARTH" ||
+            currentSt === "GROUND" ||
+            currentSt === "GROUNDED")
+        ) {
+          if (edge.portFrom === "out") continue;
+        }
+
         const neighborEl = this.graph.getCell(edge.neighborId);
         if (!neighborEl) continue;
+
+        const neighborSld = neighborEl.get("sldData") || {};
+        const neighborSt = (neighborSld.state || "").toUpperCase();
+        const isNeighborDS3P =
+          neighborSld.type === "DS_3P" ||
+          neighborEl.get("type") === "sld.Disconnector3P";
+
+        if (isNeighborDS3P) {
+          if (neighborSt === "OPEN" || neighborSt === "DEAD") continue;
+          if (
+            (neighborSt === "EARTH" ||
+              neighborSt === "GROUND" ||
+              neighborSt === "GROUNDED") &&
+            edge.portTo === "out"
+          ) {
+            continue;
+          }
+        }
 
         const conducting = isElementConducting(neighborEl);
         groundedLinks.add(edge.link.id);

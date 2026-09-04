@@ -13,6 +13,20 @@
   if (typeof joint === "undefined") return;
   joint.shapes.sld = joint.shapes.sld || {};
 
+  const fmtName = (str) =>
+    typeof window !== "undefined" &&
+    typeof window.formatSymbolLabel === "function"
+      ? window.formatSymbolLabel(str, 5)
+      : str;
+
+  const getLblAttrs = (opts) =>
+    typeof window.getSymbolLabelAttrs === "function"
+      ? window.getSymbolLabelAttrs(opts)
+      : {
+          nameAttrs: { text: opts.nameText },
+          specAttrs: { text: opts.specText },
+        };
+
   // 1. Emergency Generator (비상 발전기)
   joint.shapes.sld.Generator = joint.dia.Element.define(
     "sld.Generator",
@@ -115,6 +129,17 @@
           leadStroke = "#94a3b8";
         }
 
+        const formattedName = fmtName(data.name || "비상 발전기");
+        const specText = data.capacity || "";
+        const sz = this.get("size") || { width: 44, height: 44 };
+        const lbls = getLblAttrs({
+          angle: data.angle,
+          width: sz.width,
+          height: sz.height,
+          nameText: formattedName,
+          specText: specText,
+        });
+
         this.attr({
           circle: {
             stroke: circleStroke,
@@ -122,8 +147,8 @@
           },
           lead: { stroke: leadStroke },
           text: { fill: textFill },
-          nameLabel: { text: data.name || "비상 발전기" },
-          specLabel: { text: data.capacity || "" },
+          nameLabel: lbls.nameAttrs,
+          specLabel: lbls.specAttrs,
         });
 
         const ports = this.getPorts() || [];
@@ -135,61 +160,102 @@
   );
 
   // 2. Motor (전동기 모터)
-  joint.shapes.sld.Motor = joint.dia.Element.define("sld.Motor", {
-    size: { width: 42, height: 42 },
-    markup: [
-      { tagName: "circle", selector: "circle" },
-      { tagName: "path", selector: "lead" },
-      { tagName: "text", selector: "text" },
-      { tagName: "text", selector: "nameLabel" },
-    ],
-    attrs: {
-      circle: {
-        cx: 21,
-        cy: 21,
-        r: 17,
-        stroke: "#377DFF",
-        strokeWidth: 2,
-        fill: "#ffffff",
+  joint.shapes.sld.Motor = joint.dia.Element.define(
+    "sld.Motor",
+    {
+      size: { width: 42, height: 42 },
+      markup: [
+        { tagName: "circle", selector: "circle" },
+        { tagName: "path", selector: "lead" },
+        { tagName: "text", selector: "text" },
+        { tagName: "text", selector: "nameLabel" },
+      ],
+      attrs: {
+        circle: {
+          cx: 21,
+          cy: 21,
+          r: 17,
+          stroke: "#377DFF",
+          strokeWidth: 2,
+          fill: "#ffffff",
+        },
+        lead: { d: "M 21 0 L 21 4", stroke: "#377DFF", strokeWidth: 2 },
+        text: {
+          text: "M",
+          x: 21,
+          y: 25,
+          textAnchor: "middle",
+          fontSize: 14,
+          fontWeight: "bold",
+          fill: "#377DFF",
+        },
+        nameLabel: {
+          text: "모터",
+          refX: "50%",
+          refY: 46,
+          textAnchor: "middle",
+          fontSize: 10,
+          fontWeight: "600",
+          fill: "#1e293b",
+        },
       },
-      lead: { d: "M 21 0 L 21 4", stroke: "#377DFF", strokeWidth: 2 },
-      text: {
-        text: "M",
-        x: 21,
-        y: 25,
-        textAnchor: "middle",
-        fontSize: 14,
-        fontWeight: "bold",
-        fill: "#377DFF",
-      },
-      nameLabel: {
-        text: "모터",
-        refX: "50%",
-        refY: 46,
-        textAnchor: "middle",
-        fontSize: 10,
-        fontWeight: "600",
-        fill: "#1e293b",
-      },
-    },
-    ports: {
-      groups: {
-        ports: {
-          position: { name: "absolute" },
-          attrs: {
-            circle: {
-              r: 3.5,
-              magnet: true,
-              fill: "#fff",
-              stroke: "#377DFF",
-              strokeWidth: 1.5,
+      ports: {
+        groups: {
+          ports: {
+            position: { name: "absolute" },
+            attrs: {
+              circle: {
+                r: 3.5,
+                magnet: true,
+                fill: "#fff",
+                stroke: "#377DFF",
+                strokeWidth: 1.5,
+              },
             },
           },
         },
+        items: [{ id: "in", group: "ports", args: { x: 21, y: 0 } }],
       },
-      items: [{ id: "in", group: "ports", args: { x: 21, y: 0 } }],
     },
-  });
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateVisual();
+        this.on("change:sldData", this.updateVisual, this);
+      },
+      updateVisual: function (effectiveState, voltageColor) {
+        const data = this.get("sldData") || {};
+        const state = (effectiveState || data.state || "LIVE").toUpperCase();
+        const isLive = state === "LIVE" || state === "CLOSED";
+        const isGrounded =
+          state === "GROUNDED" || state === "GROUND" || state === "EARTH";
+        const strokeColor = isGrounded
+          ? "#84CC16"
+          : isLive
+            ? voltageColor || data.color || "#377DFF"
+            : "#94a3b8";
+        const sz = this.get("size") || { width: 42, height: 42 };
+        const lbls = getLblAttrs({
+          angle: data.angle,
+          width: sz.width,
+          height: sz.height,
+          nameText: fmtName(data.name || "모터"),
+        });
+
+        this.attr({
+          circle: { stroke: strokeColor },
+          lead: { stroke: strokeColor },
+          text: { fill: strokeColor },
+          nameLabel: lbls.nameAttrs,
+        });
+
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", strokeColor);
+        });
+      },
+    },
+  );
 
   // 3. Load (일반 부하)
   joint.shapes.sld.Load = joint.dia.Element.define(
@@ -246,6 +312,7 @@
         joint.dia.Element.prototype.initialize.apply(this, arguments);
         this.updateVisual();
         this.on("change:sldData", this.updateVisual, this);
+        this.on("change:size", this.updateVisual, this);
       },
       updateVisual: function (effectiveState, voltageColor) {
         const data = this.get("sldData") || {};
@@ -258,11 +325,18 @@
           : isLive
             ? voltageColor || data.color || "#64748b"
             : "#94a3b8";
+        const sz = this.get("size") || { width: 34, height: 36 };
+        const lbls = getLblAttrs({
+          angle: data.angle,
+          width: sz.width,
+          height: sz.height,
+          nameText: fmtName(data.name || "부하"),
+        });
 
         this.attr({
           lead: { stroke: strokeColor },
           box: { stroke: strokeColor },
-          nameLabel: { text: data.name || "부하" },
+          nameLabel: lbls.nameAttrs,
         });
 
         const ports = this.getPorts ? this.getPorts() || [] : [];
@@ -434,7 +508,7 @@
             stroke: strokeColor,
           },
           label: {
-            text: data.name || "UPS",
+            text: fmtName(data.name || "UPS"),
             fill: labelColor,
           },
         });
@@ -448,130 +522,173 @@
   );
 
   // 6. Rectifier (정류기 / 인버터)
-  joint.shapes.sld.Rectifier = joint.dia.Element.define("sld.Rectifier", {
-    size: { width: 50, height: 40 },
-    markup: [
-      { tagName: "rect", selector: "box" },
-      { tagName: "path", selector: "diag" },
-      { tagName: "path", selector: "acSymbol" },
-      { tagName: "path", selector: "dcLine" },
-      { tagName: "text", selector: "label" },
-    ],
-    attrs: {
-      box: {
-        refWidth: "100%",
-        refHeight: "100%",
-        rx: 3,
-        fill: "#ffffff",
-        stroke: "#2E7D32",
-        strokeWidth: 2,
+  joint.shapes.sld.Rectifier = joint.dia.Element.define(
+    "sld.Rectifier",
+    {
+      size: { width: 50, height: 40 },
+      markup: [
+        { tagName: "rect", selector: "box" },
+        { tagName: "path", selector: "diag" },
+        { tagName: "path", selector: "acSymbol" },
+        { tagName: "path", selector: "dcLine" },
+        { tagName: "text", selector: "label" },
+      ],
+      attrs: {
+        box: {
+          refWidth: "100%",
+          refHeight: "100%",
+          rx: 3,
+          fill: "#ffffff",
+          stroke: "#2E7D32",
+          strokeWidth: 2,
+        },
+        diag: { d: "M 0 40 L 50 0", stroke: "#2E7D32", strokeWidth: 1 },
+        acSymbol: {
+          d: "M 8 16 Q 12 10 16 16 T 24 16",
+          stroke: "#2E7D32",
+          strokeWidth: 1.5,
+          fill: "none",
+        },
+        dcLine: { d: "M 32 30 L 44 30", stroke: "#2E7D32", strokeWidth: 2 },
+        label: {
+          text: "정류기",
+          refX: 56,
+          refY: "50%",
+          textAnchor: "start",
+          textVerticalAnchor: "middle",
+          fontSize: 10,
+          fontWeight: "bold",
+          fill: "#2E7D32",
+        },
       },
-      diag: { d: "M 0 40 L 50 0", stroke: "#2E7D32", strokeWidth: 1 },
-      acSymbol: {
-        d: "M 8 16 Q 12 10 16 16 T 24 16",
-        stroke: "#2E7D32",
-        strokeWidth: 1.5,
-        fill: "none",
-      },
-      dcLine: { d: "M 32 30 L 44 30", stroke: "#2E7D32", strokeWidth: 2 },
-      label: {
-        text: "정류기",
-        refX: 56,
-        refY: "50%",
-        textAnchor: "start",
-        textVerticalAnchor: "middle",
-        fontSize: 10,
-        fontWeight: "bold",
-        fill: "#2E7D32",
-      },
-    },
-    ports: {
-      groups: {
-        ports: {
-          position: { name: "absolute" },
-          attrs: {
-            circle: {
-              r: 3.5,
-              magnet: true,
-              fill: "#fff",
-              stroke: "#2E7D32",
-              strokeWidth: 1.5,
+      ports: {
+        groups: {
+          ports: {
+            position: { name: "absolute" },
+            attrs: {
+              circle: {
+                r: 3.5,
+                magnet: true,
+                fill: "#fff",
+                stroke: "#2E7D32",
+                strokeWidth: 1.5,
+              },
             },
           },
         },
+        items: [
+          { id: "ac_in", group: "ports", args: { x: 25, y: 0 } },
+          { id: "dc_out", group: "ports", args: { x: 25, y: 40 } },
+        ],
       },
-      items: [
-        { id: "ac_in", group: "ports", args: { x: 25, y: 0 } },
-        { id: "dc_out", group: "ports", args: { x: 25, y: 40 } },
-      ],
     },
-  });
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateVisual();
+        this.on("change:sldData", this.updateVisual, this);
+      },
+      updateVisual: function () {
+        const data = this.get("sldData") || {};
+        this.attr("label/text", fmtName(data.name || "정류기"));
+      },
+    },
+  );
 
   // 7. Battery Bank (축전지)
-  joint.shapes.sld.Battery = joint.dia.Element.define("sld.Battery", {
-    size: { width: 52, height: 34 },
-    markup: [
-      { tagName: "rect", selector: "box" },
-      { tagName: "path", selector: "plus" },
-      { tagName: "path", selector: "minus" },
-      { tagName: "text", selector: "nameLabel" },
-      { tagName: "text", selector: "specLabel" },
-    ],
-    attrs: {
-      box: {
-        refWidth: "100%",
-        refHeight: "100%",
-        rx: 3,
-        fill: "#ffffff",
-        stroke: "#00838F",
-        strokeWidth: 2,
+  joint.shapes.sld.Battery = joint.dia.Element.define(
+    "sld.Battery",
+    {
+      size: { width: 52, height: 34 },
+      markup: [
+        { tagName: "rect", selector: "box" },
+        { tagName: "path", selector: "plus" },
+        { tagName: "path", selector: "minus" },
+        { tagName: "text", selector: "nameLabel" },
+        { tagName: "text", selector: "specLabel" },
+      ],
+      attrs: {
+        box: {
+          refWidth: "100%",
+          refHeight: "100%",
+          rx: 3,
+          fill: "#ffffff",
+          stroke: "#00838F",
+          strokeWidth: 2,
+        },
+        plus: {
+          d: "M 11 17 H 19 M 15 13 V 21",
+          stroke: "#00838F",
+          strokeWidth: 1.8,
+          strokeLinecap: "round",
+        },
+        minus: {
+          d: "M 33 17 H 41",
+          stroke: "#00838F",
+          strokeWidth: 1.8,
+          strokeLinecap: "round",
+        },
+        nameLabel: {
+          text: "배터리 뱅크",
+          refX: "50%",
+          refY: 40,
+          textAnchor: "middle",
+          fontSize: 10,
+          fontWeight: "600",
+          fill: "#1e293b",
+        },
+        specLabel: {
+          text: "384V DC",
+          refX: "50%",
+          refY: 52,
+          textAnchor: "middle",
+          fontSize: 9,
+          fill: "#64748b",
+        },
       },
-      plus: {
-        d: "M 11 17 H 19 M 15 13 V 21",
-        stroke: "#00838F",
-        strokeWidth: 1.8,
-        strokeLinecap: "round",
-      },
-      minus: {
-        d: "M 33 17 H 41",
-        stroke: "#00838F",
-        strokeWidth: 1.8,
-        strokeLinecap: "round",
-      },
-      nameLabel: {
-        text: "배터리 뱅크",
-        refX: "50%",
-        refY: 40,
-        textAnchor: "middle",
-        fontSize: 10,
-        fontWeight: "600",
-        fill: "#1e293b",
-      },
-      specLabel: {
-        text: "384V DC",
-        refX: "50%",
-        refY: 52,
-        textAnchor: "middle",
-        fontSize: 9,
-        fill: "#64748b",
-      },
-    },
-    ports: {
-      groups: {
-        ports: {
-          position: { name: "absolute" },
-          attrs: {
-            circle: {
-              r: 3.5,
-              magnet: true,
-              fill: "#fff",
-              stroke: "#00838F",
-              strokeWidth: 1.5,
+      ports: {
+        groups: {
+          ports: {
+            position: { name: "absolute" },
+            attrs: {
+              circle: {
+                r: 3.5,
+                magnet: true,
+                fill: "#fff",
+                stroke: "#00838F",
+                strokeWidth: 1.5,
+              },
             },
           },
         },
+        items: [{ id: "out", group: "ports", args: { x: 26, y: 0 } }],
       },
-      items: [{ id: "out", group: "ports", args: { x: 26, y: 0 } }],
     },
-  });
+    {
+      initialize: function () {
+        joint.dia.Element.prototype.initialize.apply(this, arguments);
+        this.updateVisual();
+        this.on("change:sldData", this.updateVisual, this);
+        this.on("change:size", this.updateVisual, this);
+      },
+      updateVisual: function () {
+        const data = this.get("sldData") || {};
+        const formattedName = fmtName(data.name || "배터리 뱅크");
+        const specText = data.capacity || "384V DC";
+        const sz = this.get("size") || { width: 52, height: 34 };
+        const lbls = getLblAttrs({
+          angle: data.angle,
+          width: sz.width,
+          height: sz.height,
+          nameText: formattedName,
+          specText: specText,
+        });
+
+        this.attr({
+          nameLabel: lbls.nameAttrs,
+          specLabel: lbls.specAttrs,
+        });
+      },
+    },
+  );
 })();

@@ -73,9 +73,9 @@
         "priVoltage": 154,
         "secVoltage": 22.9,
         "connection": "Y-Δ",
-        "capacity": "20MVA",
+        "capacity": "80/100MVA",
         "color": "#E53935",
-        "memo": "154kV / 22.9kV 20MVA 변압기"
+        "memo": "154kV / 22.9kV 80/100MVA (자냉/풍랭) 변압기"
       }
     },
     {

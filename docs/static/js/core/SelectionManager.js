@@ -521,6 +521,81 @@ class SelectionManager {
     this.editor.scheduleAutoSave();
   }
 
+  rotateSelected(deltaAngle = 90, absolute = false) {
+    if (!this.selectedCells || this.selectedCells.length === 0) {
+      if (this.selectedCell) {
+        this.selectedCells = [this.selectedCell];
+      } else {
+        return;
+      }
+    }
+
+    const elements = this.selectedCells.filter(
+      (c) => c && c.isElement && c.isElement(),
+    );
+    if (elements.length === 0) return;
+
+    elements.forEach((el) => {
+      const sldData = el.get("sldData") || {};
+      const curAngle =
+        sldData.angle !== undefined
+          ? sldData.angle
+          : el.angle
+            ? el.angle()
+            : el.get("angle") || 0;
+
+      let targetAngle;
+      if (absolute) {
+        targetAngle = ((deltaAngle % 360) + 360) % 360;
+      } else {
+        targetAngle = (((curAngle + deltaAngle) % 360) + 360) % 360;
+      }
+
+      const physicalAngle =
+        targetAngle === 90 || targetAngle === 270 ? 90 : 0;
+
+      if (typeof el.rotate === "function") {
+        el.rotate(physicalAngle, true);
+      }
+      sldData.angle = targetAngle;
+      el.set("sldData", Object.assign({}, sldData));
+
+      if (typeof el.updateContactVisual === "function") {
+        el.updateContactVisual();
+      } else if (typeof el.updateVisual === "function") {
+        el.updateVisual();
+      } else if (typeof el.updateFromSldData === "function") {
+        el.updateFromSldData();
+      }
+
+      if (this.editor.busbarManager) {
+        this.editor.busbarManager.syncConnectedBusbarPorts(el);
+      }
+    });
+
+    this.updateSelectionOverlay();
+    if (this.editor.propertiesPanel) {
+      if (
+        typeof this.editor.propertiesPanel.populateProperties === "function"
+      ) {
+        this.editor.propertiesPanel.populateProperties(
+          this.selectedCell || elements[0],
+        );
+      } else if (
+        typeof this.editor.propertiesPanel.updateFieldsVisibility === "function"
+      ) {
+        this.editor.propertiesPanel.updateFieldsVisibility();
+      }
+    }
+    if (this.editor.topologyTracker) {
+      this.editor.topologyTracker.applyStyles(this.editor.paper);
+    }
+    this.editor.updateMinimap();
+    this.editor.pushHistory();
+    this.editor.scheduleAutoSave();
+    this.editor.showToast("심볼 90° 회전 완료");
+  }
+
   toggleSelectedEquipmentState(forcedState) {
     if (!this.selectedCells || this.selectedCells.length === 0) {
       if (this.selectedCell) {
@@ -566,6 +641,25 @@ class SelectionManager {
           targetState === "LIVE" || targetState === "CLOSED"
             ? "CLOSED"
             : "OPEN";
+      } else if (
+        sldData.type === "DS_3P" ||
+        cell.get("type") === "sld.Disconnector3P"
+      ) {
+        if (
+          targetState === "GROUNDED" ||
+          targetState === "GROUND" ||
+          targetState === "EARTH"
+        ) {
+          nextState = "EARTH";
+        } else if (
+          targetState === "DEAD" ||
+          targetState === "OPEN" ||
+          targetState === "OFF"
+        ) {
+          nextState = "OPEN";
+        } else {
+          nextState = "CLOSED";
+        }
       } else if (
         catalog.subCategory === "SWITCH" ||
         sldData.type?.startsWith("CB_") ||
