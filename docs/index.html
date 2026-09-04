@@ -1417,35 +1417,35 @@
                     />
                     <select class="sld-combo-select" data-combo-for="prop-voltage" title="정격 전압 프리셋 선택">
                       <option value="__custom__">✏️ 직접 입력...</option>
-                      <optgroup label="[초고압 / 송전]">
-                        <option value="765">765 kV (765kV 송전)</option>
-                        <option value="345">345 kV (345kV 송전)</option>
-                        <option value="154">154 kV (154kV 수전 표준)</option>
-                        <option value="66">66 kV (66kV 송전)</option>
+                      <optgroup label="[초고압 / 송전 (kV)]">
+                        <option value="765" data-unit="kV">765 kV (765kV 송전)</option>
+                        <option value="345" data-unit="kV">345 kV (345kV 송전)</option>
+                        <option value="154" data-unit="kV">154 kV (154kV 수전 표준)</option>
+                        <option value="66" data-unit="kV">66 kV (66kV 송전)</option>
                       </optgroup>
-                      <optgroup label="[특고압 / 배전]">
-                        <option value="22.9">22.9 kV (22.9kV-Y 배전 표준)</option>
-                        <option value="22">22 kV</option>
-                        <option value="11.4">11.4 kV</option>
-                        <option value="6.6">6.6 kV (6.6kV 고압)</option>
-                        <option value="3.3">3.3 kV (3.3kV 고압)</option>
+                      <optgroup label="[특고압 / 배전 (kV)]">
+                        <option value="22.9" data-unit="kV">22.9 kV (22.9kV-Y 배전 표준)</option>
+                        <option value="22" data-unit="kV">22 kV</option>
+                        <option value="11.4" data-unit="kV">11.4 kV</option>
+                        <option value="6.6" data-unit="kV">6.6 kV (6.6kV 고압)</option>
+                        <option value="3.3" data-unit="kV">3.3 kV (3.3kV 고압)</option>
                       </optgroup>
-                      <optgroup label="[저압 / 동력]">
-                        <option value="0.48">0.48 kV (480V)</option>
-                        <option value="0.44">0.44 kV (440V)</option>
-                        <option value="0.4">0.4 kV (400V)</option>
-                        <option value="0.38">0.38 kV (380V 3상)</option>
-                        <option value="0.22">0.22 kV (220V 단상)</option>
-                        <option value="0.11">0.11 kV (110V 제어)</option>
+                      <optgroup label="[저압 / 동력 (kV)]">
+                        <option value="0.48" data-unit="kV">0.48 kV (480V)</option>
+                        <option value="0.44" data-unit="kV">0.44 kV (440V)</option>
+                        <option value="0.4" data-unit="kV">0.4 kV (400V)</option>
+                        <option value="0.38" data-unit="kV">0.38 kV (380V 3상)</option>
+                        <option value="0.22" data-unit="kV">0.22 kV (220V 단상)</option>
+                        <option value="0.11" data-unit="kV">0.11 kV (110V 제어)</option>
                       </optgroup>
                       <optgroup label="[V 단위]">
-                        <option value="480">480 V</option>
-                        <option value="440">440 V</option>
-                        <option value="380">380 V</option>
-                        <option value="220">220 V</option>
-                        <option value="110">110 V</option>
-                        <option value="24">24 V (DC)</option>
-                        <option value="12">12 V (DC)</option>
+                        <option value="480" data-unit="V">480 V</option>
+                        <option value="440" data-unit="V">440 V</option>
+                        <option value="380" data-unit="V">380 V</option>
+                        <option value="220" data-unit="V">220 V</option>
+                        <option value="110" data-unit="V">110 V</option>
+                        <option value="24" data-unit="V">24 V (DC)</option>
+                        <option value="12" data-unit="V">12 V (DC)</option>
                       </optgroup>
                     </select>
                   </div>
@@ -1502,21 +1502,29 @@
                         />
                         <select class="sld-combo-select" data-combo-for="prop-pri-voltage" title="1차 전압 프리셋 선택">
                           <option value="__custom__">✏️ 직접 입력...</option>
-                          <option value="765">765 kV</option>
-                          <option value="345">345 kV</option>
-                          <option value="154">154 kV (표준 154kV 수전)</option>
-                          <option value="66">66 kV</option>
-                          <option value="22.9">22.9 kV (배전 22.9kV)</option>
-                          <option value="6.6">6.6 kV</option>
-                          <option value="3.3">3.3 kV</option>
-                          <option value="0.44">0.44 kV (440V)</option>
-                          <option value="0.38">0.38 kV (380V)</option>
-                          <option value="0.22">0.22 kV (220V)</option>
+                          <optgroup label="[초고압 / 특고압 (kV)]">
+                            <option value="765" data-unit="kV">765 kV</option>
+                            <option value="345" data-unit="kV">345 kV</option>
+                            <option value="154" data-unit="kV">154 kV (표준 154kV 수전)</option>
+                            <option value="66" data-unit="kV">66 kV</option>
+                            <option value="22.9" data-unit="kV">22.9 kV (배전 22.9kV)</option>
+                            <option value="6.6" data-unit="kV">6.6 kV</option>
+                            <option value="3.3" data-unit="kV">3.3 kV</option>
+                            <option value="0.44" data-unit="kV">0.44 kV (440V)</option>
+                            <option value="0.38" data-unit="kV">0.38 kV (380V)</option>
+                            <option value="0.22" data-unit="kV">0.22 kV (220V)</option>
+                          </optgroup>
+                          <optgroup label="[V 단위]">
+                            <option value="440" data-unit="V">440 V</option>
+                            <option value="380" data-unit="V">380 V</option>
+                            <option value="220" data-unit="V">220 V</option>
+                            <option value="110" data-unit="V">110 V</option>
+                          </optgroup>
                         </select>
                       </div>
-                      <select class="sld-select" style="width: 60px">
-                        <option>kV</option>
-                        <option>V</option>
+                      <select class="sld-select" style="width: 60px" id="prop-pri-voltage-unit">
+                        <option value="kV">kV</option>
+                        <option value="V">V</option>
                       </select>
                     </div>
                   </div>
@@ -1542,18 +1550,26 @@
                         />
                         <select class="sld-combo-select" data-combo-for="prop-sec-voltage" title="2차 전압 프리셋 선택">
                           <option value="__custom__">✏️ 직접 입력...</option>
-                          <option value="22.9">22.9 kV (표준 배전)</option>
-                          <option value="6.6">6.6 kV (고압 동력)</option>
-                          <option value="3.3">3.3 kV (고압 동력)</option>
-                          <option value="0.44">0.44 kV (440V)</option>
-                          <option value="0.38">0.38 kV (380V 3상)</option>
-                          <option value="0.22">0.22 kV (220V 단상)</option>
-                          <option value="0.11">0.11 kV (110V 제어)</option>
+                          <optgroup label="[배전 / 고압 (kV)]">
+                            <option value="22.9" data-unit="kV">22.9 kV (표준 배전)</option>
+                            <option value="6.6" data-unit="kV">6.6 kV (고압 동력)</option>
+                            <option value="3.3" data-unit="kV">3.3 kV (고압 동력)</option>
+                            <option value="0.44" data-unit="kV">0.44 kV (440V)</option>
+                            <option value="0.38" data-unit="kV">0.38 kV (380V 3상)</option>
+                            <option value="0.22" data-unit="kV">0.22 kV (220V 단상)</option>
+                            <option value="0.11" data-unit="kV">0.11 kV (110V 제어)</option>
+                          </optgroup>
+                          <optgroup label="[V 단위]">
+                            <option value="440" data-unit="V">440 V</option>
+                            <option value="380" data-unit="V">380 V</option>
+                            <option value="220" data-unit="V">220 V</option>
+                            <option value="110" data-unit="V">110 V</option>
+                          </optgroup>
                         </select>
                       </div>
-                      <select class="sld-select" style="width: 60px">
-                        <option>kV</option>
-                        <option>V</option>
+                      <select class="sld-select" style="width: 60px" id="prop-sec-voltage-unit">
+                        <option value="kV">kV</option>
+                        <option value="V">V</option>
                       </select>
                     </div>
                   </div>
@@ -1579,17 +1595,25 @@
                         />
                         <select class="sld-combo-select" data-combo-for="prop-tert-voltage" title="3차 전압 프리셋 선택">
                           <option value="__custom__">✏️ 직접 입력...</option>
-                          <option value="6.6">6.6 kV (소내용 고압)</option>
-                          <option value="3.3">3.3 kV (소내용 고압)</option>
-                          <option value="0.44">0.44 kV (440V)</option>
-                          <option value="0.38">0.38 kV (380V)</option>
-                          <option value="0.22">0.22 kV (220V)</option>
-                          <option value="0.11">0.11 kV (110V 제어)</option>
+                          <optgroup label="[소내용 고압 (kV)]">
+                            <option value="6.6" data-unit="kV">6.6 kV (소내용 고압)</option>
+                            <option value="3.3" data-unit="kV">3.3 kV (소내용 고압)</option>
+                            <option value="0.44" data-unit="kV">0.44 kV (440V)</option>
+                            <option value="0.38" data-unit="kV">0.38 kV (380V)</option>
+                            <option value="0.22" data-unit="kV">0.22 kV (220V)</option>
+                            <option value="0.11" data-unit="kV">0.11 kV (110V 제어)</option>
+                          </optgroup>
+                          <optgroup label="[V 단위]">
+                            <option value="440" data-unit="V">440 V</option>
+                            <option value="380" data-unit="V">380 V</option>
+                            <option value="220" data-unit="V">220 V</option>
+                            <option value="110" data-unit="V">110 V</option>
+                          </optgroup>
                         </select>
                       </div>
-                      <select class="sld-select" style="width: 60px">
-                        <option>kV</option>
-                        <option>V</option>
+                      <select class="sld-select" style="width: 60px" id="prop-tert-voltage-unit">
+                        <option value="kV">kV</option>
+                        <option value="V">V</option>
                       </select>
                     </div>
                   </div>
@@ -1717,43 +1741,53 @@
                     />
                     <select class="sld-combo-select" data-combo-for="prop-current" title="정격 전류 프리셋 선택">
                       <option value="__custom__">✏️ 직접 입력...</option>
-                      <optgroup label="[초고압 / 대용량 (Main)]">
-                        <option value="5000">5000 A</option>
-                        <option value="4000">4000 A (154kV GIS / ACB)</option>
-                        <option value="3200">3200 A (주 수전 ACB 3200A)</option>
-                        <option value="2500">2500 A (ACB 2500A)</option>
-                        <option value="2000">2000 A (ACB / VCB 2000A)</option>
-                        <option value="1600">1600 A (ACB / VCB 1600A)</option>
-                        <option value="1250">1250 A (VCB 1250A)</option>
-                        <option value="1000">1000 A (ACB 1000A)</option>
+                      <optgroup label="[초고압 / 대용량 (Main - A)]">
+                        <option value="5000" data-unit="A">5000 A</option>
+                        <option value="4000" data-unit="A">4000 A (154kV GIS / ACB)</option>
+                        <option value="3200" data-unit="A">3200 A (주 수전 ACB 3200A)</option>
+                        <option value="2500" data-unit="A">2500 A (ACB 2500A)</option>
+                        <option value="2000" data-unit="A">2000 A (ACB / VCB 2000A)</option>
+                        <option value="1600" data-unit="A">1600 A (ACB / VCB 1600A)</option>
+                        <option value="1250" data-unit="A">1250 A (VCB 1250A)</option>
+                        <option value="1000" data-unit="A">1000 A (ACB 1000A)</option>
                       </optgroup>
-                      <optgroup label="[배전 / 중용량 (Sub-main)]">
-                        <option value="800">800 A (MCCB / ACB 800A)</option>
-                        <option value="630">630 A (VCB / MCCB 630A)</option>
-                        <option value="600">600 A (MCCB 600A)</option>
-                        <option value="500">500 A (MCCB 500A)</option>
-                        <option value="400">400 A (MCCB 400A)</option>
-                        <option value="350">350 A (MCCB 350A)</option>
-                        <option value="300">300 A (MCCB 300A)</option>
-                        <option value="250">250 A (MCCB 250A)</option>
-                        <option value="225">225 A (MCCB 225A)</option>
-                        <option value="200">200 A (MCCB 200A)</option>
-                        <option value="175">175 A (MCCB 175A)</option>
-                        <option value="150">150 A (MCCB 150A)</option>
-                        <option value="125">125 A (MCCB 125A)</option>
+                      <optgroup label="[배전 / 중용량 (Sub-main - A)]">
+                        <option value="800" data-unit="A">800 A (MCCB / ACB 800A)</option>
+                        <option value="630" data-unit="A">630 A (VCB / MCCB 630A)</option>
+                        <option value="600" data-unit="A">600 A (MCCB 600A)</option>
+                        <option value="500" data-unit="A">500 A (MCCB 500A)</option>
+                        <option value="400" data-unit="A">400 A (MCCB 400A)</option>
+                        <option value="350" data-unit="A">350 A (MCCB 350A)</option>
+                        <option value="300" data-unit="A">300 A (MCCB 300A)</option>
+                        <option value="250" data-unit="A">250 A (MCCB 250A)</option>
+                        <option value="225" data-unit="A">225 A (MCCB 225A)</option>
+                        <option value="200" data-unit="A">200 A (MCCB 200A)</option>
+                        <option value="175" data-unit="A">175 A (MCCB 175A)</option>
+                        <option value="150" data-unit="A">150 A (MCCB 150A)</option>
+                        <option value="125" data-unit="A">125 A (MCCB 125A)</option>
                       </optgroup>
-                      <optgroup label="[분기 / 모터 (Branch)]">
-                        <option value="100">100 A (MCCB 100A)</option>
-                        <option value="80">80 A</option>
-                        <option value="75">75 A</option>
-                        <option value="60">60 A</option>
-                        <option value="50">50 A (MCCB 50A)</option>
-                        <option value="40">40 A</option>
-                        <option value="30">30 A (MCCB 30A)</option>
-                        <option value="20">20 A</option>
-                        <option value="15">15 A</option>
-                        <option value="10">10 A</option>
-                        <option value="5">5 A</option>
+                      <optgroup label="[분기 / 모터 (Branch - A)]">
+                        <option value="100" data-unit="A">100 A (MCCB 100A)</option>
+                        <option value="80" data-unit="A">80 A</option>
+                        <option value="75" data-unit="A">75 A</option>
+                        <option value="60" data-unit="A">60 A</option>
+                        <option value="50" data-unit="A">50 A (MCCB 50A)</option>
+                        <option value="40" data-unit="A">40 A</option>
+                        <option value="30" data-unit="A">30 A (MCCB 30A)</option>
+                        <option value="20" data-unit="A">20 A</option>
+                        <option value="15" data-unit="A">15 A</option>
+                        <option value="10" data-unit="A">10 A</option>
+                        <option value="5" data-unit="A">5 A</option>
+                      </optgroup>
+                      <optgroup label="[단락 / 차단용량 (kA)]">
+                        <option value="63" data-unit="kA">63 kA (154kV 차단용량)</option>
+                        <option value="50" data-unit="kA">50 kA (154kV / 22.9kV 차단)</option>
+                        <option value="40" data-unit="kA">40 kA (22.9kV 차단용량)</option>
+                        <option value="31.5" data-unit="kA">31.5 kA (22.9kV VCB)</option>
+                        <option value="25" data-unit="kA">25 kA (22.9kV / 6.6kV)</option>
+                        <option value="20" data-unit="kA">20 kA</option>
+                        <option value="12.5" data-unit="kA">12.5 kA (고압 차단용량)</option>
+                        <option value="5" data-unit="kA">5 kA</option>
                       </optgroup>
                     </select>
                   </div>

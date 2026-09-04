@@ -81,6 +81,79 @@ class PropertiesPanel {
     bindInput("prop-line-color", "lineColor");
     bindInput("prop-line-width", "lineWidth", true);
 
+    // Unit Select Bindings
+    const bindUnitSelect = (id, propKey, linkedVoltageInputId = null) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const handler = (e) => {
+        if (!this.editor.selectedCell) return;
+        const sldData = this.editor.selectedCell.get("sldData") || {};
+        const val = e.target.value;
+        sldData[propKey] = val;
+
+        // When voltage unit changes, recalculate voltage color
+        if (
+          linkedVoltageInputId &&
+          typeof window.getVoltageColor === "function"
+        ) {
+          const vInput = document.getElementById(linkedVoltageInputId);
+          const vVal =
+            sldData.voltage !== undefined
+              ? sldData.voltage
+              : vInput
+                ? parseFloat(vInput.value) || 0
+                : 0;
+          const autoColor = window.getVoltageColor(vVal, val);
+          sldData.color = autoColor;
+          sldData.lineColor = autoColor;
+          const colorInput = document.getElementById("prop-symbol-color");
+          const lineInput = document.getElementById("prop-line-color");
+          if (colorInput) colorInput.value = autoColor;
+          if (lineInput) lineInput.value = autoColor;
+        }
+
+        this.editor.selectedCell.set("sldData", Object.assign({}, sldData));
+
+        if (typeof this.editor.selectedCell.updateFromSldData === "function") {
+          this.editor.selectedCell.updateFromSldData();
+        }
+        if (typeof this.editor.selectedCell.updateVisual === "function") {
+          this.editor.selectedCell.updateVisual();
+        }
+        if (
+          typeof this.editor.selectedCell.updateContactVisual === "function"
+        ) {
+          this.editor.selectedCell.updateContactVisual();
+        }
+        if (this.editor.topologyTracker) {
+          this.editor.topologyTracker.applyStyles(this.editor.paper);
+        }
+        this.editor.updateMinimap();
+        this.editor.scheduleAutoSave();
+      };
+
+      el.addEventListener("change", handler);
+      el.addEventListener("input", handler);
+    };
+
+    bindUnitSelect("prop-voltage-unit", "voltageUnit", "prop-voltage");
+    bindUnitSelect(
+      "prop-pri-voltage-unit",
+      "priVoltageUnit",
+      "prop-pri-voltage",
+    );
+    bindUnitSelect(
+      "prop-sec-voltage-unit",
+      "secVoltageUnit",
+      "prop-sec-voltage",
+    );
+    bindUnitSelect(
+      "prop-tert-voltage-unit",
+      "tertVoltageUnit",
+      "prop-tert-voltage",
+    );
+    bindUnitSelect("prop-current-unit", "currentUnit");
+
     // Setup all combo dropdowns (Direct input vs presets)
     this.setupComboDropdowns();
 
@@ -274,12 +347,35 @@ class PropertiesPanel {
       const targetInput = document.getElementById(targetId);
       if (!targetInput) return;
 
+      const getUnitSelect = () => {
+        return (
+          document.getElementById(`${targetId}-unit`) ||
+          sel
+            .closest(".sld-input-row")
+            ?.querySelector("select:not([data-combo-for])")
+        );
+      };
+
+      const syncUnitFromOption = (opt) => {
+        if (!opt) return;
+        const unit = opt.getAttribute("data-unit");
+        if (unit) {
+          const unitSel = getUnitSelect();
+          if (unitSel && unitSel.value !== unit) {
+            unitSel.value = unit;
+            unitSel.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        }
+      };
+
       sel.addEventListener("change", () => {
         if (sel.value === "__custom__") {
           targetInput.focus();
           targetInput.select();
         } else {
           targetInput.value = sel.value;
+          const selectedOpt = sel.options[sel.selectedIndex];
+          syncUnitFromOption(selectedOpt);
           targetInput.dispatchEvent(new Event("input", { bubbles: true }));
           targetInput.dispatchEvent(new Event("change", { bubbles: true }));
         }
@@ -291,6 +387,9 @@ class PropertiesPanel {
           (opt) => opt.value !== "__custom__" && opt.value === String(val),
         );
         sel.value = matchOpt ? String(val) : "__custom__";
+        if (matchOpt) {
+          syncUnitFromOption(matchOpt);
+        }
       };
 
       targetInput.addEventListener("input", syncSelectToInput);
@@ -546,23 +645,28 @@ class PropertiesPanel {
     setValue("prop-desc", sldData.desc || catalog.descKo || "");
     setValue("prop-state", mappedState);
     setValue("prop-voltage", sldData.voltage || sldData.priVoltage || "");
+    setValue("prop-voltage-unit", sldData.voltageUnit || "kV");
     setValue(
       "prop-pri-voltage",
       sldData.priVoltage !== undefined
         ? sldData.priVoltage
         : sldData.voltage || 154,
     );
+    setValue("prop-pri-voltage-unit", sldData.priVoltageUnit || "kV");
     setValue(
       "prop-sec-voltage",
       sldData.secVoltage !== undefined ? sldData.secVoltage : 22.9,
     );
+    setValue("prop-sec-voltage-unit", sldData.secVoltageUnit || "kV");
     setValue(
       "prop-tert-voltage",
       sldData.tertVoltage !== undefined ? sldData.tertVoltage : 6.6,
     );
+    setValue("prop-tert-voltage-unit", sldData.tertVoltageUnit || "kV");
     setValue("prop-connection", sldData.connection || defConn);
     setValue("prop-capacity", sldData.capacity || "");
     setValue("prop-current", sldData.current || "");
+    setValue("prop-current-unit", sldData.currentUnit || "A");
     setValue("prop-poles", sldData.poles || "3P");
     setValue("prop-location", sldData.location || "");
     setValue("prop-symbol-color", sldData.color || "#377DFF");
