@@ -780,41 +780,6 @@ class SLDEditor {
           this._isMultiDragging = false;
         };
       }
-
-      // If clicked on contact blade, toggle OPEN/CLOSED state
-      const isBreakerOrSwitch =
-        catalog.subCategory === "SWITCH" ||
-        sldData.type === "GROUND_SWITCH" ||
-        sldData.isTie ||
-        catalog.isTieBreaker;
-
-      const targetSel = evt.target
-        ? evt.target.getAttribute("joint-selector") ||
-          evt.target.getAttribute("data-selector") ||
-          evt.target.getAttribute("class") ||
-          ""
-        : "";
-      const isClickOnBlade =
-        targetSel === "blade" ||
-        targetSel === "contactPath" ||
-        targetSel === "stateBadge" ||
-        targetSel === "crescent" ||
-        (evt.target && evt.target.classList && evt.target.classList.contains("contact-blade"));
-
-      if (
-        isBreakerOrSwitch &&
-        isClickOnBlade &&
-        this.selectedCells.length <= 1
-      ) {
-        const currentState = sldData.state || "CLOSED";
-        const newState = currentState === "CLOSED" ? "OPEN" : "CLOSED";
-        el.set("sldData", Object.assign({}, sldData, { state: newState }));
-        this.topologyTracker.applyStyles(this.paper);
-        this.populateProperties(el);
-        this.updateMinimap();
-        this.pushHistory();
-        this.scheduleAutoSave();
-      }
     });
 
     // Snap to port grid on drag release & sync busbar ports
@@ -1378,19 +1343,25 @@ class SLDEditor {
     this.pushHistory();
     this.requestMinimapUpdate();
 
-    // Restore saved viewport or auto zoom to fit
+    // Restore saved viewport or default to top-left (0, 0)
     if (
       restoredMeta.viewport &&
       typeof restoredMeta.viewport.zoom === "number"
     ) {
       const vp = restoredMeta.viewport;
-      this.paper.scale(vp.zoom, vp.zoom);
-      this.paper.translate(vp.x || 0, vp.y || 0);
+      this.scale = vp.zoom || 1.0;
+      this.origin = { x: vp.x || 0, y: vp.y || 0 };
+      this.paper.scale(this.scale, this.scale);
+      this.paper.setOrigin(this.origin.x, this.origin.y);
+      if (this.toolbarManager) this.toolbarManager.updateZoomDisplay();
     } else {
-      this.zoomToFit();
-      setTimeout(() => this.zoomToFit(), 100);
-      setTimeout(() => this.zoomToFit(), 400);
+      this.scale = 1.0;
+      this.origin = { x: 0, y: 0 };
+      this.paper.scale(1.0, 1.0);
+      this.paper.setOrigin(0, 0);
+      if (this.toolbarManager) this.toolbarManager.updateZoomDisplay();
     }
+    this.updateMinimap();
   }
 
   startStaticTelemetrySimulation() {
@@ -1506,16 +1477,35 @@ class SLDEditor {
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
 
-      if (!this._minimapBounds || !this._minimapScale) return;
+      if (!this._minimapBounds || !this._minimapScale || !this.container) return;
 
-      const targetPaperX = this._minimapBounds.x + clickX / this._minimapScale;
-      const targetPaperY = this._minimapBounds.y + clickY / this._minimapScale;
+      const bounds = this._minimapBounds;
+      const mmScale = this._minimapScale;
+      const mmW = 200;
+      const mmH = 90;
 
-      const viewportWidth = this.container.clientWidth / this.scale;
-      const viewportHeight = this.container.clientHeight / this.scale;
+      const containerW = this.container.clientWidth || 1200;
+      const containerH = this.container.clientHeight || 800;
 
-      this.origin.x = -(targetPaperX - viewportWidth / 2) * this.scale;
-      this.origin.y = -(targetPaperY - viewportHeight / 2) * this.scale;
+      const vpW = Math.max(6, Math.min(mmW, (containerW / this.scale) * mmScale));
+      const vpH = Math.max(6, Math.min(mmH, (containerH / this.scale) * mmScale));
+
+      // Calculate desired top-left of viewport in minimap space
+      const vpX = clickX - vpW / 2;
+      const vpY = clickY - vpH / 2;
+
+      // Clamp strictly inside [0, mmW - vpW] and [0, mmH - vpH]
+      const maxVpX = Math.max(0, mmW - vpW);
+      const maxVpY = Math.max(0, mmH - vpH);
+      const clampedVpX = Math.max(0, Math.min(maxVpX, vpX));
+      const clampedVpY = Math.max(0, Math.min(maxVpY, vpY));
+
+      // Convert clamped minimap coordinate back to paper world coordinate
+      const paperLeft = bounds.x + clampedVpX / mmScale;
+      const paperTop = bounds.y + clampedVpY / mmScale;
+
+      this.origin.x = -paperLeft * this.scale;
+      this.origin.y = -paperTop * this.scale;
       this.paper.setOrigin(this.origin.x, this.origin.y);
       this.updateMinimapViewport();
     };
@@ -1523,6 +1513,7 @@ class SLDEditor {
     boxContainer.addEventListener("mousedown", (e) => {
       isMinimapDragging = true;
       handleMinimapNav(e);
+      e.preventDefault();
     });
 
     window.addEventListener("mousemove", (e) => {
@@ -1561,21 +1552,25 @@ class SLDEditor {
     const mmW = 200;
     const mmH = 90;
 
-    const vpW = (this.container.clientWidth / this.scale) * mmScale;
-    const vpH = (this.container.clientHeight / this.scale) * mmScale;
-    const vpX = (-this.origin.x / this.scale - bounds.x) * mmScale;
-    const vpY = (-this.origin.y / this.scale - bounds.y) * mmScale;
+    const containerW = this.container.clientWidth || 1200;
+    const containerH = this.container.clientHeight || 800;
 
-    viewportBox.setAttribute("x", Math.max(0, vpX).toFixed(1));
-    viewportBox.setAttribute("y", Math.max(0, vpY).toFixed(1));
-    viewportBox.setAttribute(
-      "width",
-      Math.max(6, Math.min(mmW, vpW)).toFixed(1),
-    );
-    viewportBox.setAttribute(
-      "height",
-      Math.max(6, Math.min(mmH, vpH)).toFixed(1),
-    );
+    const vpW = Math.max(6, Math.min(mmW, (containerW / this.scale) * mmScale));
+    const vpH = Math.max(6, Math.min(mmH, (containerH / this.scale) * mmScale));
+
+    const rawVpX = (-this.origin.x / this.scale - bounds.x) * mmScale;
+    const rawVpY = (-this.origin.y / this.scale - bounds.y) * mmScale;
+
+    // Clamp strictly inside [0, mmW - vpW] and [0, mmH - vpH]
+    const maxVpX = Math.max(0, mmW - vpW);
+    const maxVpY = Math.max(0, mmH - vpH);
+    const clampedVpX = Math.max(0, Math.min(maxVpX, rawVpX));
+    const clampedVpY = Math.max(0, Math.min(maxVpY, rawVpY));
+
+    viewportBox.setAttribute("x", clampedVpX.toFixed(1));
+    viewportBox.setAttribute("y", clampedVpY.toFixed(1));
+    viewportBox.setAttribute("width", vpW.toFixed(1));
+    viewportBox.setAttribute("height", vpH.toFixed(1));
   }
 
   updateMinimap() {
@@ -1588,7 +1583,10 @@ class SLDEditor {
 
     if (elements.length === 0 && links.length === 0) {
       minimapContent.innerHTML = "";
+      viewportBox.setAttribute("x", "0");
+      viewportBox.setAttribute("y", "0");
       viewportBox.setAttribute("width", "0");
+      viewportBox.setAttribute("height", "0");
       return;
     }
 
@@ -1609,16 +1607,21 @@ class SLDEditor {
     if (minX === Infinity) {
       minX = 0;
       minY = 0;
-      maxX = 1200;
-      maxY = 800;
+      maxX = 1600;
+      maxY = 1000;
     }
 
     const padding = 50;
+    const effectiveMinX = Math.min(0, minX);
+    const effectiveMinY = Math.min(0, minY);
+    const effectiveMaxX = Math.max(1600, maxX + padding);
+    const effectiveMaxY = Math.max(1000, maxY + padding);
+
     const bounds = {
-      x: minX - padding,
-      y: minY - padding,
-      width: Math.max(900, maxX - minX + padding * 2),
-      height: Math.max(600, maxY - minY + padding * 2),
+      x: effectiveMinX,
+      y: effectiveMinY,
+      width: Math.max(800, effectiveMaxX - effectiveMinX),
+      height: Math.max(450, effectiveMaxY - effectiveMinY),
     };
 
     const mmW = 200;
