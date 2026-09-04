@@ -233,18 +233,31 @@ class SLDEditor {
     this.initMinimap();
   }
 
+  isTextInputFocused() {
+    const el = document.activeElement;
+    if (!el) return false;
+    return (
+      el.tagName === "INPUT" ||
+      el.tagName === "TEXTAREA" ||
+      el.isContentEditable ||
+      (el.getAttribute && el.getAttribute("contenteditable") === "true")
+    );
+  }
+
   setupCanvasEvents() {
     const paperEl = this.paper.el;
 
+    // Space Key Down -> Enable Pan Mode (only when not editing text and no elements selected)
     window.addEventListener("keydown", (e) => {
       if (
-        e.code === "Space" &&
-        e.target.tagName !== "INPUT" &&
-        e.target.tagName !== "TEXTAREA"
+        (e.code === "Space" || e.key === " " || e.key === "Spacebar") &&
+        !this.isSpacePressed &&
+        !this.isTextInputFocused()
       ) {
         if (!this.selectedCells || this.selectedCells.length === 0) {
           this.isSpacePressed = true;
           paperEl.style.cursor = "grab";
+          e.preventDefault();
         }
       }
     });
@@ -785,9 +798,7 @@ class SLDEditor {
         targetSel === "contactPath" ||
         targetSel === "stateBadge" ||
         targetSel === "crescent" ||
-        targetSel === "box" ||
-        targetSel === "stamp" ||
-        (evt.target && evt.target.tagName === "use");
+        (evt.target && evt.target.classList && evt.target.classList.contains("contact-blade"));
 
       if (
         isBreakerOrSwitch &&
