@@ -77,6 +77,7 @@ class SelectionManager {
   }
 
   _onSelectedCellTransform() {
+    if (this.editor._isMultiDragging) return;
     if (this._overlayRafId) return;
     this._overlayRafId = requestAnimationFrame(() => {
       this._overlayRafId = null;

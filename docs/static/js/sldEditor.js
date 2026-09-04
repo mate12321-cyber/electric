@@ -476,8 +476,10 @@ class SLDEditor {
       if (this._isBatchOperation || !this.historyManager?.isHistoryTracking)
         return;
       if (element && element.isElement && element.isElement()) {
-        this.busbarManager.syncConnectedBusbarPorts(element);
-        this.updateAffectedLinks(element);
+        if (!this._isMultiDragging) {
+          this.busbarManager.syncConnectedBusbarPorts(element);
+          this.updateAffectedLinks(element);
+        }
       }
       this.requestMinimapUpdate();
       this.scheduleAutoSave();
@@ -691,21 +693,31 @@ class SLDEditor {
         this._multiDragPivotStart = Object.assign({}, el.position());
         this._isMultiDragging = true;
 
+        let multiDragRafId = null;
         const onPivotChange = () => {
           if (!this._isMultiDragging) return;
-          const curPos = el.position();
-          const dx = curPos.x - this._multiDragPivotStart.x;
-          const dy = curPos.y - this._multiDragPivotStart.y;
+          if (multiDragRafId) return;
+          multiDragRafId = requestAnimationFrame(() => {
+            multiDragRafId = null;
+            if (!this._isMultiDragging) return;
+            const curPos = el.position();
+            const dx = curPos.x - this._multiDragPivotStart.x;
+            const dy = curPos.y - this._multiDragPivotStart.y;
 
-          this._multiDragStarts.forEach((item) => {
-            if (item.cell.id !== el.id) {
-              item.cell.position(item.pos.x + dx, item.pos.y + dy);
-            }
+            this._multiDragStarts.forEach((item) => {
+              if (item.cell.id !== el.id) {
+                item.cell.position(item.pos.x + dx, item.pos.y + dy);
+              }
+            });
           });
         };
 
         el.on("change:position", onPivotChange);
         this._cleanupPivotDrag = () => {
+          if (multiDragRafId) {
+            cancelAnimationFrame(multiDragRafId);
+            multiDragRafId = null;
+          }
           el.off("change:position", onPivotChange);
           this._isMultiDragging = false;
         };
