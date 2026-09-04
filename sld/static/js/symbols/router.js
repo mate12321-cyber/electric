@@ -880,10 +880,11 @@
         targetPoint,
       ];
       const pts = simplifyCollinearPoints(rawPts);
-      if (linkView) {
-        linkView._polyPoints = pts;
-      }
       if (pts.length < 2) {
+        if (linkView) {
+          linkView._polyPoints = pts;
+          linkView._polyBBox = null;
+        }
         return `M ${sourcePoint.x} ${sourcePoint.y} L ${targetPoint.x} ${targetPoint.y}`;
       }
 
@@ -907,6 +908,11 @@
         maxY: linkMaxY + pad,
       };
 
+      if (linkView) {
+        linkView._polyPoints = pts;
+        linkView._polyBBox = linkBox;
+      }
+
       const link = linkView && linkView.model;
       const paper = linkView && linkView.paper;
       const graph = (paper && paper.model) || (link && link.graph);
@@ -918,8 +924,6 @@
       if (graph && link) {
         const srcId = link.get("source")?.id;
         const tgtId = link.get("target")?.id;
-        const srcPort = link.get("source")?.port;
-        const tgtPort = link.get("target")?.port;
 
         // 1. Busbars (with AABB pre-filtering)
         const elements =
@@ -960,34 +964,52 @@
           }
         });
 
-        // 2. Other Links (Wires, with AABB pre-filtering)
+        // 2. Other Links (Wires, with AABB pre-filtering and cached BBox/Points)
         const allLinks =
           typeof graph.getLinks === "function" ? graph.getLinks() : [];
         allLinks.forEach((otherLink) => {
           if (!otherLink || otherLink.id === link.id) return;
+          const oView = paper ? paper.findViewByModel(otherLink) : null;
 
-          const otherPts = getLinkPolyline(otherLink, paper);
-          if (otherPts && otherPts.length >= 2) {
-            // Fast AABB check: skip other link if its bounding box does not overlap
-            let oMinX = Infinity,
-              oMaxX = -Infinity,
-              oMinY = Infinity,
-              oMaxY = -Infinity;
-            for (let k = 0; k < otherPts.length; k++) {
-              const op = otherPts[k];
-              if (op.x < oMinX) oMinX = op.x;
-              if (op.x > oMaxX) oMaxX = op.x;
-              if (op.y < oMinY) oMinY = op.y;
-              if (op.y > oMaxY) oMaxY = op.y;
-            }
-
+          // Fast BBox check using cached BBox if available
+          let oBox = oView && oView._polyBBox;
+          if (oBox) {
             if (
-              linkBox.maxX < oMinX ||
-              linkBox.minX > oMaxX ||
-              linkBox.maxY < oMinY ||
-              linkBox.minY > oMaxY
+              linkBox.maxX < oBox.minX ||
+              linkBox.minX > oBox.maxX ||
+              linkBox.maxY < oBox.minY ||
+              linkBox.minY > oBox.maxY
             ) {
               return;
+            }
+          }
+
+          const otherPts =
+            (oView && oView._polyPoints) || getLinkPolyline(otherLink, paper);
+          if (otherPts && otherPts.length >= 2) {
+            if (!oBox) {
+              let oMinX = Infinity,
+                oMaxX = -Infinity,
+                oMinY = Infinity,
+                oMaxY = -Infinity;
+              for (let k = 0; k < otherPts.length; k++) {
+                const op = otherPts[k];
+                if (op.x < oMinX) oMinX = op.x;
+                if (op.x > oMaxX) oMaxX = op.x;
+                if (op.y < oMinY) oMinY = op.y;
+                if (op.y > oMaxY) oMaxY = op.y;
+              }
+              oBox = { minX: oMinX, maxX: oMaxX, minY: oMinY, maxY: oMaxY };
+              if (oView) oView._polyBBox = oBox;
+
+              if (
+                linkBox.maxX < oBox.minX ||
+                linkBox.minX > oBox.maxX ||
+                linkBox.maxY < oBox.minY ||
+                linkBox.minY > oBox.maxY
+              ) {
+                return;
+              }
             }
 
             crossingLinks.push({

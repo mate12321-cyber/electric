@@ -77,11 +77,24 @@ class PowerSystemTopologyTracker {
   constructor(graph, editor = null) {
     this.graph = graph;
     this.editor = editor;
+    this._cache = null;
+    this._isDirty = true;
+
+    if (this.graph && typeof this.graph.on === "function") {
+      this.graph.on(
+        "add remove change:source change:target change:sldData",
+        () => {
+          this._isDirty = true;
+        },
+      );
+    }
   }
 
-  /**
-   * Resolve an element's nominal or active voltage color
-   */
+  invalidateCache() {
+    this._isDirty = true;
+    this._cache = null;
+  }
+
   /**
    * Resolve an element's nominal or active voltage color
    */
@@ -131,6 +144,10 @@ class PowerSystemTopologyTracker {
    * @returns {Object} { nodeStatus: Map, linkStatus: Map, summary: Object }
    */
   evaluate() {
+    if (!this._isDirty && this._cache) {
+      return this._cache;
+    }
+
     if (!this.graph)
       return {
         nodeStatus: new Map(),
@@ -594,7 +611,10 @@ class PowerSystemTopologyTracker {
       }
     });
 
-    return { nodeStatus, linkStatus, conflicts, nodeVoltages };
+    const result = { nodeStatus, linkStatus, conflicts, nodeVoltages };
+    this._cache = result;
+    this._isDirty = false;
+    return result;
   }
 
   /**

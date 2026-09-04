@@ -251,30 +251,39 @@ class SLDEditor {
       }
     });
 
-    // Mouse Move -> Status Coordinates & Pan Drag & Area Selection Drag & T-Branch Live Preview
-    let mouseMoveThrottle = false;
+    // Mouse Move -> Status Coordinates & Pan Drag & Area Selection Drag & T-Branch Live Preview (Consolidated rAF Loop)
+    let mouseMovePendingEvent = null;
+    let mouseMoveRafId = null;
+
     paperEl.addEventListener("mousemove", (e) => {
-      if (this.isPanning) {
-        const dx = e.clientX - this.panStart.x;
-        const dy = e.clientY - this.panStart.y;
-        this.origin.x += dx;
-        this.origin.y += dy;
-        this.panStart = { x: e.clientX, y: e.clientY };
-        this.paper.setOrigin(this.origin.x, this.origin.y);
-        this.requestMinimapUpdate();
-        return;
-      }
+      mouseMovePendingEvent = {
+        clientX: e.clientX,
+        clientY: e.clientY,
+      };
 
-      if (this.selectionManager.isAreaSelecting) {
-        this.selectionManager.updateAreaSelection(e.clientX, e.clientY);
-        return;
-      }
+      if (mouseMoveRafId) return;
+      mouseMoveRafId = requestAnimationFrame(() => {
+        mouseMoveRafId = null;
+        if (!mouseMovePendingEvent) return;
+        const { clientX, clientY } = mouseMovePendingEvent;
 
-      if (mouseMoveThrottle) return;
-      mouseMoveThrottle = true;
-      requestAnimationFrame(() => {
-        mouseMoveThrottle = false;
-        const p = this.paper.clientToLocalPoint({ x: e.clientX, y: e.clientY });
+        if (this.isPanning) {
+          const dx = clientX - this.panStart.x;
+          const dy = clientY - this.panStart.y;
+          this.origin.x += dx;
+          this.origin.y += dy;
+          this.panStart = { x: clientX, y: clientY };
+          this.paper.setOrigin(this.origin.x, this.origin.y);
+          this.requestMinimapUpdate();
+          return;
+        }
+
+        if (this.selectionManager.isAreaSelecting) {
+          this.selectionManager.updateAreaSelection(clientX, clientY);
+          return;
+        }
+
+        const p = this.paper.clientToLocalPoint({ x: clientX, y: clientY });
 
         const coordEl = document.getElementById("status-coord");
         if (coordEl) {
@@ -1288,10 +1297,12 @@ class SLDEditor {
   }
 
   applyLoadedSchema(schema) {
-    if (!schema || (!schema.elements && !schema.links)) return;
-
     this.isHistoryTracking = false;
     this._isBatchOperation = true;
+
+    if (typeof this.paper?.freeze === "function") {
+      this.paper.freeze();
+    }
 
     const parsed = SLDSerializer.fromCompactJSON(schema);
     this.graph.clear();
@@ -1308,12 +1319,17 @@ class SLDEditor {
           el.get("sldData")?.type === "BUSBAR",
       );
     busbars.forEach((b) => this.busbarManager.syncConnectedBusbarPorts(b));
+    this.topologyTracker.invalidateCache();
     this.topologyTracker.applyStyles(this.paper);
+
+    if (typeof this.paper?.unfreeze === "function") {
+      this.paper.unfreeze();
+    }
 
     this._isBatchOperation = false;
     this.isHistoryTracking = true;
     this.pushHistory();
-    this.updateMinimap();
+    this.requestMinimapUpdate();
 
     // Restore saved viewport or auto zoom to fit
     if (

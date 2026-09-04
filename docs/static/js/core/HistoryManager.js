@@ -19,8 +19,24 @@ class HistoryManager {
       { diagramId: this.editor.options?.diagramId },
     );
 
+    const jsonStr = JSON.stringify(compactObj);
+
+    // Skip pushing duplicate snapshots if elements and links have not changed
+    if (this.historyIndex >= 0 && this.history[this.historyIndex]) {
+      try {
+        const lastObj = JSON.parse(this.history[this.historyIndex]);
+        if (
+          JSON.stringify(lastObj.elements) ===
+            JSON.stringify(compactObj.elements) &&
+          JSON.stringify(lastObj.links) === JSON.stringify(compactObj.links)
+        ) {
+          return; // Identical graph structure and properties
+        }
+      } catch (e) {}
+    }
+
     this.history = this.history.slice(0, this.historyIndex + 1);
-    this.history.push(JSON.stringify(compactObj));
+    this.history.push(jsonStr);
 
     // Max history cap
     if (this.history.length > this.maxHistory) {
@@ -41,12 +57,17 @@ class HistoryManager {
       this.editor._isBatchOperation = true;
       this.editor.removeSelectionOverlay();
 
+      if (typeof this.editor.paper?.freeze === "function") {
+        this.editor.paper.freeze();
+      }
+
       const schema = JSON.parse(this.history[this.historyIndex]);
       const { elements, links } = SLDSerializer.fromCompactJSON(schema);
       this.editor.graph.clear();
       this.editor.graph.addCells([...elements, ...links]);
 
       if (this.editor.topologyTracker) {
+        this.editor.topologyTracker.invalidateCache();
         this.editor.topologyTracker.applyStyles(this.editor.paper);
       }
 
@@ -61,6 +82,10 @@ class HistoryManager {
         }
       } else {
         this.editor.deselectAll();
+      }
+
+      if (typeof this.editor.paper?.unfreeze === "function") {
+        this.editor.paper.unfreeze();
       }
 
       this.editor.requestMinimapUpdate();
@@ -82,12 +107,17 @@ class HistoryManager {
       this.editor._isBatchOperation = true;
       this.editor.removeSelectionOverlay();
 
+      if (typeof this.editor.paper?.freeze === "function") {
+        this.editor.paper.freeze();
+      }
+
       const schema = JSON.parse(this.history[this.historyIndex]);
       const { elements, links } = SLDSerializer.fromCompactJSON(schema);
       this.editor.graph.clear();
       this.editor.graph.addCells([...elements, ...links]);
 
       if (this.editor.topologyTracker) {
+        this.editor.topologyTracker.invalidateCache();
         this.editor.topologyTracker.applyStyles(this.editor.paper);
       }
 
@@ -102,6 +132,10 @@ class HistoryManager {
         }
       } else {
         this.editor.deselectAll();
+      }
+
+      if (typeof this.editor.paper?.unfreeze === "function") {
+        this.editor.paper.unfreeze();
       }
 
       this.editor.requestMinimapUpdate();

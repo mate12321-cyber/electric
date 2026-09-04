@@ -250,68 +250,90 @@ class SLDEditor {
       }
     });
 
-    // Mouse Move -> Status Coordinates & Pan Drag & Area Selection Drag & T-Branch Live Preview
+    // Mouse Move -> Status Coordinates & Pan Drag & Area Selection Drag & T-Branch Live Preview (Consolidated rAF Loop)
+    let mouseMovePendingEvent = null;
+    let mouseMoveRafId = null;
+
     paperEl.addEventListener("mousemove", (e) => {
-      const p = this.paper.clientToLocalPoint({ x: e.clientX, y: e.clientY });
+      mouseMovePendingEvent = {
+        clientX: e.clientX,
+        clientY: e.clientY,
+      };
 
-      const coordEl = document.getElementById("status-coord");
-      if (coordEl) {
-        coordEl.innerText = "X: " + Math.round(p.x) + ", Y: " + Math.round(p.y);
-      }
+      if (mouseMoveRafId) return;
+      mouseMoveRafId = requestAnimationFrame(() => {
+        mouseMoveRafId = null;
+        if (!mouseMovePendingEvent) return;
+        const { clientX, clientY } = mouseMovePendingEvent;
 
-      // Live T-Branch Preview when dragging a wire or using Wire Tool
-      const drawingSrc =
-        (this._activeDrawingLink && this._activeDrawingLink.get("source")) ||
-        (this.activeTool === "wire" ? this._wireSource : null);
+        if (this.isPanning) {
+          const dx = clientX - this.panStart.x;
+          const dy = clientY - this.panStart.y;
+          this.origin.x += dx;
+          this.origin.y += dy;
+          this.panStart = { x: clientX, y: clientY };
+          this.paper.setOrigin(this.origin.x, this.origin.y);
+          this.requestMinimapUpdate();
+          return;
+        }
 
-      if (drawingSrc && drawingSrc.id) {
-        const found = this.tJunctionManager.findTBranchTarget(
-          p,
-          drawingSrc,
-          50,
-        );
+        if (this.selectionManager.isAreaSelecting) {
+          this.selectionManager.updateAreaSelection(clientX, clientY);
+          return;
+        }
 
-        if (found) {
-          const jx = found.projection.x;
-          const jy = found.projection.y;
-          const srcEl = this.graph.getCell(drawingSrc.id);
+        const p = this.paper.clientToLocalPoint({ x: clientX, y: clientY });
 
-          if (this._activeDrawingLink) {
-            this._activeDrawingLink.set({
-              target: { x: jx, y: jy },
-              vertices: [],
-            });
+        const coordEl = document.getElementById("status-coord");
+        if (coordEl) {
+          coordEl.innerText =
+            "X: " + Math.round(p.x) + ", Y: " + Math.round(p.y);
+        }
+
+        // Live T-Branch Preview when dragging a wire or using Wire Tool
+        const drawingSrc =
+          (this._activeDrawingLink && this._activeDrawingLink.get("source")) ||
+          (this.activeTool === "wire" ? this._wireSource : null);
+
+        if (drawingSrc && drawingSrc.id) {
+          const found = this.tJunctionManager.findTBranchTarget(
+            p,
+            drawingSrc,
+            50,
+          );
+
+          if (found) {
+            const jx = found.projection.x;
+            const jy = found.projection.y;
+            const srcEl = this.graph.getCell(drawingSrc.id);
+
+            if (this._activeDrawingLink) {
+              this._activeDrawingLink.set({
+                target: { x: jx, y: jy },
+                vertices: [],
+              });
+            }
+
+            const wireColor =
+              this.topologyTracker.getElementVoltageColor(srcEl) || "#377DFF";
+            this.tJunctionManager.showTBranchPreview(
+              { x: jx, y: jy },
+              wireColor,
+            );
+            this._snappedTBranch = {
+              link: found.link,
+              projection: { x: jx, y: jy },
+              source: drawingSrc,
+            };
+          } else {
+            this.tJunctionManager.hideTBranchPreview();
+            this._snappedTBranch = null;
           }
-
-          const wireColor =
-            this.topologyTracker.getElementVoltageColor(srcEl) || "#377DFF";
-          this.tJunctionManager.showTBranchPreview({ x: jx, y: jy }, wireColor);
-          this._snappedTBranch = {
-            link: found.link,
-            projection: { x: jx, y: jy },
-            source: drawingSrc,
-          };
         } else {
           this.tJunctionManager.hideTBranchPreview();
           this._snappedTBranch = null;
         }
-      } else {
-        this.tJunctionManager.hideTBranchPreview();
-        this._snappedTBranch = null;
-      }
-
-      // Pan drag handling
-      if (this.isPanning) {
-        const dx = e.clientX - this.panStart.x;
-        const dy = e.clientY - this.panStart.y;
-        this.origin.x += dx;
-        this.origin.y += dy;
-        this.panStart = { x: e.clientX, y: e.clientY };
-        this.paper.setOrigin(this.origin.x, this.origin.y);
-        this.updateMinimap();
-      } else if (this.selectionManager.isAreaSelecting) {
-        this.selectionManager.updateAreaSelection(e.clientX, e.clientY);
-      }
+      });
     });
 
     // Mousedown -> Pan Start or Area Selection Start
@@ -1274,10 +1296,12 @@ class SLDEditor {
   }
 
   applyLoadedSchema(schema) {
-    if (!schema || (!schema.elements && !schema.links)) return;
-
     this.isHistoryTracking = false;
     this._isBatchOperation = true;
+
+    if (typeof this.paper?.freeze === "function") {
+      this.paper.freeze();
+    }
 
     const parsed = SLDSerializer.fromCompactJSON(schema);
     this.graph.clear();
@@ -1294,12 +1318,17 @@ class SLDEditor {
           el.get("sldData")?.type === "BUSBAR",
       );
     busbars.forEach((b) => this.busbarManager.syncConnectedBusbarPorts(b));
+    this.topologyTracker.invalidateCache();
     this.topologyTracker.applyStyles(this.paper);
+
+    if (typeof this.paper?.unfreeze === "function") {
+      this.paper.unfreeze();
+    }
 
     this._isBatchOperation = false;
     this.isHistoryTracking = true;
     this.pushHistory();
-    this.updateMinimap();
+    this.requestMinimapUpdate();
 
     // Restore saved viewport or auto zoom to fit
     if (
