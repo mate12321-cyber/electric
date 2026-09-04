@@ -240,7 +240,11 @@
         this.attr({
           stamp: { color: strokeColor },
           blade: { d: bladeD, stroke: strokeColor },
-          groundSymbol: { display: showGround, fill: "#84CC16" },
+          groundSymbol: {
+            display: showGround,
+            fill: "#84CC16",
+            transform: data.angle ? `rotate(${-data.angle}, 5, 20)` : "",
+          },
           nameLabel: lbls.nameAttrs,
           specLabel: lbls.specAttrs,
         });
@@ -416,21 +420,37 @@
         const earthNameY = 30 - (earthNameLines - 1) * 6;
         const earthSpecY = earthNameY + (earthNameLines - 1) * 12 + 14;
 
+        const angle = ((Math.round(data.angle || 0) % 360) + 360) % 360;
+
         this.attr({
           stamp: { color: inColor },
           blade: { d: bladeD, stroke: bladeStroke },
           nameLabel: {
             text: formattedName,
+            x: 4,
             y: nameY,
             fill: isClosed ? "#1e293b" : "#64748b",
+            transform: angle ? `rotate(${-angle}, 4, ${nameY})` : "",
           },
-          specLabel: { text: data.current ? data.current + "A" : "", y: specY },
+          specLabel: {
+            text: data.current ? data.current + "A" : "",
+            x: 4,
+            y: specY,
+            transform: angle ? `rotate(${-angle}, 4, ${specY})` : "",
+          },
           earthNameLabel: {
             text: formattedEarthName,
+            x: 48,
             y: earthNameY,
             fill: isEarth ? "#84CC16" : "#64748b",
+            transform: angle ? `rotate(${-angle}, 48, ${earthNameY})` : "",
           },
-          earthSpecLabel: { text: isEarth ? "접지" : "", y: earthSpecY },
+          earthSpecLabel: {
+            text: isEarth ? "접지" : "",
+            x: 48,
+            y: earthSpecY,
+            transform: angle ? `rotate(${-angle}, 48, ${earthSpecY})` : "",
+          },
         });
 
         const ports = this.getPorts ? this.getPorts() || [] : [];
@@ -730,6 +750,7 @@
               fill: labelFill,
               fontSize: 12,
               fontWeight: "bold",
+              transform: data.angle ? `rotate(${-data.angle}, 18, 19)` : "",
               display: "block",
             },
             botVectorLabel: {
@@ -741,6 +762,7 @@
               fill: labelFill,
               fontSize: 12,
               fontWeight: "bold",
+              transform: data.angle ? `rotate(${-data.angle}, 18, 42)` : "",
               display: "block",
             },
             tertVectorLabel: {
@@ -752,6 +774,7 @@
               fill: labelFill,
               fontSize: 12,
               fontWeight: "bold",
+              transform: data.angle ? `rotate(${-data.angle}, 38, 32)` : "",
               display: "block",
             },
             nameLabel: lbls.nameAttrs,
@@ -841,6 +864,7 @@
               fill: labelFill,
               fontSize: 12,
               fontWeight: "bold",
+              transform: data.angle ? `rotate(${-data.angle}, 22, 19)` : "",
               display: "block",
             },
             botVectorLabel: {
@@ -852,6 +876,7 @@
               fill: labelFill,
               fontSize: 12,
               fontWeight: "bold",
+              transform: data.angle ? `rotate(${-data.angle}, 22, 42)` : "",
               display: "block",
             },
             tertVectorLabel: { display: "none" },

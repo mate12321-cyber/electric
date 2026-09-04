@@ -32,7 +32,6 @@
     "sld-sym-relay": `
       <g id="sld-sym-relay">
         <circle cx="19" cy="19" r="17" stroke="currentColor" stroke-width="2" fill="#ffffff"/>
-        <text x="19" y="19" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="bold" fill="currentColor" font-family="Pretendard, -apple-system, sans-serif">51</text>
       </g>`,
 
     "sld-sym-ct": `
@@ -61,14 +60,12 @@
       <g id="sld-sym-motor">
         <path d="M 21 0 L 21 4" stroke="currentColor" stroke-width="2"/>
         <circle cx="21" cy="21" r="17" stroke="currentColor" stroke-width="2" fill="#ffffff"/>
-        <text x="21" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor" font-family="Pretendard, -apple-system, sans-serif">M</text>
       </g>`,
 
     "sld-sym-gen": `
       <g id="sld-sym-gen">
         <path d="M 22 0 L 22 4" stroke="currentColor" stroke-width="2"/>
         <circle cx="22" cy="22" r="18" stroke="currentColor" stroke-width="2" fill="#f8fafc"/>
-        <text x="22" y="26" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor" font-family="Pretendard, -apple-system, sans-serif">G</text>
       </g>`,
 
     "sld-sym-load": `

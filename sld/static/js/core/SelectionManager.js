@@ -552,10 +552,8 @@ class SelectionManager {
         targetAngle = (((curAngle + deltaAngle) % 360) + 360) % 360;
       }
 
-      const physicalAngle = targetAngle === 90 || targetAngle === 270 ? 90 : 0;
-
       if (typeof el.rotate === "function") {
-        el.rotate(physicalAngle, true);
+        el.rotate(targetAngle, true);
       }
       sldData.angle = targetAngle;
       el.set("sldData", Object.assign({}, sldData));

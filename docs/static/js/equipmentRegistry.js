@@ -285,8 +285,37 @@ function getSymbolLabelAttrs(options) {
       textAnchor: "middle",
       transform: `rotate(-90, ${specX}, ${cy})`,
     };
+  } else if (angle === 180) {
+    // 세로 심볼 (180도 물리 회전), 텍스트 좌측 (Screen Left)
+    const baseNameRefY =
+      options.baseNameRefY !== undefined
+        ? options.baseNameRefY
+        : Math.round(cy - 10);
+    const nameRefY = baseNameRefY - (nameLines - 1) * 6;
+    const specRefY = nameRefY + (nameLines - 1) * lineHeight + gap;
+    const rightRefX =
+      options.rightRefX !== undefined ? options.rightRefX : w + 6;
+
+    nameAttrs = {
+      text: nameText,
+      refX: null,
+      refY: null,
+      x: rightRefX,
+      y: nameRefY,
+      textAnchor: "end",
+      transform: `rotate(-180, ${rightRefX}, ${nameRefY})`,
+    };
+    specAttrs = {
+      text: specText,
+      refX: null,
+      refY: null,
+      x: rightRefX,
+      y: specRefY,
+      textAnchor: "end",
+      transform: `rotate(-180, ${rightRefX}, ${specRefY})`,
+    };
   } else if (angle === 270) {
-    // 가로 심볼 (90도 물리 회전), 텍스트 상단 (Screen Top)
+    // 가로 심볼 (270도 물리 회전), 텍스트 상단 (Screen Top)
     const topLimitScreenY =
       cy - w / 2 - (options.topPad !== undefined ? options.topPad : 6);
     const specScreenY = topLimitScreenY;
@@ -301,7 +330,7 @@ function getSymbolLabelAttrs(options) {
       x: nameX,
       y: cy,
       textAnchor: "middle",
-      transform: `rotate(-90, ${nameX}, ${cy})`,
+      transform: `rotate(-270, ${nameX}, ${cy})`,
     };
     specAttrs = {
       text: specText,
@@ -310,35 +339,7 @@ function getSymbolLabelAttrs(options) {
       x: specX,
       y: cy,
       textAnchor: "middle",
-      transform: `rotate(-90, ${specX}, ${cy})`,
-    };
-  } else if (angle === 180) {
-    // 세로 심볼 (0도 물리 회전), 텍스트 좌측 (Screen Left)
-    const baseNameRefY =
-      options.baseNameRefY !== undefined
-        ? options.baseNameRefY
-        : Math.round(cy - 10);
-    const nameRefY = baseNameRefY - (nameLines - 1) * 6;
-    const specRefY = nameRefY + (nameLines - 1) * lineHeight + gap;
-    const leftRefX = options.leftRefX !== undefined ? options.leftRefX : -6;
-
-    nameAttrs = {
-      text: nameText,
-      refX: null,
-      refY: null,
-      x: leftRefX,
-      y: nameRefY,
-      textAnchor: "end",
-      transform: "",
-    };
-    specAttrs = {
-      text: specText,
-      refX: null,
-      refY: null,
-      x: leftRefX,
-      y: specRefY,
-      textAnchor: "end",
-      transform: "",
+      transform: `rotate(-270, ${specX}, ${cy})`,
     };
   } else {
     // 0도 (세로 심볼, 텍스트 우측 Screen Right)

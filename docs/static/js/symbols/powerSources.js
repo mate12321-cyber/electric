@@ -41,6 +41,7 @@
             "xlink:href": "#sld-sym-gen",
           },
         },
+        { tagName: "text", selector: "symbolText" },
         { tagName: "text", selector: "nameLabel" },
         { tagName: "text", selector: "specLabel" },
       ],
@@ -49,6 +50,18 @@
           href: "#sld-sym-gen",
           xlinkHref: "#sld-sym-gen",
           color: "#94a3b8",
+        },
+        symbolText: {
+          text: "G",
+          x: 22,
+          y: 22,
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          fontSize: 14,
+          fontWeight: "bold",
+          fill: "#94a3b8",
+          fontFamily: "Pretendard, -apple-system, sans-serif",
+          pointerEvents: "none",
         },
         nameLabel: {
           text: "비상 발전기",
@@ -122,8 +135,17 @@
           specText: specText,
         });
 
+        const angle = ((Math.round(data.angle || 0) % 360) + 360) % 360;
+        const cx = sz.width / 2;
+        const cy = sz.height / 2;
+
         this.attr({
           stamp: { color: strokeColor },
+          symbolText: {
+            text: "G",
+            fill: strokeColor,
+            transform: angle ? `rotate(${-angle}, ${cx}, ${cy})` : "",
+          },
           nameLabel: lbls.nameAttrs,
           specLabel: lbls.specAttrs,
         });
@@ -150,6 +172,7 @@
             "xlink:href": "#sld-sym-motor",
           },
         },
+        { tagName: "text", selector: "symbolText" },
         { tagName: "text", selector: "nameLabel" },
       ],
       attrs: {
@@ -157,6 +180,18 @@
           href: "#sld-sym-motor",
           xlinkHref: "#sld-sym-motor",
           color: "#377DFF",
+        },
+        symbolText: {
+          text: "M",
+          x: 21,
+          y: 21,
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          fontSize: 14,
+          fontWeight: "bold",
+          fill: "#377DFF",
+          fontFamily: "Pretendard, -apple-system, sans-serif",
+          pointerEvents: "none",
         },
         nameLabel: {
           text: "모터",
@@ -214,8 +249,17 @@
           nameText: fmtName(data.name || "모터"),
         });
 
+        const angle = ((Math.round(data.angle || 0) % 360) + 360) % 360;
+        const cx = sz.width / 2;
+        const cy = sz.height / 2;
+
         this.attr({
           stamp: { color: strokeColor },
+          symbolText: {
+            text: "M",
+            fill: strokeColor,
+            transform: angle ? `rotate(${-angle}, ${cx}, ${cy})` : "",
+          },
           nameLabel: lbls.nameAttrs,
         });
 

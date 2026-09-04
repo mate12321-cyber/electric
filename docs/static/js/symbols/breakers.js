@@ -155,7 +155,11 @@
             width: sz.width,
             height: sz.height,
           },
-          groundSymbol: { display: showGround, fill: "#ffffff" },
+          groundSymbol: {
+            display: showGround,
+            fill: "#ffffff",
+            transform: data.angle ? `rotate(${-data.angle}, 23, 20)` : "",
+          },
           nameLabel: lbls.nameAttrs,
           specLabel: lbls.specAttrs,
         });
@@ -296,7 +300,11 @@
 
         this.attr({
           stamp: { color: strokeColor },
-          groundSymbol: { display: showGround, fill: "#ffffff" },
+          groundSymbol: {
+            display: showGround,
+            fill: "#ffffff",
+            transform: data.angle ? `rotate(${-data.angle}, 23, 20)` : "",
+          },
           nameLabel: lbls.nameAttrs,
           specLabel: lbls.specAttrs,
         });
@@ -437,7 +445,11 @@
 
         this.attr({
           stamp: { color: strokeColor },
-          groundSymbol: { display: showGround, fill: "#ffffff" },
+          groundSymbol: {
+            display: showGround,
+            fill: "#ffffff",
+            transform: data.angle ? `rotate(${-data.angle}, 23, 20)` : "",
+          },
           nameLabel: lbls.nameAttrs,
           specLabel: lbls.specAttrs,
         });
@@ -832,6 +844,7 @@
             "xlink:href": "#sld-sym-relay",
           },
         },
+        { tagName: "text", selector: "symbolText" },
         { tagName: "text", selector: "nameLabel" },
       ],
       attrs: {
@@ -839,6 +852,18 @@
           href: "#sld-sym-relay",
           xlinkHref: "#sld-sym-relay",
           color: "#E53935",
+        },
+        symbolText: {
+          text: "51",
+          x: 19,
+          y: 19,
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          fontSize: 12,
+          fontWeight: "bold",
+          fontFamily: "Pretendard, -apple-system, sans-serif",
+          fill: "#E53935",
+          pointerEvents: "none",
         },
         nameLabel: {
           text: "OCR",
@@ -888,8 +913,16 @@
           height: sz.height,
           nameText: fmtName(data.name || "OCR"),
         });
+        const angle = ((Math.round(data.angle || 0) % 360) + 360) % 360;
+        const cx = sz.width / 2;
+        const cy = sz.height / 2;
         this.attr({
           stamp: { color: strokeColor },
+          symbolText: {
+            text: data.relayCode || "51",
+            fill: strokeColor,
+            transform: angle ? `rotate(${-angle}, ${cx}, ${cy})` : "",
+          },
           nameLabel: Object.assign({}, lbls.nameAttrs, { fill: strokeColor }),
         });
         const ports = this.getPorts ? this.getPorts() || [] : [];
