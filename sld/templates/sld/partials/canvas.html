@@ -1,3 +1,46 @@
+<div class="sld-resizer sld-resizer-left" id="resizer-left" title="드래그하여 너비 조절 (더블클릭 시 접기/펼치기)"></div>
 <main class="sld-canvas-wrapper">
-    <div id="sld-paper-container"></div>
+  <button
+    class="sld-floating-panel-btn sld-floating-left-btn"
+    id="btn-expand-left-panel"
+    title="심볼 라이브러리 펼치기"
+    style="display: none;"
+  >
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+    <span>심볼 라이브러리</span>
+  </button>
+  <button
+    class="sld-floating-panel-btn sld-floating-right-btn"
+    id="btn-expand-right-panel"
+    title="속성창 펼치기"
+    style="display: none;"
+  >
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+    <span>속성 패널</span>
+  </button>
+  <div id="sld-paper-container"></div>
 </main>
+<div class="sld-resizer sld-resizer-right" id="resizer-right" title="드래그하여 너비 조절 (더블클릭 시 접기/펼치기)"></div>
+

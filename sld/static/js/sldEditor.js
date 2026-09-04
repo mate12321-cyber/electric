@@ -220,6 +220,7 @@ class SLDEditor {
     // 3. Setup Events and Sub-Managers
     this.setupCanvasEvents();
     this.setupResponsiveCanvas();
+    this.setupPanelResizeAndCollapse();
     this.paletteManager.setupDragDrop();
     this.setupCellInteractions();
     this.propertiesPanel.setup();
@@ -277,6 +278,173 @@ class SLDEditor {
         scheduleResize(this.container.clientWidth, this.container.clientHeight);
       }
     });
+  }
+
+  setupPanelResizeAndCollapse() {
+    const leftSidebar =
+      document.getElementById("sld-sidebar-left") ||
+      document.querySelector(".sld-sidebar-left");
+    const rightSidebar =
+      document.getElementById("sld-sidebar-right") ||
+      document.querySelector(".sld-sidebar-right");
+    const leftResizer = document.getElementById("resizer-left");
+    const rightResizer = document.getElementById("resizer-right");
+
+    const btnCollapseLeft = document.getElementById("btn-collapse-left-panel");
+    const btnExpandLeft = document.getElementById("btn-expand-left-panel");
+    const btnCollapseRight = document.getElementById("btn-collapse-right-panel");
+    const btnExpandRight = document.getElementById("btn-expand-right-panel");
+
+    // Restore saved widths and collapsed states
+    const savedLeftWidth = localStorage.getItem("sld_left_panel_width");
+    const savedRightWidth = localStorage.getItem("sld_right_panel_width");
+    const isLeftCollapsed =
+      localStorage.getItem("sld_left_panel_collapsed") === "true";
+    const isRightCollapsed =
+      localStorage.getItem("sld_right_panel_collapsed") === "true";
+
+    if (savedLeftWidth && leftSidebar) {
+      const w = parseInt(savedLeftWidth, 10);
+      if (w >= 160 && w <= 800) {
+        leftSidebar.style.width = w + "px";
+      }
+    }
+    if (savedRightWidth && rightSidebar) {
+      const w = parseInt(savedRightWidth, 10);
+      if (w >= 200 && w <= 900) {
+        rightSidebar.style.width = w + "px";
+      }
+    }
+
+    const setLeftCollapsed = (collapsed) => {
+      if (!leftSidebar) return;
+      if (collapsed) {
+        leftSidebar.classList.add("collapsed");
+        if (leftResizer) leftResizer.classList.add("hidden");
+        if (btnExpandLeft) btnExpandLeft.style.display = "flex";
+      } else {
+        leftSidebar.classList.remove("collapsed");
+        if (leftResizer) leftResizer.classList.remove("hidden");
+        if (btnExpandLeft) btnExpandLeft.style.display = "none";
+      }
+      localStorage.setItem(
+        "sld_left_panel_collapsed",
+        collapsed ? "true" : "false",
+      );
+    };
+
+    const setRightCollapsed = (collapsed) => {
+      if (!rightSidebar) return;
+      if (collapsed) {
+        rightSidebar.classList.add("collapsed");
+        if (rightResizer) rightResizer.classList.add("hidden");
+        if (btnExpandRight) btnExpandRight.style.display = "flex";
+      } else {
+        rightSidebar.classList.remove("collapsed");
+        if (rightResizer) rightResizer.classList.remove("hidden");
+        if (btnExpandRight) btnExpandRight.style.display = "none";
+      }
+      localStorage.setItem(
+        "sld_right_panel_collapsed",
+        collapsed ? "true" : "false",
+      );
+    };
+
+    if (isLeftCollapsed) setLeftCollapsed(true);
+    if (isRightCollapsed) setRightCollapsed(true);
+
+    if (btnCollapseLeft) {
+      btnCollapseLeft.addEventListener("click", () => setLeftCollapsed(true));
+    }
+    if (btnExpandLeft) {
+      btnExpandLeft.addEventListener("click", () => setLeftCollapsed(false));
+    }
+    if (btnCollapseRight) {
+      btnCollapseRight.addEventListener("click", () => setRightCollapsed(true));
+    }
+    if (btnExpandRight) {
+      btnExpandRight.addEventListener("click", () => setRightCollapsed(false));
+    }
+
+    // Left Resizer Drag
+    if (leftResizer && leftSidebar) {
+      let isDragging = false;
+      let startX = 0;
+      let startWidth = 0;
+
+      leftResizer.addEventListener("mousedown", (e) => {
+        if (e.button !== 0) return;
+        isDragging = true;
+        startX = e.clientX;
+        startWidth = leftSidebar.getBoundingClientRect().width;
+        leftResizer.classList.add("dragging");
+        document.body.classList.add("sld-resizing-col");
+        e.preventDefault();
+      });
+
+      leftResizer.addEventListener("dblclick", () => {
+        const isCollapsed = leftSidebar.classList.contains("collapsed");
+        setLeftCollapsed(!isCollapsed);
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const minW = 180;
+        const maxW = Math.min(650, Math.floor(window.innerWidth * 0.45));
+        const newW = Math.max(minW, Math.min(maxW, Math.round(startWidth + dx)));
+        leftSidebar.style.width = newW + "px";
+      });
+
+      window.addEventListener("mouseup", () => {
+        if (!isDragging) return;
+        isDragging = false;
+        leftResizer.classList.remove("dragging");
+        document.body.classList.remove("sld-resizing-col");
+        const finalW = Math.round(leftSidebar.getBoundingClientRect().width);
+        localStorage.setItem("sld_left_panel_width", String(finalW));
+      });
+    }
+
+    // Right Resizer Drag
+    if (rightResizer && rightSidebar) {
+      let isDragging = false;
+      let startX = 0;
+      let startWidth = 0;
+
+      rightResizer.addEventListener("mousedown", (e) => {
+        if (e.button !== 0) return;
+        isDragging = true;
+        startX = e.clientX;
+        startWidth = rightSidebar.getBoundingClientRect().width;
+        rightResizer.classList.add("dragging");
+        document.body.classList.add("sld-resizing-col");
+        e.preventDefault();
+      });
+
+      rightResizer.addEventListener("dblclick", () => {
+        const isCollapsed = rightSidebar.classList.contains("collapsed");
+        setRightCollapsed(!isCollapsed);
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        const dx = startX - e.clientX;
+        const minW = 220;
+        const maxW = Math.min(750, Math.floor(window.innerWidth * 0.5));
+        const newW = Math.max(minW, Math.min(maxW, Math.round(startWidth + dx)));
+        rightSidebar.style.width = newW + "px";
+      });
+
+      window.addEventListener("mouseup", () => {
+        if (!isDragging) return;
+        isDragging = false;
+        rightResizer.classList.remove("dragging");
+        document.body.classList.remove("sld-resizing-col");
+        const finalW = Math.round(rightSidebar.getBoundingClientRect().width);
+        localStorage.setItem("sld_right_panel_width", String(finalW));
+      });
+    }
   }
 
   isTextInputFocused() {
@@ -1522,7 +1690,8 @@ class SLDEditor {
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
 
-      if (!this._minimapBounds || !this._minimapScale || !this.container) return;
+      if (!this._minimapBounds || !this._minimapScale || !this.container)
+        return;
 
       const bounds = this._minimapBounds;
       const mmScale = this._minimapScale;
@@ -1532,8 +1701,14 @@ class SLDEditor {
       const containerW = this.container.clientWidth || 1200;
       const containerH = this.container.clientHeight || 800;
 
-      const vpW = Math.max(6, Math.min(mmW, (containerW / this.scale) * mmScale));
-      const vpH = Math.max(6, Math.min(mmH, (containerH / this.scale) * mmScale));
+      const vpW = Math.max(
+        6,
+        Math.min(mmW, (containerW / this.scale) * mmScale),
+      );
+      const vpH = Math.max(
+        6,
+        Math.min(mmH, (containerH / this.scale) * mmScale),
+      );
 
       // Calculate desired top-left of viewport in minimap space
       const vpX = clickX - vpW / 2;
