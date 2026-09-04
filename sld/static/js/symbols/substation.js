@@ -1,10 +1,11 @@
 /**
  * symbols/substation.js
- * 수전 및 변전 설비 심볼 정의:
+ * 수전 및 변전 설비 심볼 정의 (Hybrid SVG Stamp Engine):
  * - TransmissionTower (송전철탑 154kV 수전)
  * - Transformer2W / Transformer3W (2권선 / 3권선 변압기)
  * - SurgeArrester (피뢰기 LA)
  * - Disconnector (단로기 DS)
+ * - Disconnector3P (3로 단로기 3-DS)
  */
 (function () {
   if (typeof joint === "undefined") return;
@@ -23,31 +24,27 @@
           specAttrs: { text: opts.specText },
         };
 
-  // 1. Transmission Tower (송전철탑)
+  // 1. Transmission Tower (송전철탑 - Stamp + Interactive Label)
   joint.shapes.sld.TransmissionTower = joint.dia.Element.define(
     "sld.TransmissionTower",
     {
       size: { width: 56, height: 56 },
       markup: [
-        { tagName: "rect", selector: "bodyBox" },
-        { tagName: "path", selector: "towerPath" },
+        {
+          tagName: "use",
+          selector: "stamp",
+          attributes: {
+            href: "#sld-sym-tower",
+            "xlink:href": "#sld-sym-tower",
+          },
+        },
         { tagName: "text", selector: "nameLabel" },
       ],
       attrs: {
-        bodyBox: {
-          refWidth: "100%",
-          refHeight: "100%",
-          fill: "#ffffff",
-          stroke: "#94a3b8",
-          strokeWidth: 1,
-          rx: 4,
-        },
-        towerPath: {
-          d: "M 28 6 L 14 44 L 42 44 Z M 28 16 L 38 44 M 28 16 L 18 44 M 10 26 L 46 26 M 14 34 L 42 34",
-          stroke: "#7A3E9D",
-          strokeWidth: 1.5,
-          fill: "none",
-          strokeLinecap: "round",
+        stamp: {
+          href: "#sld-sym-tower",
+          xlinkHref: "#sld-sym-tower",
+          color: "#7A3E9D",
         },
         nameLabel: {
           text: "154kV 수전",
@@ -85,38 +82,46 @@
       },
       updateVisual: function () {
         const data = this.get("sldData") || {};
-        this.attr("nameLabel/text", fmtName(data.name || "154kV 수전"));
+        const strokeColor = data.color || "#7A3E9D";
+        this.attr({
+          stamp: { color: strokeColor },
+          nameLabel: {
+            text: fmtName(data.name || "154kV 수전"),
+            fill: strokeColor,
+          },
+        });
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", strokeColor);
+        });
       },
     },
   );
 
-  // 2. Disconnector (DS - 단로기: 상/하단 원형 링 + 우측 외곽 접선 연결선 디자인)
+  // 2. Disconnector (DS - 단로기: Base Stamp + Dynamic Blade + Labels)
   joint.shapes.sld.Disconnector = joint.dia.Element.define(
     "sld.Disconnector",
     {
       size: { width: 28, height: 40 },
       markup: [
-        { tagName: "path", selector: "inLine" },
-        { tagName: "path", selector: "outLine" },
+        {
+          tagName: "use",
+          selector: "stamp",
+          attributes: {
+            href: "#sld-sym-ds-base",
+            "xlink:href": "#sld-sym-ds-base",
+          },
+        },
         { tagName: "path", selector: "blade" },
-        { tagName: "circle", selector: "topNode" },
-        { tagName: "circle", selector: "botNode" },
         { tagName: "text", selector: "groundSymbol" },
         { tagName: "text", selector: "nameLabel" },
         { tagName: "text", selector: "specLabel" },
       ],
       attrs: {
-        inLine: {
-          d: "M 14 0 L 14 6",
-          stroke: "#7A3E9D",
-          strokeWidth: 2,
-          strokeLinecap: "round",
-        },
-        outLine: {
-          d: "M 14 34 L 14 40",
-          stroke: "#7A3E9D",
-          strokeWidth: 2,
-          strokeLinecap: "round",
+        stamp: {
+          href: "#sld-sym-ds-base",
+          xlinkHref: "#sld-sym-ds-base",
+          color: "#7A3E9D",
         },
         blade: {
           d: "M 18.5 6 L 18.5 34",
@@ -124,22 +129,6 @@
           strokeWidth: 2.5,
           strokeLinecap: "round",
           cursor: "pointer",
-        },
-        topNode: {
-          cx: 14,
-          cy: 6,
-          r: 4.5,
-          stroke: "#7A3E9D",
-          strokeWidth: 2,
-          fill: "#ffffff",
-        },
-        botNode: {
-          cx: 14,
-          cy: 34,
-          r: 4.5,
-          stroke: "#7A3E9D",
-          strokeWidth: 2,
-          fill: "#ffffff",
         },
         groundSymbol: {
           text: "⏚",
@@ -250,10 +239,7 @@
         });
 
         this.attr({
-          inLine: { stroke: strokeColor },
-          outLine: { stroke: strokeColor },
-          topNode: { stroke: strokeColor, fill: "#ffffff" },
-          botNode: { stroke: strokeColor, fill: "#ffffff" },
+          stamp: { color: strokeColor },
           blade: { d: bladeD, stroke: strokeColor },
           groundSymbol: { display: showGround, fill: "#84CC16" },
           nameLabel: lbls.nameAttrs,
@@ -274,53 +260,25 @@
     {
       size: { width: 44, height: 48 },
       markup: [
-        { tagName: "path", selector: "inLine" },
-        { tagName: "path", selector: "outLine" },
-        { tagName: "circle", selector: "topNode" },
-        { tagName: "circle", selector: "pivotNode" },
-        { tagName: "circle", selector: "pivotDot" },
+        {
+          tagName: "use",
+          selector: "stamp",
+          attributes: {
+            href: "#sld-sym-ds3p-base",
+            "xlink:href": "#sld-sym-ds3p-base",
+          },
+        },
         { tagName: "path", selector: "blade" },
-        { tagName: "circle", selector: "earthNode" },
-        { tagName: "path", selector: "earthSymbol" },
         { tagName: "text", selector: "nameLabel" },
         { tagName: "text", selector: "specLabel" },
         { tagName: "text", selector: "earthNameLabel" },
         { tagName: "text", selector: "earthSpecLabel" },
       ],
       attrs: {
-        inLine: {
-          d: "M 14 34 L 14 48",
-          stroke: "#7A3E9D",
-          strokeWidth: 2,
-          strokeLinecap: "round",
-        },
-        outLine: {
-          d: "M 14 0 L 14 10",
-          stroke: "#7A3E9D",
-          strokeWidth: 2,
-          strokeLinecap: "round",
-        },
-        topNode: {
-          cx: 14,
-          cy: 10,
-          r: 4.5,
-          stroke: "#7A3E9D",
-          strokeWidth: 2,
-          fill: "#ffffff",
-        },
-        pivotNode: {
-          cx: 14,
-          cy: 34,
-          r: 4.5,
-          stroke: "#7A3E9D",
-          strokeWidth: 2,
-          fill: "#ffffff",
-        },
-        pivotDot: {
-          cx: 14,
-          cy: 34,
-          r: 2,
-          fill: "#7A3E9D",
+        stamp: {
+          href: "#sld-sym-ds3p-base",
+          xlinkHref: "#sld-sym-ds3p-base",
+          color: "#7A3E9D",
         },
         blade: {
           d: "M 18.5 34 L 18.5 10",
@@ -328,20 +286,6 @@
           strokeWidth: 2.5,
           strokeLinecap: "round",
           cursor: "pointer",
-        },
-        earthNode: {
-          cx: 38,
-          cy: 34,
-          r: 4.5,
-          stroke: "#94a3b8",
-          strokeWidth: 2,
-          fill: "#ffffff",
-        },
-        earthSymbol: {
-          d: "M 38 38.5 L 38 42 M 32 42 L 44 42 M 34 44.5 L 42 44.5 M 36 47 L 40 47",
-          stroke: "#94a3b8",
-          strokeWidth: 1.5,
-          strokeLinecap: "round",
         },
         nameLabel: {
           text: "154kV DS",
@@ -432,8 +376,6 @@
 
         const baseColor = activeVoltageColor || data.color || "#7A3E9D";
 
-        // 접지 상태(EARTH)일 때 하단 인입선(in) 및 피벗 노드는 접지색(#84CC16)
-        // 상단 인출선(out) 및 상단 노드(topNode)는 반드시 절연 회색(#94a3b8) 유지
         const isGrounded =
           isEarth || (topologyState === "GROUNDED" && isClosed);
         const inColor = isGrounded ? "#84CC16" : isOpen ? "#94a3b8" : baseColor;
@@ -444,7 +386,7 @@
             : topologyState === "DEAD"
               ? "#94a3b8"
               : baseColor
-          : "#94a3b8"; // EARTH 또는 OPEN일 때 상단 노드는 절대 접지색으로 바뀌지 않음
+          : "#94a3b8";
 
         const earthColor = isEarth ? "#84CC16" : "#94a3b8";
 
@@ -477,14 +419,8 @@
         const earthSpecY = earthNameY + (earthNameLines - 1) * 12 + 14;
 
         this.attr({
-          inLine: { stroke: inColor },
-          outLine: { stroke: outColor },
-          topNode: { stroke: outColor, fill: "#ffffff" },
-          pivotNode: { stroke: inColor, fill: "#ffffff" },
-          pivotDot: { fill: inColor },
+          stamp: { color: inColor },
           blade: { d: bladeD, stroke: bladeStroke },
-          earthNode: { stroke: earthColor, fill: "#ffffff" },
-          earthSymbol: { stroke: earthColor },
           nameLabel: {
             text: formattedName,
             y: nameY,
@@ -938,28 +874,27 @@
   // 4. Transformer 3W (3권선 변압기)
   joint.shapes.sld.Transformer3W = joint.shapes.sld.Transformer2W;
 
-  // 5. Surge Arrester (LA - 피뢰기)
+  // 5. Surge Arrester (LA - 피뢰기: Stamp + Interactive Label)
   joint.shapes.sld.SurgeArrester = joint.dia.Element.define(
     "sld.SurgeArrester",
     {
       size: { width: 32, height: 44 },
       markup: [
-        { tagName: "path", selector: "lead" },
-        { tagName: "path", selector: "zig" },
+        {
+          tagName: "use",
+          selector: "stamp",
+          attributes: {
+            href: "#sld-sym-la",
+            "xlink:href": "#sld-sym-la",
+          },
+        },
         { tagName: "text", selector: "nameLabel" },
       ],
       attrs: {
-        lead: {
-          d: "M 16 0 L 16 8 M 16 36 L 16 44",
-          stroke: "#7A3E9D",
-          strokeWidth: 2,
-        },
-        zig: {
-          d: "M 11 8 h 10 l -5 8 h 6 l -8 10 h 6 l -5 10",
-          stroke: "#7A3E9D",
-          strokeWidth: 1.8,
-          fill: "none",
-          strokeLinecap: "round",
+        stamp: {
+          href: "#sld-sym-la",
+          xlinkHref: "#sld-sym-la",
+          color: "#7A3E9D",
         },
         nameLabel: {
           text: "LA",
@@ -1001,6 +936,7 @@
       },
       updateVisual: function () {
         const data = this.get("sldData") || {};
+        const strokeColor = data.color || "#7A3E9D";
         const sz = this.get("size") || { width: 32, height: 44 };
         const lbls = getLblAttrs({
           angle: data.angle,
@@ -1009,7 +945,12 @@
           nameText: fmtName(data.name || "LA"),
         });
         this.attr({
-          nameLabel: lbls.nameAttrs,
+          stamp: { color: strokeColor },
+          nameLabel: Object.assign({}, lbls.nameAttrs, { fill: strokeColor }),
+        });
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", strokeColor);
         });
       },
     },

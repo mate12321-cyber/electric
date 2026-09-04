@@ -1,6 +1,6 @@
 /**
  * symbols/breakers.js
- * 차단기 및 보호/계측 설비 심볼 정의:
+ * 차단기 및 보호/계측 설비 심볼 정의 (Hybrid SVG Stamp Engine):
  * - Breaker (표준 차단기: VCB, GCB)
  * - ACB (기중차단기)
  * - MCCB (배선용차단기)
@@ -169,42 +169,29 @@
     },
   );
 
-  // 2. Air Circuit Breaker (ACB - 기중차단기)
+  // 2. Air Circuit Breaker (ACB - 기중차단기: Stamp + Dynamic Ground/Labels)
   joint.shapes.sld.ACB = joint.dia.Element.define(
     "sld.ACB",
     {
       size: { width: 28, height: 40 },
       markup: [
-        { tagName: "path", selector: "crescent" },
-        { tagName: "circle", selector: "topNode" },
-        { tagName: "circle", selector: "botNode" },
+        {
+          tagName: "use",
+          selector: "stamp",
+          attributes: {
+            href: "#sld-sym-acb-crescent",
+            "xlink:href": "#sld-sym-acb-crescent",
+          },
+        },
         { tagName: "text", selector: "groundSymbol" },
         { tagName: "text", selector: "nameLabel" },
         { tagName: "text", selector: "specLabel" },
       ],
       attrs: {
-        crescent: {
-          d: "M 17 6 C 22 12, 22 28, 17 34 C 33 30, 33 10, 17 6 Z",
-          stroke: "#377DFF",
-          strokeWidth: 1.5,
-          strokeLinejoin: "round",
-          fill: "#000000",
-        },
-        topNode: {
-          cx: 14,
-          cy: 6,
-          r: 3.5,
-          fill: "#000000",
-          stroke: "#377DFF",
-          strokeWidth: 1.5,
-        },
-        botNode: {
-          cx: 14,
-          cy: 34,
-          r: 3.5,
-          fill: "#000000",
-          stroke: "#377DFF",
-          strokeWidth: 1.5,
+        stamp: {
+          href: "#sld-sym-acb-crescent",
+          xlinkHref: "#sld-sym-acb-crescent",
+          color: "#377DFF",
         },
         groundSymbol: {
           text: "⏚",
@@ -291,7 +278,6 @@
         const isDead = topState === "DEAD" || !isContactClosed;
 
         const baseColor = activeVoltageColor || data.color || "#377DFF";
-        let fillColor = isGrounded ? "#84CC16" : isDead ? "#94a3b8" : "#000000";
         let strokeColor = isGrounded
           ? "#84CC16"
           : isDead
@@ -311,9 +297,7 @@
         });
 
         this.attr({
-          crescent: { fill: fillColor, stroke: strokeColor },
-          topNode: { stroke: strokeColor, fill: fillColor },
-          botNode: { stroke: strokeColor, fill: fillColor },
+          stamp: { color: strokeColor },
           groundSymbol: { display: showGround, fill: "#ffffff" },
           nameLabel: lbls.nameAttrs,
           specLabel: lbls.specAttrs,
@@ -327,38 +311,29 @@
     },
   );
 
-  // 3. Molded Case Circuit Breaker (MCCB - 배선용차단기)
+  // 3. Molded Case Circuit Breaker (MCCB - 배선용차단기: Stamp + Dynamic Ground/Labels)
   joint.shapes.sld.MCCB = joint.dia.Element.define(
     "sld.MCCB",
     {
       size: { width: 28, height: 40 },
       markup: [
-        { tagName: "path", selector: "crescent" },
-        { tagName: "path", selector: "topLead" },
-        { tagName: "path", selector: "botLead" },
+        {
+          tagName: "use",
+          selector: "stamp",
+          attributes: {
+            href: "#sld-sym-mccb-crescent",
+            "xlink:href": "#sld-sym-mccb-crescent",
+          },
+        },
         { tagName: "text", selector: "groundSymbol" },
         { tagName: "text", selector: "nameLabel" },
         { tagName: "text", selector: "specLabel" },
       ],
       attrs: {
-        topLead: {
-          d: "M 14 0 L 14 6",
-          stroke: "#377DFF",
-          strokeWidth: 2,
-          strokeLinecap: "round",
-        },
-        botLead: {
-          d: "M 14 34 L 14 40",
-          stroke: "#377DFF",
-          strokeWidth: 2,
-          strokeLinecap: "round",
-        },
-        crescent: {
-          d: "M 14 6 C 21 12, 21 28, 14 34 C 31 30, 31 10, 14 6 Z",
-          stroke: "#377DFF",
-          strokeWidth: 1.5,
-          strokeLinejoin: "round",
-          fill: "#000000",
+        stamp: {
+          href: "#sld-sym-mccb-crescent",
+          xlinkHref: "#sld-sym-mccb-crescent",
+          color: "#377DFF",
         },
         groundSymbol: {
           text: "⏚",
@@ -446,7 +421,6 @@
 
         const baseColor = activeVoltageColor || data.color || "#377DFF";
         const sz = this.get("size") || { width: 28, height: 40 };
-        let fillColor = isGrounded ? "#84CC16" : isDead ? "#94a3b8" : "#000000";
         let strokeColor = isGrounded
           ? "#84CC16"
           : isDead
@@ -465,9 +439,7 @@
         });
 
         this.attr({
-          topLead: { stroke: strokeColor },
-          botLead: { stroke: strokeColor },
-          crescent: { fill: fillColor, stroke: strokeColor },
+          stamp: { color: strokeColor },
           groundSymbol: { display: showGround, fill: "#ffffff" },
           nameLabel: lbls.nameAttrs,
           specLabel: lbls.specAttrs,
@@ -767,32 +739,27 @@
     },
   );
 
-  // 6. Power Fuse (PF - 퓨즈)
+  // 6. Power Fuse (PF - 퓨즈: Stamp + Dynamic Label)
   joint.shapes.sld.Fuse = joint.dia.Element.define(
     "sld.Fuse",
     {
       size: { width: 32, height: 44 },
       markup: [
-        { tagName: "rect", selector: "body" },
-        { tagName: "path", selector: "line" },
+        {
+          tagName: "use",
+          selector: "stamp",
+          attributes: {
+            href: "#sld-sym-pf",
+            "xlink:href": "#sld-sym-pf",
+          },
+        },
         { tagName: "text", selector: "nameLabel" },
       ],
       attrs: {
-        body: {
-          width: 14,
-          height: 32,
-          x: 9,
-          y: 6,
-          rx: 1,
-          ry: 1,
-          stroke: "#377DFF",
-          strokeWidth: 2,
-          fill: "#ffffff",
-        },
-        line: {
-          d: "M 16 0 L 16 44",
-          stroke: "#377DFF",
-          strokeWidth: 2,
+        stamp: {
+          href: "#sld-sym-pf",
+          xlinkHref: "#sld-sym-pf",
+          color: "#377DFF",
         },
         nameLabel: {
           text: "PF",
@@ -834,6 +801,7 @@
       },
       updateVisual: function () {
         const data = this.get("sldData") || {};
+        const strokeColor = data.color || "#377DFF";
         const sz = this.get("size") || { width: 32, height: 44 };
         const lbls = getLblAttrs({
           angle: data.angle,
@@ -842,41 +810,38 @@
           nameText: fmtName(data.name || "PF"),
         });
         this.attr({
-          nameLabel: lbls.nameAttrs,
+          stamp: { color: strokeColor },
+          nameLabel: Object.assign({}, lbls.nameAttrs, { fill: strokeColor }),
+        });
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", strokeColor);
         });
       },
     },
   );
 
-  // 7. Protective Relay (OCR/UVR - 보호계전기)
+  // 7. Protective Relay (OCR/UVR - 보호계전기: Stamp + Dynamic Label)
   joint.shapes.sld.Relay = joint.dia.Element.define(
     "sld.Relay",
     {
       size: { width: 38, height: 38 },
       markup: [
-        { tagName: "circle", selector: "body" },
-        { tagName: "text", selector: "label" },
+        {
+          tagName: "use",
+          selector: "stamp",
+          attributes: {
+            href: "#sld-sym-relay",
+            "xlink:href": "#sld-sym-relay",
+          },
+        },
         { tagName: "text", selector: "nameLabel" },
       ],
       attrs: {
-        body: {
-          cx: 19,
-          cy: 19,
-          r: 17,
-          stroke: "#E53935",
-          strokeWidth: 2,
-          fill: "#ffffff",
-        },
-        label: {
-          text: "51",
-          x: 19,
-          y: 19,
-          textAnchor: "middle",
-          textVerticalAnchor: "middle",
-          fontSize: 12,
-          fontWeight: "bold",
-          fill: "#E53935",
-          fontFamily: "Pretendard, -apple-system, sans-serif",
+        stamp: {
+          href: "#sld-sym-relay",
+          xlinkHref: "#sld-sym-relay",
+          color: "#E53935",
         },
         nameLabel: {
           text: "OCR",
@@ -918,6 +883,7 @@
       },
       updateVisual: function () {
         const data = this.get("sldData") || {};
+        const strokeColor = data.color || "#E53935";
         const sz = this.get("size") || { width: 38, height: 38 };
         const lbls = getLblAttrs({
           angle: data.angle,
@@ -926,40 +892,38 @@
           nameText: fmtName(data.name || "OCR"),
         });
         this.attr({
-          nameLabel: lbls.nameAttrs,
+          stamp: { color: strokeColor },
+          nameLabel: Object.assign({}, lbls.nameAttrs, { fill: strokeColor }),
+        });
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", strokeColor);
         });
       },
     },
   );
 
-  // 8. Current Transformer (CT - 변류기)
+  // 8. Current Transformer (CT - 변류기: Stamp + Dynamic Label)
   joint.shapes.sld.CT = joint.dia.Element.define(
     "sld.CT",
     {
       size: { width: 34, height: 38 },
       markup: [
-        { tagName: "circle", selector: "topCircle" },
-        { tagName: "circle", selector: "botCircle" },
-        { tagName: "path", selector: "lead" },
+        {
+          tagName: "use",
+          selector: "stamp",
+          attributes: {
+            href: "#sld-sym-ct",
+            "xlink:href": "#sld-sym-ct",
+          },
+        },
         { tagName: "text", selector: "nameLabel" },
       ],
       attrs: {
-        lead: { d: "M 17 0 L 17 38", stroke: "#00897B", strokeWidth: 2 },
-        topCircle: {
-          cx: 17,
-          cy: 14,
-          r: 7,
-          stroke: "#00897B",
-          strokeWidth: 2,
-          fill: "none",
-        },
-        botCircle: {
-          cx: 17,
-          cy: 24,
-          r: 7,
-          stroke: "#00897B",
-          strokeWidth: 2,
-          fill: "none",
+        stamp: {
+          href: "#sld-sym-ct",
+          xlinkHref: "#sld-sym-ct",
+          color: "#00897B",
         },
         nameLabel: {
           text: "CT",
@@ -1001,6 +965,7 @@
       },
       updateVisual: function () {
         const data = this.get("sldData") || {};
+        const strokeColor = data.color || "#00897B";
         const sz = this.get("size") || { width: 34, height: 38 };
         const lbls = getLblAttrs({
           angle: data.angle,
@@ -1009,42 +974,38 @@
           nameText: fmtName(data.name || "CT"),
         });
         this.attr({
-          nameLabel: lbls.nameAttrs,
+          stamp: { color: strokeColor },
+          nameLabel: Object.assign({}, lbls.nameAttrs, { fill: strokeColor }),
+        });
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", strokeColor);
         });
       },
     },
   );
 
-  // 9. Potential Transformer (PT - 계기용변압기)
+  // 9. Potential Transformer (PT - 계기용변압기: Stamp + Dynamic Label)
   joint.shapes.sld.PT = joint.dia.Element.define(
     "sld.PT",
     {
       size: { width: 34, height: 44 },
       markup: [
-        { tagName: "circle", selector: "c1" },
-        { tagName: "circle", selector: "c2" },
-        { tagName: "path", selector: "topLead" },
-        { tagName: "path", selector: "botLead" },
+        {
+          tagName: "use",
+          selector: "stamp",
+          attributes: {
+            href: "#sld-sym-pt",
+            "xlink:href": "#sld-sym-pt",
+          },
+        },
         { tagName: "text", selector: "nameLabel" },
       ],
       attrs: {
-        topLead: { d: "M 17 0 L 17 8", stroke: "#00897B", strokeWidth: 2 },
-        botLead: { d: "M 17 36 L 17 44", stroke: "#00897B", strokeWidth: 2 },
-        c1: {
-          cx: 17,
-          cy: 16,
-          r: 8,
-          stroke: "#00897B",
-          strokeWidth: 2,
-          fill: "#ffffff",
-        },
-        c2: {
-          cx: 17,
-          cy: 28,
-          r: 8,
-          stroke: "#00897B",
-          strokeWidth: 2,
-          fill: "#ffffff",
+        stamp: {
+          href: "#sld-sym-pt",
+          xlinkHref: "#sld-sym-pt",
+          color: "#00897B",
         },
         nameLabel: {
           text: "PT",
@@ -1086,6 +1047,7 @@
       },
       updateVisual: function () {
         const data = this.get("sldData") || {};
+        const strokeColor = data.color || "#00897B";
         const sz = this.get("size") || { width: 34, height: 44 };
         const lbls = getLblAttrs({
           angle: data.angle,
@@ -1094,13 +1056,18 @@
           nameText: fmtName(data.name || "PT"),
         });
         this.attr({
-          nameLabel: lbls.nameAttrs,
+          stamp: { color: strokeColor },
+          nameLabel: Object.assign({}, lbls.nameAttrs, { fill: strokeColor }),
+        });
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", strokeColor);
         });
       },
     },
   );
 
-  // 10. Ground Switch (ES - 접지단로기)
+  // 10. Ground Switch (ES - 접지단로기: Interactive Contact + Ground Symbol)
   joint.shapes.sld.GroundSwitch = joint.dia.Element.define(
     "sld.GroundSwitch",
     {
@@ -1190,7 +1157,12 @@
           inLine: { stroke: strokeColor },
           node: { stroke: strokeColor },
           groundSymbol: { stroke: strokeColor },
-          nameLabel: lbls.nameAttrs,
+          nameLabel: Object.assign({}, lbls.nameAttrs, { fill: strokeColor }),
+        });
+
+        const ports = this.getPorts ? this.getPorts() || [] : [];
+        ports.forEach((p) => {
+          this.portProp(p.id, "attrs/circle/stroke", strokeColor);
         });
       },
     },

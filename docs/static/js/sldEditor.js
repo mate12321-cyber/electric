@@ -208,7 +208,15 @@ class SLDEditor {
       },
     });
 
-    // 2. Setup Events and Sub-Managers
+    // 2. Inject Symbol Stamp SVG Templates into Paper <defs>
+    if (
+      typeof SymbolStampRegistry !== "undefined" &&
+      typeof SymbolStampRegistry.injectDefs === "function"
+    ) {
+      SymbolStampRegistry.injectDefs(this.paper);
+    }
+
+    // 3. Setup Events and Sub-Managers
     this.setupCanvasEvents();
     this.paletteManager.setupDragDrop();
     this.setupCellInteractions();

@@ -16,22 +16,2658 @@
     </style>
   </head>
   <body>
-    <div id="sld-paper-container"></div>
+    <input
+      type="hidden"
+      name="csrfmiddlewaretoken"
+      value="CdyrwmuyNPf5CgAc3N0D9UbQNaFZLIvyWMiQ5sD8A3UZjDSILnB6FsQIp9vDbdSf"
+    />
+    <div class="sld-app-container">
+      <!-- Top Header -->
+      <header class="sld-header">
+        <div class="sld-header-left">
+          <div class="sld-logo">
+            <div class="sld-logo-icon">⚡</div>
+            <span>전력 계통도 편집기</span>
+          </div>
+          <div class="sld-project-selector" id="project-dropdown-btn">
+            <span>프로젝트 01 - 154kV 수전 단선도</span>
+            <span style="font-size: 10px">▾</span>
+          </div>
+          <div class="sld-autosave-badge" id="auto-save-status">
+            ☁️ 자동 저장 <span id="save-time">11:02:52</span>
+            <span style="color: #52c41a">✓</span>
+          </div>
+        </div>
 
-    <!-- Vendor scripts (order matters) -->
-    <script src="./static/js/vendor/jquery.min.js"></script>
-    <script src="./static/js/vendor/backbone-min.js"></script>
-    <script src="./static/js/vendor/joint.min.js"></script>
+        <div class="sld-header-right">
+          <button
+            class="sld-btn sld-btn-dark"
+            id="btn-voltage-colors-modal"
+            title="전압 레벨별 색상 설정"
+          >
+            <span>🎨</span>
+            <span>전압 색상</span>
+          </button>
+          <button class="sld-btn sld-btn-dark" id="btn-save-project">
+            <span>💾</span>
+            <span>저장</span>
+          </button>
+          <div
+            class="sld-dropdown-wrapper"
+            style="position: relative; display: inline-block"
+          >
+            <button class="sld-btn sld-btn-dark" id="btn-export-dropdown">
+              <span>📤</span>
+              <span>내보내기</span>
+              <span style="font-size: 9px">▾</span>
+            </button>
+            <div
+              class="sld-dropdown-menu"
+              id="export-menu"
+              style="
+                display: none;
+                position: absolute;
+                right: 0;
+                top: 100%;
+                margin-top: 4px;
+                background: #fff;
+                border: 1px solid #e2e8f0;
+                border-radius: 6px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                z-index: 100;
+                min-width: 140px;
+                padding: 4px 0;
+              "
+            >
+              <a
+                href="javascript:void(0)"
+                id="btn-export-png"
+                style="
+                  display: block;
+                  padding: 8px 14px;
+                  font-size: 12px;
+                  color: #1e293b;
+                  text-decoration: none;
+                "
+                >🖼️ PNG 이미지</a
+              >
+              <a
+                href="javascript:void(0)"
+                id="btn-export-svg"
+                style="
+                  display: block;
+                  padding: 8px 14px;
+                  font-size: 12px;
+                  color: #1e293b;
+                  text-decoration: none;
+                "
+                >📐 SVG 벡터</a
+              >
+              <a
+                href="javascript:void(0)"
+                id="btn-export-json"
+                style="
+                  display: block;
+                  padding: 8px 14px;
+                  font-size: 12px;
+                  color: #1e293b;
+                  text-decoration: none;
+                "
+                >📄 JSON 스키마</a
+              >
+            </div>
+          </div>
+          <button class="sld-btn sld-btn-dark" id="btn-share-modal">
+            <span>🔗</span>
+            <span>공유</span>
+          </button>
+          <button
+            class="sld-btn sld-btn-dark"
+            id="btn-help-modal"
+            title="단축키 및 도움말"
+          >
+            <span>❓</span>
+          </button>
+          <div class="sld-avatar" title="사용자 관리자">AD</div>
+        </div>
+      </header>
 
-    <!-- Core / helper scripts used by the editor -->
-    <script src="./static/js/core/SLDSerializer.js"></script>
-    <script src="./static/js/core/HistoryManager.js"></script>
-    <script src="./static/js/core/ClipboardManager.js"></script>
-    <script src="./static/js/topologyTracker.js"></script>
-    <script src="./static/js/sldSymbols.js"></script>
+      <!-- Sub Toolbar -->
+      <div class="sld-toolbar">
+        <div class="sld-tool-group">
+          <!-- Selection Tool -->
+          <button
+            class="tool-btn active"
+            data-tool="select"
+            title="선택 도구 (V)"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M4 0l16 12.279-6.951 1.17 4.325 8.817-3.596 1.734-4.35-8.879-5.428 5.428z"
+              />
+            </svg>
+          </button>
+          <!-- Lasso Tool -->
+          <button class="tool-btn" data-tool="lasso" title="영역 선택 (L)">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M7 22a5 5 0 0 1-2-4c0-3.8 4-5.2 6-6s4-3.2 4-6a5 5 0 0 0-10 0c0 4 3 6 5 8"
+              />
+              <circle cx="17" cy="18" r="3" />
+            </svg>
+          </button>
+          <div class="sld-tool-divider"></div>
 
-    <!-- Main editor implementation (must load after dependencies) -->
-    <script src="./static/js/sldEditor.js"></script>
+          <!-- Wire Tool -->
+          <button class="tool-btn" data-tool="wire" title="직교 배선 도구 (W)">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M4 4h8v8h8" />
+            </svg>
+          </button>
+          <!-- Pen Tool -->
+          <button class="tool-btn" data-tool="pen" title="펜 그리기 (P)">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M12 19l7-7 3 3-7 7-3-3z" />
+              <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+            </svg>
+          </button>
+          <!-- Text Tool -->
+          <button class="tool-btn" data-tool="text" title="텍스트 라벨 (T)">
+            <span style="font-size: 14px; font-weight: bold">T</span>
+          </button>
+          <!-- Group Box Tool -->
+          <button class="tool-btn" data-tool="group" title="영역 그룹 박스 (G)">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-dasharray="3 3"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+            </svg>
+          </button>
+          <!-- Rotate 90deg Tool -->
+          <button
+            class="tool-btn"
+            id="btn-rotate-toolbar"
+            title="심볼 90° 회전 (R)"
+            style="color: #4f46e5"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+            </svg>
+          </button>
+          <!-- Batch Rename Tool -->
+          <button
+            class="tool-btn"
+            id="btn-batch-rename-toolbar"
+            title="설비 이름 일괄 변경 / 치환 (Ctrl+H / F2)"
+            style="color: #2563eb"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
+              />
+              <line x1="7" y1="7" x2="7.01" y2="7" />
+            </svg>
+          </button>
+          <!-- Delete Tool -->
+          <button
+            class="tool-btn"
+            id="btn-delete-toolbar"
+            title="선택 항목 삭제 (Delete / Backspace)"
+            style="color: #ef4444"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="3 6 5 6 21 6" />
+              <path
+                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              />
+            </svg>
+          </button>
+          <div class="sld-tool-divider"></div>
+
+          <!-- Color Quick Palette -->
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              margin-left: 4px;
+            "
+          >
+            <div
+              class="palette-color-dot"
+              style="background: #e53935"
+              title="154kV 초고압 적색"
+            ></div>
+            <div
+              class="palette-color-dot"
+              style="background: #9c27b0"
+              title="22.9kV 특고압 자주"
+            ></div>
+            <div
+              class="palette-color-dot"
+              style="background: #1e88e5"
+              title="6.6kV 고압 청색"
+            ></div>
+            <div
+              class="palette-color-dot"
+              style="background: #16a34a"
+              title="0.4kV 저압 녹색"
+            ></div>
+            <div
+              class="palette-color-dot"
+              style="background: #eab308"
+              title="0.22kV 상용 황색"
+            ></div>
+            <div
+              class="palette-color-dot"
+              style="background: #ea580c"
+              title="DC 주황"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Zoom & Viewport Controls -->
+        <div class="sld-tool-group">
+          <button class="tool-btn" id="btn-zoom-out" title="축소 (-)">
+            <span>—</span>
+          </button>
+          <span
+            id="zoom-percentage"
+            style="
+              font-size: 11px;
+              font-weight: 600;
+              min-width: 42px;
+              text-align: center;
+              color: var(--text-secondary);
+            "
+            >100%</span
+          >
+          <button class="tool-btn" id="btn-zoom-in" title="확대 (+)">
+            <span>+</span>
+          </button>
+          <button
+            class="tool-btn"
+            id="btn-zoom-fit"
+            title="화면 맞춤 (Fit to Screen)"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Workspace -->
+      <div class="sld-workspace">
+        <!-- Left Palette -->
+        <aside class="sld-sidebar-left">
+          <div class="sld-sidebar-header">심볼 라이브러리</div>
+          <div class="sld-search-box">
+            <input
+              type="text"
+              class="sld-search-input"
+              id="symbol-search-input"
+              placeholder="검색"
+            />
+          </div>
+
+          <div class="sld-palette-scroll" id="symbol-palette-scroll">
+            <!-- 1. 수전 설비 -->
+            <div class="palette-category-block">
+              <div class="sld-category-title">
+                <span>▾</span>
+                <span>수전 설비</span>
+              </div>
+              <div class="sld-palette-grid">
+                <div
+                  class="palette-item"
+                  data-symbol-type="TRANSMISSION_TOWER"
+                  title="154kV 송전선로 수전 철탑"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#7A3E9D"
+                    stroke-width="1.5"
+                  >
+                    <path
+                      d="M12 2L4 22h16L12 2zm0 6l5 12H7l5-12zM2 14h20M5 18h14"
+                    />
+                  </svg>
+                  <span>송전선로</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="TR_2W"
+                  title="2권선 변압기"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#2E7D32"
+                    stroke-width="1.5"
+                  >
+                    <circle cx="12" cy="8" r="5" />
+                    <circle cx="12" cy="16" r="5" />
+                  </svg>
+                  <span>변압기</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="CB_GCB"
+                  title="154kV 가스차단기 (GCB)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#7A3E9D"
+                    stroke-width="1.5"
+                  >
+                    <rect x="6" y="4" width="12" height="16" rx="2" />
+                    <path d="M12 4v4M12 16v4M8 12h8" />
+                  </svg>
+                  <span>차단기</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="DS"
+                  title="154kV 단로기 (DS)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#7A3E9D"
+                    stroke-width="1.5"
+                  >
+                    <path d="M12 3v5M12 16v5M12 8l4 6M12 14h2" />
+                    <circle cx="12" cy="8" r="1.5" fill="#7A3E9D" />
+                    <circle cx="12" cy="16" r="1.5" fill="#7A3E9D" />
+                  </svg>
+                  <span>단로기</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="DS_3P"
+                  title="154kV 3로 단로기 (3-Position DS)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#7A3E9D"
+                    stroke-width="1.4"
+                  >
+                    <path d="M6 2v4M6 18v4M9 6v12" stroke-linecap="round" />
+                    <circle cx="6" cy="6" r="2.2" />
+                    <circle cx="6" cy="18" r="2.2" />
+                    <circle cx="16" cy="18" r="2.2" />
+                    <path d="M16 20.2v2.2M13.5 22.4h5M14.5 23.8h3" stroke-linecap="round" stroke-width="1.1" />
+                  </svg>
+                  <span>3로 단로기</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. 보호 / 차단 설비 -->
+            <div class="palette-category-block">
+              <div class="sld-category-title">
+                <span>▾</span>
+                <span>보호 / 차단 설비</span>
+              </div>
+              <div class="sld-palette-grid">
+                <div
+                  class="palette-item"
+                  data-symbol-type="CB_ACB"
+                  title="기중차단기 (ACB)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#377DFF"
+                    stroke-width="1.5"
+                  >
+                    <rect x="5" y="4" width="14" height="16" rx="2" />
+                    <text
+                      x="12"
+                      y="14"
+                      text-anchor="middle"
+                      font-size="6.5"
+                      font-weight="bold"
+                      fill="#377DFF"
+                    >
+                      ACB
+                    </text>
+                  </svg>
+                  <span>ACB</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="CB_VCB"
+                  title="진공차단기 (VCB)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#9C27B0"
+                    stroke-width="1.5"
+                  >
+                    <rect x="5" y="4" width="14" height="16" rx="2" />
+                    <text
+                      x="12"
+                      y="14"
+                      text-anchor="middle"
+                      font-size="6.5"
+                      font-weight="bold"
+                      fill="#9C27B0"
+                    >
+                      VCB
+                    </text>
+                  </svg>
+                  <span>VCB</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="CB_MCCB"
+                  title="배선용차단기 (MCCB)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#2B6CB0"
+                    stroke-width="1.5"
+                  >
+                    <rect x="6" y="4" width="12" height="16" rx="1.5" />
+                    <path d="M9 8h6M9 16h6M12 8v8" />
+                  </svg>
+                  <span>MCCB</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="CB_TIE_HV"
+                  title="고압 TIE 차단기 (가로형 VCB / ATO)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#9C27B0"
+                    stroke-width="1.5"
+                  >
+                    <rect x="4" y="7" width="16" height="10" rx="2" />
+                  </svg>
+                  <span>고압 TIE</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="CB_TIE_LV"
+                  title="저압 TIE 차단기 (가로형 ACB / ATO)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#377DFF"
+                    stroke-width="1.5"
+                  >
+                    <circle cx="5" cy="12" r="2.5" />
+                    <circle cx="19" cy="12" r="2.5" />
+                    <path
+                      d="M 5 11 C 8 8, 16 8, 19 11 C 17 3, 7 3, 5 11 Z"
+                      stroke-width="1"
+                      stroke-linejoin="round"
+                      fill="#377DFF"
+                    />
+                  </svg>
+                  <span>저압 TIE</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="FUSE"
+                  title="파워 퓨즈 (PF)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#E65100"
+                    stroke-width="1.5"
+                  >
+                    <path d="M12 3v4M12 17v4" />
+                    <rect x="7" y="7" width="10" height="10" rx="1" />
+                    <path d="M12 7v10" />
+                  </svg>
+                  <span>퓨즈</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="RELAY"
+                  title="보호계전기 (OCR)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#2E7D32"
+                    stroke-width="1.5"
+                  >
+                    <rect x="4" y="4" width="16" height="16" rx="2" />
+                    <text
+                      x="12"
+                      y="14"
+                      text-anchor="middle"
+                      font-size="6"
+                      font-weight="bold"
+                      fill="#2E7D32"
+                    >
+                      51
+                    </text>
+                  </svg>
+                  <span>계전기</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="CT"
+                  title="변류기 (CT)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#00838F"
+                    stroke-width="1.5"
+                  >
+                    <circle cx="12" cy="12" r="6" />
+                    <path d="M6 12h12M12 3v3M12 18v3" />
+                  </svg>
+                  <span>CT</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="PT"
+                  title="계기용변압기 (PT)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#00838F"
+                    stroke-width="1.5"
+                  >
+                    <circle cx="12" cy="9" r="4.5" />
+                    <circle cx="12" cy="15" r="4.5" />
+                  </svg>
+                  <span>PT</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="LA"
+                  title="피뢰기 (LA)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#7A3E9D"
+                    stroke-width="1.5"
+                  >
+                    <path d="M12 2v6M9 8h6l-3 4h4l-5 6h4l-3 4" />
+                  </svg>
+                  <span>피뢰기</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. 배전 설비 -->
+            <div class="palette-category-block">
+              <div class="sld-category-title">
+                <span>▾</span>
+                <span>배전 설비</span>
+              </div>
+              <div class="sld-palette-grid">
+                <div
+                  class="palette-item"
+                  data-symbol-type="BUSBAR"
+                  title="전력 모선 (Busbar)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#9C27B0"
+                    stroke-width="1.5"
+                  >
+                    <rect
+                      x="2"
+                      y="10"
+                      width="20"
+                      height="4"
+                      rx="1"
+                      fill="#9C27B0"
+                    />
+                    <circle cx="6" cy="12" r="1.5" fill="#fff" />
+                    <circle cx="12" cy="12" r="1.5" fill="#fff" />
+                    <circle cx="18" cy="12" r="1.5" fill="#fff" />
+                  </svg>
+                  <span>모선</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="SWITCHGEAR"
+                  title="배전반 (Switchgear)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#2E7D32"
+                    stroke-width="1.5"
+                  >
+                    <rect x="4" y="3" width="16" height="18" rx="2" />
+                    <line x1="4" y1="10" x2="20" y2="10" />
+                    <line x1="4" y1="16" x2="20" y2="16" />
+                  </svg>
+                  <span>배전반</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="PANELBOARD"
+                  title="분전반 (Panelboard)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#2B6CB0"
+                    stroke-width="1.5"
+                  >
+                    <rect x="5" y="4" width="14" height="16" rx="1.5" />
+                    <rect x="8" y="7" width="8" height="10" stroke-width="1" />
+                  </svg>
+                  <span>분전반</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="MOTOR"
+                  title="전동기 (Motor)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#377DFF"
+                    stroke-width="1.5"
+                  >
+                    <circle cx="12" cy="12" r="8" />
+                    <text
+                      x="12"
+                      y="15"
+                      text-anchor="middle"
+                      font-size="9"
+                      font-weight="bold"
+                      fill="#377DFF"
+                    >
+                      M
+                    </text>
+                  </svg>
+                  <span>모터</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="LOAD"
+                  title="일반 부하 (Load)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#374151"
+                    stroke-width="1.5"
+                  >
+                    <rect x="5" y="7" width="14" height="10" rx="1" />
+                    <path d="M12 2v5M12 17v5" />
+                  </svg>
+                  <span>부하</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. 전원 설비 -->
+            <div class="palette-category-block">
+              <div class="sld-category-title">
+                <span>▾</span>
+                <span>전원 설비</span>
+              </div>
+              <div class="sld-palette-grid">
+                <div
+                  class="palette-item"
+                  data-symbol-type="UPS"
+                  title="무정전 전원장치 (UPS)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#00838F"
+                    stroke-width="1.5"
+                  >
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                    <line x1="3" y1="19" x2="21" y2="5" stroke-width="1" />
+                    <text
+                      x="14"
+                      y="15"
+                      font-size="6"
+                      font-weight="bold"
+                      fill="#00838F"
+                    >
+                      =
+                    </text>
+                  </svg>
+                  <span>UPS</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="RECTIFIER"
+                  title="정류기 / 충전기"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#2E7D32"
+                    stroke-width="1.5"
+                  >
+                    <rect x="4" y="5" width="16" height="14" rx="2" />
+                    <line x1="4" y1="19" x2="20" y2="5" stroke-width="1" />
+                  </svg>
+                  <span>정류기</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="BATTERY"
+                  title="축전지 (Battery Bank)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#00838F"
+                    stroke-width="1.5"
+                  >
+                    <rect x="4" y="6" width="16" height="12" rx="2" />
+                    <rect x="7" y="4" width="3" height="2" fill="#00838F" />
+                    <rect x="14" y="4" width="3" height="2" fill="#00838F" />
+                  </svg>
+                  <span>배터리</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="GENERATOR"
+                  title="비상 발전기 (Generator)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#E65100"
+                    stroke-width="1.5"
+                  >
+                    <circle cx="12" cy="12" r="8" />
+                    <text
+                      x="12"
+                      y="15"
+                      text-anchor="middle"
+                      font-size="9"
+                      font-weight="bold"
+                      fill="#E65100"
+                    >
+                      G
+                    </text>
+                  </svg>
+                  <span>발전기</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. 기타 -->
+            <div class="palette-category-block">
+              <div class="sld-category-title">
+                <span>▾</span>
+                <span>기타</span>
+              </div>
+              <div class="sld-palette-grid">
+                <div
+                  class="palette-item"
+                  data-symbol-type="GROUND"
+                  title="접지 (Earth)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#2E7D32"
+                    stroke-width="1.5"
+                  >
+                    <path d="M12 4v8M6 12h12M8 15h8M10 18h4" />
+                  </svg>
+                  <span>접지</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="JUNCTION"
+                  title="접속점 (Junction Node)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#377DFF"
+                    stroke-width="1.5"
+                  >
+                    <circle cx="12" cy="12" r="4" fill="#377DFF" />
+                  </svg>
+                  <span>연결점</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="TEXT_LABEL"
+                  title="텍스트 주석"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#1e293b"
+                    stroke-width="1.8"
+                  >
+                    <path d="M5 5h14M12 5v14M8 19h8" />
+                  </svg>
+                  <span>텍스트</span>
+                </div>
+                <div
+                  class="palette-item"
+                  data-symbol-type="GROUP_BOX"
+                  title="영역 점선 박스"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#377DFF"
+                    stroke-width="1.5"
+                    stroke-dasharray="3 2"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                  </svg>
+                  <span>그룹박스</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Minimap Box -->
+          <div class="sld-minimap-container">
+            <div class="sld-minimap-header">미니맵</div>
+            <div
+              class="sld-minimap-box"
+              id="minimap-box-container"
+              style="cursor: crosshair"
+            >
+              <svg
+                id="minimap-svg"
+                width="100%"
+                height="100%"
+                viewBox="0 0 200 90"
+                preserveAspectRatio="none"
+              >
+                <g id="minimap-content"></g>
+                <rect
+                  id="minimap-viewport"
+                  x="0"
+                  y="0"
+                  width="50"
+                  height="35"
+                  fill="rgba(55, 125, 255, 0.18)"
+                  stroke="#377DFF"
+                  stroke-width="1.5"
+                  style="pointer-events: none"
+                />
+              </svg>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Center Canvas -->
+        <main class="sld-canvas-wrapper">
+          <div id="sld-paper-container"></div>
+        </main>
+
+        <!-- Right Properties Panel -->
+        <aside class="sld-sidebar-right">
+          <div class="sld-prop-tabs">
+            <button class="prop-tab-btn active" data-tab="general">일반</button>
+            <button class="prop-tab-btn" data-tab="style">스타일</button>
+            <button class="prop-tab-btn" data-tab="data">데이터</button>
+          </div>
+
+          <div class="sld-prop-content">
+            <!-- Tab 1: 일반 속성 -->
+            <div class="tab-pane active" id="tab-general">
+              <!-- 다중 설비 선택 시 일괄 제어 안내 배너 -->
+              <div
+                class="sld-form-group"
+                id="group-prop-multi-selection"
+                style="
+                  display: none;
+                  background: #eff6ff;
+                  border: 1px solid #bfdbfe;
+                  border-radius: 6px;
+                  padding: 10px;
+                  margin-bottom: 12px;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 4px;
+                  "
+                >
+                  <span
+                    style="font-weight: 700; font-size: 13px; color: #1e40af"
+                    id="prop-multi-count-title"
+                  >
+                    다중 설비 선택됨 (0개)
+                  </span>
+                  <span
+                    style="
+                      font-size: 10px;
+                      color: #2563eb;
+                      font-weight: 600;
+                      background: #dbeafe;
+                      padding: 2px 6px;
+                      border-radius: 4px;
+                    "
+                    >일괄 제어</span
+                  >
+                </div>
+                <div
+                  style="
+                    font-size: 11px;
+                    color: #475569;
+                    line-height: 1.4;
+                    margin-bottom: 8px;
+                  "
+                  id="prop-multi-summary-text"
+                >
+                  선택된 심볼들의 이름 일괄 치환, 상태 변경(투입/개방/접지) 및
+                  일괄 삭제가 가능합니다.
+                </div>
+                <button
+                  type="button"
+                  class="sld-btn sld-btn-primary"
+                  id="btn-prop-batch-rename"
+                  style="
+                    width: 100%;
+                    justify-content: center;
+                    font-size: 11px;
+                    padding: 5px 8px;
+                    font-weight: 600;
+                  "
+                >
+                  <span>🏷️</span>
+                  <span>선택 설비 이름 일괄 변경 (Batch Rename)</span>
+                </button>
+              </div>
+
+              <div class="sld-form-group" id="group-prop-name">
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 4px;
+                  "
+                >
+                  <label class="sld-form-label" style="margin-bottom: 0"
+                    >이름</label
+                  >
+                  <a
+                    href="javascript:void(0)"
+                    id="btn-prop-open-rename"
+                    style="
+                      font-size: 11px;
+                      color: #2563eb;
+                      text-decoration: none;
+                      font-weight: 600;
+                    "
+                    title="일괄 치환 / 이름 변경 창 열기 (Ctrl+H)"
+                  >
+                    일괄 치환 ➜
+                  </a>
+                </div>
+                <input
+                  type="text"
+                  class="sld-input"
+                  id="prop-name"
+                  placeholder="설비명 입력 (예: ACB)"
+                />
+              </div>
+
+              <!-- 3로 단로기 접지 스위치 명칭 (3-Position DS 선택 시 노출) -->
+              <div
+                class="sld-form-group"
+                id="group-prop-earth-name"
+                style="display: none"
+              >
+                <label class="sld-form-label">접지 스위치 명칭 (Earth Name)</label>
+                <input
+                  type="text"
+                  class="sld-input"
+                  id="prop-earth-name"
+                  placeholder="접지 스위치명 입력 (예: 154kV ES)"
+                />
+              </div>
+
+              <div class="sld-form-group" id="group-prop-desc">
+                <label class="sld-form-label">설명</label>
+                <input
+                  type="text"
+                  class="sld-input"
+                  id="prop-desc"
+                  placeholder="설비 설명 (예: 주 배전 차단기)"
+                />
+              </div>
+
+              <!-- 모선 길이 조절 필드 (모선 선택 시 노출) -->
+              <div
+                class="sld-form-group"
+                id="group-prop-bus-length"
+                style="display: none"
+              >
+                <label
+                  class="sld-form-label"
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                  "
+                >
+                  <span>모선 길이 (Length)</span>
+                  <span style="font-size: 10px; color: #64748b">(px)</span>
+                </label>
+                <div class="sld-input-row">
+                  <input
+                    type="number"
+                    step="10"
+                    min="40"
+                    max="3000"
+                    class="sld-input"
+                    id="prop-bus-length"
+                    placeholder="200"
+                  />
+                  <span
+                    style="
+                      display: flex;
+                      align-items: center;
+                      padding: 0 10px;
+                      font-size: 11px;
+                      font-weight: 600;
+                      color: #64748b;
+                      background: #f8fafc;
+                      border: 1px solid var(--border-color);
+                      border-radius: 4px;
+                    "
+                    >px</span
+                  >
+                </div>
+              </div>
+
+              <div class="sld-form-group" id="group-prop-state">
+                <label class="sld-form-label"
+                  >설비 상태 (Equipment State)</label
+                >
+                <div class="sld-state-toggle-group">
+                  <button
+                    type="button"
+                    class="state-toggle-btn btn-state-live"
+                    data-state="LIVE"
+                  >
+                    <span class="state-dot dot-live"></span>
+                    <span>투입 (Closed)</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="state-toggle-btn btn-state-dead"
+                    data-state="DEAD"
+                  >
+                    <span class="state-dot dot-dead"></span>
+                    <span>개방 (Open)</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="state-toggle-btn btn-state-grounded"
+                    data-state="GROUNDED"
+                  >
+                    <span class="state-dot dot-grounded"></span>
+                    <span>접지 (Ground)</span>
+                  </button>
+                </div>
+                <select
+                  class="sld-select"
+                  id="prop-state"
+                  style="display: none"
+                >
+                  <option value="LIVE">투입 (Closed)</option>
+                  <option value="DEAD">개방 (Open)</option>
+                  <option value="GROUNDED">접지 (Grounded)</option>
+                </select>
+              </div>
+
+              <div class="sld-form-group" id="group-prop-voltage">
+                <label class="sld-form-label">정격 전압</label>
+                <div class="sld-input-row">
+                  <input
+                    type="number"
+                    step="any"
+                    class="sld-input"
+                    id="prop-voltage"
+                    placeholder="0.4"
+                  />
+                  <select
+                    class="sld-select"
+                    style="width: 70px"
+                    id="prop-voltage-unit"
+                  >
+                    <option value="kV">kV</option>
+                    <option value="V">V</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Transformer Multi-Winding Voltage Fields -->
+              <div
+                class="sld-form-group"
+                id="group-prop-tr-voltages"
+                style="display: none"
+              >
+                <label
+                  class="sld-form-label"
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                  "
+                >
+                  <span>변압기 권선별 전압 설정</span>
+                  <span style="font-size: 10px; color: #64748b"
+                    >(1차/2차 개별)</span
+                  >
+                </label>
+                <div style="display: flex; flex-direction: column; gap: 8px">
+                  <div>
+                    <div
+                      style="
+                        font-size: 11px;
+                        font-weight: 600;
+                        color: #475569;
+                        margin-bottom: 3px;
+                      "
+                    >
+                      1차 전압 (Primary)
+                    </div>
+                    <div class="sld-input-row">
+                      <input
+                        type="number"
+                        step="any"
+                        class="sld-input"
+                        id="prop-pri-voltage"
+                        placeholder="154"
+                      />
+                      <select class="sld-select" style="width: 60px">
+                        <option>kV</option>
+                        <option>V</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <div
+                      style="
+                        font-size: 11px;
+                        font-weight: 600;
+                        color: #475569;
+                        margin-bottom: 3px;
+                      "
+                    >
+                      2차 전압 (Secondary)
+                    </div>
+                    <div class="sld-input-row">
+                      <input
+                        type="number"
+                        step="any"
+                        class="sld-input"
+                        id="prop-sec-voltage"
+                        placeholder="22.9"
+                      />
+                      <select class="sld-select" style="width: 60px">
+                        <option>kV</option>
+                        <option>V</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div id="group-prop-tert-voltage" style="display: none">
+                    <div
+                      style="
+                        font-size: 11px;
+                        font-weight: 600;
+                        color: #475569;
+                        margin-bottom: 3px;
+                      "
+                    >
+                      3차 전압 (Tertiary)
+                    </div>
+                    <div class="sld-input-row">
+                      <input
+                        type="number"
+                        step="any"
+                        class="sld-input"
+                        id="prop-tert-voltage"
+                        placeholder="6.6"
+                      />
+                      <select class="sld-select" style="width: 60px">
+                        <option>kV</option>
+                        <option>V</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="sld-form-group"
+                id="group-prop-connection"
+                style="display: none"
+              >
+                <label class="sld-form-label">결선 방식 (Vector Group)</label>
+                <select
+                  class="sld-select"
+                  id="prop-connection"
+                  style="width: 100%"
+                >
+                  <option value="Δ-Y">Δ - Y (델타-와이)</option>
+                  <option value="Y-Δ">Y - Δ (와이-델타)</option>
+                  <option value="Δ-Δ">Δ - Δ (델타-델타)</option>
+                  <option value="Y-Y">Y - Y (와이-와이)</option>
+                  <option value="Yn-Δ">Yn - Δ (와이접지-델타)</option>
+                  <option value="Δ-Yn">Δ - Yn (델타-와이접지)</option>
+                  <option value="Y-Y-Δ">Y - Y - Δ (3권선)</option>
+                  <option value="Y-Δ-Δ">Y - Δ - Δ (3권선)</option>
+                </select>
+              </div>
+
+              <div
+                class="sld-form-group"
+                id="group-prop-capacity"
+                style="display: none"
+              >
+                <label class="sld-form-label">정격 용량 (Capacity)</label>
+                <input
+                  type="text"
+                  class="sld-input"
+                  id="prop-capacity"
+                  placeholder="초고압: 80/100MVA | 고압: 3MVA | 저압: 1000kVA"
+                />
+                <div style="font-size: 11px; color: #64748b; margin-top: 3px;">
+                  * 초고압(≥100kV)은 자냉/풍랭(80/100MVA) 형식 지원
+                </div>
+              </div>
+
+              <div class="sld-form-group">
+                <label class="sld-form-label">정격 전류</label>
+                <div class="sld-input-row">
+                  <input
+                    type="number"
+                    step="any"
+                    class="sld-input"
+                    id="prop-current"
+                    placeholder="3200"
+                  />
+                  <select class="sld-select" style="width: 70px">
+                    <option>A</option>
+                    <option>kA</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="sld-form-group">
+                <label class="sld-form-label">극수</label>
+                <select class="sld-select" id="prop-poles" style="width: 100%">
+                  <option value="1P">1P</option>
+                  <option value="2P">2P</option>
+                  <option value="3P" selected>3P</option>
+                  <option value="4P">4P</option>
+                </select>
+              </div>
+
+              <div class="sld-form-group">
+                <label class="sld-form-label">설치 위치</label>
+                <select
+                  class="sld-select"
+                  id="prop-location"
+                  style="width: 100%"
+                >
+                  <option value="154kV 수전단">154kV 수전단</option>
+                  <option value="22.9kV 모선">22.9kV 모선</option>
+                  <option value="0.4kV 모선 (A)" selected>
+                    0.4kV 모선 (A)
+                  </option>
+                  <option value="0.4kV 모선 (B)">0.4kV 모선 (B)</option>
+                  <option value="0.4kV 모선 (C)">0.4kV 모선 (C)</option>
+                  <option value="UPS 배전반">UPS 배전반</option>
+                </select>
+              </div>
+
+              <!-- ATO (자동절체) 및 연계 차단기 설정 (TIE 차단기 전용) -->
+              <div
+                class="sld-form-group"
+                id="group-prop-ato"
+                style="display: none"
+              >
+                <div
+                  style="
+                    background: #f8fafc;
+                    border: 1px solid #cbd5e1;
+                    border-radius: 8px;
+                    padding: 12px;
+                    margin-top: 4px;
+                  "
+                >
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    <label
+                      class="sld-form-label"
+                      style="
+                        margin: 0;
+                        font-weight: 700;
+                        color: #1e293b;
+                        font-size: 12px;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                      "
+                    >
+                      <span>⚡</span>
+                      <span>ATO / SOP 연계 차단기 설정</span>
+                    </label>
+                    <label
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                        font-size: 11px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        color: #1e293b;
+                      "
+                    >
+                      <input
+                        type="checkbox"
+                        id="prop-ato-enabled"
+                        checked
+                        style="accent-color: #2563eb; cursor: pointer"
+                      />
+                      <span>ATO 사용</span>
+                    </label>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <div>
+                      <div
+                        style="
+                          font-size: 11px;
+                          font-weight: 600;
+                          color: #475569;
+                          margin-bottom: 3px;
+                        "
+                      >
+                        연계 주 차단기 1 (Main CB 1)
+                      </div>
+                      <select
+                        class="sld-select"
+                        id="prop-ato-cb1"
+                        style="width: 100%; font-size: 11px; height: 30px"
+                      >
+                        <option value="">(연계 주 차단기 1 선택)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <div
+                        style="
+                          font-size: 11px;
+                          font-weight: 600;
+                          color: #475569;
+                          margin-bottom: 3px;
+                        "
+                      >
+                        연계 주 차단기 2 (Main CB 2)
+                      </div>
+                      <select
+                        class="sld-select"
+                        id="prop-ato-cb2"
+                        style="width: 100%; font-size: 11px; height: 30px"
+                      >
+                        <option value="">(연계 주 차단기 2 선택)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <div
+                        style="
+                          font-size: 11px;
+                          font-weight: 600;
+                          color: #475569;
+                          margin-bottom: 3px;
+                        "
+                      >
+                        연동 51 과전류 계전기 (OCR)
+                      </div>
+                      <select
+                        class="sld-select"
+                        id="prop-ato-relay51"
+                        style="width: 100%; font-size: 11px; height: 30px"
+                      >
+                        <option value="">
+                          (연동 51 계전기 선택 - 선택 사항)
+                        </option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <div
+                        style="
+                          font-size: 11px;
+                          font-weight: 600;
+                          color: #475569;
+                          margin-bottom: 3px;
+                        "
+                      >
+                        절체 인터록 방식
+                      </div>
+                      <select
+                        class="sld-select"
+                        id="prop-ato-mode"
+                        style="width: 100%; font-size: 11px; height: 30px"
+                      >
+                        <option value="UV_ATO" selected>
+                          UV 감지 무사고(No 51) 자동절체 (SOP)
+                        </option>
+                        <option value="2_OUT_OF_3">
+                          2-out-of-3 (3대 중 2대 투입 인터록)
+                        </option>
+                      </select>
+                    </div>
+
+                    <div
+                      id="prop-ato-status-badge"
+                      style="
+                        margin-top: 4px;
+                        padding: 6px 8px;
+                        border-radius: 4px;
+                        font-size: 11px;
+                        font-weight: 600;
+                        text-align: center;
+                        background: #e0f2fe;
+                        color: #0369a1;
+                      "
+                    >
+                      ⚡ ATO 연계 준비 완료 (Ready)
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sld-form-group">
+                <label class="sld-form-label">메모</label>
+                <textarea
+                  class="sld-textarea"
+                  id="prop-memo"
+                  placeholder="특이사항 및 메모 입력"
+                ></textarea>
+              </div>
+
+              <div style="margin-top: 24px">
+                <button
+                  type="button"
+                  class="sld-btn-danger"
+                  id="btn-delete-element"
+                >
+                  <span>🗑️</span>
+                  <span>삭제</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Tab 2: 스타일 속성 -->
+            <div class="tab-pane" id="tab-style" style="display: none">
+              <!-- 심볼 회전 제어 (90도 단위 회전) -->
+              <div class="sld-form-group" id="group-prop-rotation">
+                <label class="sld-form-label" style="display: flex; justify-content: space-between; align-items: center;">
+                  <span>심볼 회전 (Rotation)</span>
+                  <span style="font-size: 11px; font-weight: 700; color: #2563eb;" id="prop-rotation-display">0°</span>
+                </label>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <div style="display: flex; flex: 1; gap: 4px;">
+                    <button type="button" class="sld-btn sld-btn-sm sld-btn-secondary btn-prop-angle" data-angle="0" style="flex: 1; justify-content: center; padding: 4px 0; font-size: 11px;">0°</button>
+                    <button type="button" class="sld-btn sld-btn-sm sld-btn-secondary btn-prop-angle" data-angle="90" style="flex: 1; justify-content: center; padding: 4px 0; font-size: 11px;">90°</button>
+                    <button type="button" class="sld-btn sld-btn-sm sld-btn-secondary btn-prop-angle" data-angle="180" style="flex: 1; justify-content: center; padding: 4px 0; font-size: 11px;">180°</button>
+                    <button type="button" class="sld-btn sld-btn-sm sld-btn-secondary btn-prop-angle" data-angle="270" style="flex: 1; justify-content: center; padding: 4px 0; font-size: 11px;">270°</button>
+                  </div>
+                  <button type="button" class="sld-btn sld-btn-sm sld-btn-primary" id="btn-prop-rotate-90" title="90도 회전 (단축키: R)" style="padding: 4px 8px; font-size: 11px; font-weight: 600; white-space: nowrap;">
+                    <span>🔄 +90°</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="sld-form-group">
+                <label class="sld-form-label">심볼 색상</label>
+                <div class="sld-input-row" style="align-items: center">
+                  <input
+                    type="color"
+                    id="prop-symbol-color"
+                    value="#377DFF"
+                    style="
+                      width: 40px;
+                      height: 32px;
+                      padding: 0;
+                      border: none;
+                      cursor: pointer;
+                    "
+                  />
+                  <div style="display: flex; gap: 6px">
+                    <div
+                      class="palette-color-dot prop-color-picker"
+                      data-color="#7A3E9D"
+                      style="background: #7a3e9d"
+                    ></div>
+                    <div
+                      class="palette-color-dot prop-color-picker"
+                      data-color="#9C27B0"
+                      style="background: #9c27b0"
+                    ></div>
+                    <div
+                      class="palette-color-dot prop-color-picker"
+                      data-color="#2B6CB0"
+                      style="background: #2b6cb0"
+                    ></div>
+                    <div
+                      class="palette-color-dot prop-color-picker"
+                      data-color="#2E7D32"
+                      style="background: #2e7d32"
+                    ></div>
+                    <div
+                      class="palette-color-dot prop-color-picker"
+                      data-color="#E65100"
+                      style="background: #e65100"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sld-form-group">
+                <label class="sld-form-label">선 색상</label>
+                <input
+                  type="color"
+                  id="prop-line-color"
+                  value="#377DFF"
+                  style="
+                    width: 40px;
+                    height: 32px;
+                    padding: 0;
+                    border: none;
+                    cursor: pointer;
+                  "
+                />
+              </div>
+
+              <div class="sld-form-group">
+                <label class="sld-form-label">선 두께 (px)</label>
+                <input
+                  type="number"
+                  class="sld-input"
+                  id="prop-line-width"
+                  value="2"
+                  min="1"
+                  max="10"
+                />
+              </div>
+
+              <div class="sld-form-group">
+                <label class="sld-form-label">라벨 표시</label>
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 12px;
+                    cursor: pointer;
+                  "
+                >
+                  <input type="checkbox" id="prop-show-label" checked />
+                  <span>캔버스에 명칭 표시</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Tab 3: 데이터 & HTMX 텔레메트리 -->
+            <div class="tab-pane" id="tab-data" style="display: none">
+              <div
+                id="telemetry-container"
+                data-hx-get="/api/sld/default-154kv-substation/telemetry/"
+                hx-trigger="load, every 10s"
+                hx-swap="innerHTML"
+              >
+                <div class="telemetry-panel-root">
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      margin-bottom: 12px;
+                    "
+                  >
+                    <span
+                      style="
+                        font-size: 12px;
+                        font-weight: 700;
+                        color: var(--text-primary);
+                      "
+                      >실시간 계측 (Telemetry)</span
+                    >
+                    <span
+                      id="telemetry-status-badge"
+                      class="telemetry-badge-live"
+                      >정상 운전</span
+                    >
+                  </div>
+
+                  <!-- Active Power / Reactive Power -->
+                  <div class="telemetry-card">
+                    <div class="telemetry-metric-title">
+                      유효전력 (Active Power)
+                    </div>
+                    <div
+                      class="telemetry-metric-val"
+                      id="telemetry-p"
+                      style="color: #377dff"
+                    >
+                      14.8 MW
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        margin-top: 6px;
+                        font-size: 11px;
+                        color: var(--text-secondary);
+                      "
+                    >
+                      <span>무효전력: 2.3 MVAR</span>
+                      <span>역률: 98.8%</span>
+                    </div>
+                  </div>
+
+                  <!-- Voltage Levels -->
+                  <div class="telemetry-card">
+                    <div class="telemetry-metric-title">
+                      계통 전압 (Voltages)
+                    </div>
+                    <div
+                      style="
+                        margin-top: 4px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 4px;
+                        font-size: 12px;
+                      "
+                    >
+                      <div
+                        style="display: flex; justify-content: space-between"
+                      >
+                        <span style="color: #7a3e9d; font-weight: 600"
+                          >154kV 수전단:</span
+                        >
+                        <span style="font-weight: 700">154.2 kV</span>
+                      </div>
+                      <div
+                        style="display: flex; justify-content: space-between"
+                      >
+                        <span style="color: #9c27b0; font-weight: 600"
+                          >22.9kV 주 모선:</span
+                        >
+                        <span style="font-weight: 700">22.92 kV</span>
+                      </div>
+                      <div
+                        style="display: flex; justify-content: space-between"
+                      >
+                        <span style="color: #2b6cb0; font-weight: 600"
+                          >0.4kV 배전 모선:</span
+                        >
+                        <span style="font-weight: 700">380.4 V</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Frequency & Current -->
+                  <div class="telemetry-card">
+                    <div class="telemetry-metric-title">
+                      주파수 및 전류 (Freq & Current)
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-end;
+                        margin-top: 4px;
+                      "
+                    >
+                      <div>
+                        <span
+                          style="font-size: 11px; color: var(--text-secondary)"
+                          >계통 주파수:</span
+                        >
+                        <div
+                          style="
+                            font-size: 15px;
+                            font-weight: 700;
+                            color: #2e7d32;
+                          "
+                        >
+                          60.01 Hz
+                        </div>
+                      </div>
+                      <div>
+                        <span
+                          style="font-size: 11px; color: var(--text-secondary)"
+                          >수전 전류:</span
+                        >
+                        <div
+                          style="
+                            font-size: 15px;
+                            font-weight: 700;
+                            color: #1e293b;
+                          "
+                          id="telemetry-i"
+                        >
+                          372.4 A
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    style="
+                      font-size: 10px;
+                      color: var(--text-muted);
+                      text-align: right;
+                      margin-top: 8px;
+                    "
+                  >
+                    갱신 시간: 실시간 (HTMX 10s)
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Bottom Status Bar -->
+      <footer class="sld-statusbar">
+        <div style="display: flex; align-items: center; gap: 16px">
+          <span class="sld-status-item">페이지: 1 / 1</span>
+          <span class="sld-status-item">격자: 10mm</span>
+          <span class="sld-status-item active" id="status-snap-toggle"
+            >스냅: 켜짐</span
+          >
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 16px">
+          <span id="status-coord" style="font-family: monospace"
+            >X: 0, Y: 0</span
+          >
+        </div>
+      </footer>
+
+      <!-- Modals -->
+      <!-- Shortcuts & Help Modal -->
+      <div class="sld-modal-overlay" id="modal-help">
+        <div class="sld-modal">
+          <div class="sld-modal-header">
+            <span>⚡ 단축키 및 조작 안내</span>
+            <button
+              class="tool-btn"
+              id="btn-close-help-modal"
+              style="font-size: 16px"
+            >
+              ✕
+            </button>
+          </div>
+          <div class="sld-modal-body" style="font-size: 13px; line-height: 1.7">
+            <p><strong>🖱️ 캔버스 조작:</strong></p>
+            <ul style="padding-left: 20px; margin-bottom: 12px">
+              <li>
+                <strong>패닝(화면 이동):</strong> 마우스 우클릭 드래그 / Space +
+                드래그
+              </li>
+              <li>
+                <strong>확대 / 축소:</strong> 마우스 휠 스크롤 (또는 상단 +/-
+                버튼)
+              </li>
+              <li>
+                <strong>심볼 추가:</strong> 좌측 팔레트에서 캔버스로 드래그 앤
+                드롭 또는 클릭
+              </li>
+              <li>
+                <strong>선 연결:</strong> 심볼의 원형 포트(Port)를 드래그하여
+                다른 설비/모선에 연결
+              </li>
+              <li>
+                <strong>차단기 개폐 토글:</strong> 차단기/단로기 클릭 시 즉시
+                <code>OPEN / CLOSED</code> 토글 및 실시간 전력 흐름(Live Flow)
+                시뮬레이션
+              </li>
+            </ul>
+            <p><strong>⌨️ 키보드 단축키:</strong></p>
+            <ul style="padding-left: 20px">
+              <li>
+                <kbd>Space</kbd>: 선택 설비 투입(Closed) / 개방(Open) 상태 토글
+              </li>
+              <li><kbd>G</kbd>: 선택 설비 접지(Ground) 상태 설정 / 해제</li>
+              <li>
+                <kbd>V</kbd> / <kbd>L</kbd> / <kbd>W</kbd>: 선택 / 영역 선택 /
+                배선 도구 전환
+              </li>
+              <li><kbd>Ctrl+A</kbd>: 전체 설비 선택</li>
+              <li>
+                <kbd>Ctrl+C</kbd> / <kbd>Ctrl+V</kbd> / <kbd>Ctrl+D</kbd>: 설비
+                복사 / 붙여넣기 / 복제
+              </li>
+              <li>
+                <kbd>방향키(↑↓←→)</kbd>: 선택된 심볼 10px 이동 (<kbd>Shift</kbd>
+                조합 시 50px)
+              </li>
+              <li><kbd>Del</kbd> / <kbd>Backspace</kbd>: 선택 설비/선 삭제</li>
+              <li>
+                <kbd>Ctrl+H</kbd> / <kbd>F2</kbd>: 설비 이름 일괄 변경 / 치환
+              </li>
+              <li>
+                <kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd>: 실행 취소 / 다시 실행
+              </li>
+              <li><kbd>Ctrl+S</kbd>: 프로젝트 저장</li>
+            </ul>
+          </div>
+          <div class="sld-modal-footer">
+            <button class="sld-btn sld-btn-primary" id="btn-confirm-help">
+              확인
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project Switcher / New Project Modal -->
+      <div class="sld-modal-overlay" id="modal-projects">
+        <div class="sld-modal">
+          <div class="sld-modal-header">
+            <span>📁 프로젝트 선택 및 새로 만들기</span>
+            <button
+              class="tool-btn"
+              id="btn-close-project-modal"
+              style="font-size: 16px"
+            >
+              ✕
+            </button>
+          </div>
+          <div class="sld-modal-body">
+            <div style="margin-bottom: 16px">
+              <label class="sld-form-label">새 프로젝트 생성</label>
+              <form id="create-project-form" style="display: flex; gap: 8px">
+                <input
+                  type="text"
+                  class="sld-input"
+                  id="new-project-title"
+                  placeholder="프로젝트 이름 입력..."
+                  required
+                />
+                <button
+                  type="submit"
+                  class="sld-btn sld-btn-primary"
+                  style="white-space: nowrap"
+                >
+                  생성
+                </button>
+              </form>
+            </div>
+            <div>
+              <label class="sld-form-label">기존 프로젝트 목록</label>
+              <div
+                style="
+                  max-height: 160px;
+                  overflow-y: auto;
+                  border: 1px solid #e2e8f0;
+                  border-radius: 4px;
+                "
+              >
+                <a
+                  href="/?id=default-154kv-substation"
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 10px 12px;
+                    font-size: 12px;
+                    color: #1e293b;
+                    text-decoration: none;
+                    border-bottom: 1px solid #f1f5f9;
+                    background: #eff6ff;
+                  "
+                >
+                  <span style="font-weight: 600"
+                    >프로젝트 01 - 154kV 수전 단선도</span
+                  >
+                  <span style="color: #94a3b8">2026-09-03 11:02</span>
+                </a>
+
+                <a
+                  href="/?id=8fe9c15c-a974-4a14-802c-7d5cff411096"
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 10px 12px;
+                    font-size: 12px;
+                    color: #1e293b;
+                    text-decoration: none;
+                    border-bottom: 1px solid #f1f5f9;
+                    background: #ffffff;
+                  "
+                >
+                  <span style="font-weight: 600">aa</span>
+                  <span style="color: #94a3b8">2026-09-02 23:34</span>
+                </a>
+
+                <a
+                  href="/?id=2d2b3043-87a7-46a3-adc0-e1c8ba94c71d"
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 10px 12px;
+                    font-size: 12px;
+                    color: #1e293b;
+                    text-decoration: none;
+                    border-bottom: 1px solid #f1f5f9;
+                    background: #ffffff;
+                  "
+                >
+                  <span style="font-weight: 600">test</span>
+                  <span style="color: #94a3b8">2026-09-02 11:59</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voltage Colors Settings Modal -->
+      <div class="sld-modal-overlay" id="modal-voltage-colors">
+        <div class="sld-modal" style="max-width: 580px">
+          <div class="sld-modal-header">
+            <span>🎨 전압 레벨별 색상 설정 (Voltage Color Scheme)</span>
+            <button
+              class="tool-btn"
+              id="btn-close-voltage-modal"
+              style="font-size: 16px"
+            >
+              ✕
+            </button>
+          </div>
+          <div
+            class="sld-modal-body"
+            style="font-size: 13px; max-height: 480px; overflow-y: auto"
+          >
+            <p
+              style="
+                color: #64748b;
+                margin-bottom: 16px;
+                font-size: 12px;
+                line-height: 1.5;
+              "
+            >
+              각 계통 전압에 해당하는 기본 색상을 지정합니다. 심볼 배치 및 전압
+              입력 시 해당 전압의 색상이
+              <strong>자동으로 기본 설정</strong>됩니다.
+            </p>
+            <div
+              id="voltage-color-list"
+              style="display: flex; flex-direction: column; gap: 10px"
+            >
+              <!-- Populated dynamically via JavaScript -->
+            </div>
+          </div>
+          <div
+            class="sld-modal-footer"
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <button
+              class="sld-btn"
+              id="btn-reset-voltage-colors"
+              style="
+                background: #f1f5f9;
+                color: #475569;
+                border: 1px solid #cbd5e1;
+              "
+            >
+              <span>🔄 기본값 복원</span>
+            </button>
+            <div style="display: flex; gap: 8px">
+              <button
+                class="sld-btn"
+                id="btn-cancel-voltage-colors"
+                style="background: #f1f5f9; color: #475569"
+              >
+                취소
+              </button>
+              <button
+                class="sld-btn sld-btn-primary"
+                id="btn-save-voltage-colors"
+              >
+                <span>적용 및 저장</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Batch Equipment Rename & Replace Modal -->
+      <div class="sld-modal-overlay" id="modal-batch-rename">
+        <div class="sld-modal" style="max-width: 680px; width: 92%">
+          <div
+            class="sld-modal-header"
+            style="background: #0f172a; color: #f8fafc"
+          >
+            <div style="display: flex; align-items: center; gap: 8px">
+              <span style="font-size: 16px">🏷️</span>
+              <span style="font-weight: 700"
+                >설비 이름 일괄 변경 (Batch Rename)</span
+              >
+            </div>
+            <button
+              class="tool-btn"
+              id="btn-close-rename-modal"
+              style="font-size: 16px; color: #94a3b8"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div
+            class="sld-modal-body"
+            style="
+              font-size: 13px;
+              max-height: 560px;
+              overflow-y: auto;
+              padding: 18px 20px;
+            "
+          >
+            <!-- Scope Selector -->
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 14px;
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                padding: 8px 12px;
+              "
+            >
+              <span style="font-size: 12px; font-weight: 600; color: #475569"
+                >변경 대상 범위</span
+              >
+              <div style="display: flex; gap: 6px">
+                <button
+                  type="button"
+                  class="sld-scope-toggle-btn active"
+                  id="rename-scope-selected"
+                >
+                  선택된 설비만 (<span id="rename-count-selected">0</span>개)
+                </button>
+                <button
+                  type="button"
+                  class="sld-scope-toggle-btn"
+                  id="rename-scope-all"
+                >
+                  전체 계통 설비 (<span id="rename-count-all">0</span>개)
+                </button>
+              </div>
+            </div>
+
+            <!-- Mode Tabs -->
+            <div
+              class="sld-rename-tabs"
+              style="
+                display: flex;
+                border-bottom: 1px solid #e2e8f0;
+                margin-bottom: 16px;
+                gap: 4px;
+              "
+            >
+              <button
+                type="button"
+                class="rename-tab-btn active"
+                data-mode="replace"
+              >
+                <span>🔄 문자열 치환 (Find & Replace)</span>
+              </button>
+              <button
+                type="button"
+                class="rename-tab-btn"
+                data-mode="prefix-suffix"
+              >
+                <span>➕ 접두사 / 접미사</span>
+              </button>
+              <button type="button" class="rename-tab-btn" data-mode="pattern">
+                <span>🔢 번호 매기기 (Pattern)</span>
+              </button>
+            </div>
+
+            <!-- Mode 1: Find & Replace -->
+            <div class="rename-mode-pane" data-mode="replace">
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: 12px;
+                  margin-bottom: 12px;
+                "
+              >
+                <div>
+                  <label
+                    class="sld-form-label"
+                    style="font-weight: 600; font-size: 12px"
+                    >찾을 문자열 (Find)</label
+                  >
+                  <input
+                    type="text"
+                    class="sld-input"
+                    id="rename-find-text"
+                    placeholder="예: C5, #1, 154kV"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="sld-form-label"
+                    style="font-weight: 600; font-size: 12px"
+                    >바꿀 문자열 (Replace with)</label
+                  >
+                  <input
+                    type="text"
+                    class="sld-input"
+                    id="rename-replace-text"
+                    placeholder="예: C3, #2, 22.9kV"
+                  />
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 14px;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    gap: 16px;
+                    font-size: 12px;
+                    color: #475569;
+                  "
+                >
+                  <label
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                      cursor: pointer;
+                    "
+                  >
+                    <input
+                      type="checkbox"
+                      id="rename-match-case"
+                      style="cursor: pointer; accent-color: #2563eb"
+                    />
+                    <span>대소문자 구분 (Match Case)</span>
+                  </label>
+                  <label
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                      cursor: pointer;
+                    "
+                  >
+                    <input
+                      type="checkbox"
+                      id="rename-use-regex"
+                      style="cursor: pointer; accent-color: #2563eb"
+                    />
+                    <span>정규표현식 (Regex)</span>
+                  </label>
+                </div>
+
+                <!-- Quick Presets -->
+                <div style="display: flex; gap: 4px; align-items: center">
+                  <span
+                    style="font-size: 11px; color: #94a3b8; margin-right: 2px"
+                    >자주 쓰는 치환:</span
+                  >
+                  <button
+                    type="button"
+                    class="sld-preset-tag rename-preset-btn"
+                    data-find="C5"
+                    data-replace="C3"
+                  >
+                    C5 ➜ C3
+                  </button>
+                  <button
+                    type="button"
+                    class="sld-preset-tag rename-preset-btn"
+                    data-find="#1"
+                    data-replace="#2"
+                  >
+                    #1 ➜ #2
+                  </button>
+                  <button
+                    type="button"
+                    class="sld-preset-tag rename-preset-btn"
+                    data-find="TR1"
+                    data-replace="TR2"
+                  >
+                    TR1 ➜ TR2
+                  </button>
+                  <button
+                    type="button"
+                    class="sld-preset-tag rename-preset-btn"
+                    data-find="F1"
+                    data-replace="F2"
+                  >
+                    F1 ➜ F2
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mode 2: Prefix & Suffix -->
+            <div
+              class="rename-mode-pane"
+              data-mode="prefix-suffix"
+              style="display: none"
+            >
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: 12px;
+                  margin-bottom: 14px;
+                "
+              >
+                <div>
+                  <label
+                    class="sld-form-label"
+                    style="font-weight: 600; font-size: 12px"
+                    >접두사 추가 (Prefix)</label
+                  >
+                  <input
+                    type="text"
+                    class="sld-input"
+                    id="rename-prefix-text"
+                    placeholder="예: [A동] , 2F-"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="sld-form-label"
+                    style="font-weight: 600; font-size: 12px"
+                    >접미사 추가 (Suffix)</label
+                  >
+                  <input
+                    type="text"
+                    class="sld-input"
+                    id="rename-suffix-text"
+                    placeholder="예: -SEC, #2"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Mode 3: Sequence Pattern -->
+            <div
+              class="rename-mode-pane"
+              data-mode="pattern"
+              style="display: none"
+            >
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 2fr 1fr 1fr 1fr;
+                  gap: 8px;
+                  margin-bottom: 8px;
+                "
+              >
+                <div>
+                  <label
+                    class="sld-form-label"
+                    style="font-weight: 600; font-size: 12px"
+                    >명칭 패턴 (Pattern)</label
+                  >
+                  <input
+                    type="text"
+                    class="sld-input"
+                    id="rename-pattern-text"
+                    value="{name}-{n}"
+                    placeholder="예: CB-{0n}, {name}-{n}"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="sld-form-label"
+                    style="font-weight: 600; font-size: 12px"
+                    >시작 번호</label
+                  >
+                  <input
+                    type="number"
+                    class="sld-input"
+                    id="rename-pattern-start"
+                    value="1"
+                    min="0"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="sld-form-label"
+                    style="font-weight: 600; font-size: 12px"
+                    >증분 (Step)</label
+                  >
+                  <input
+                    type="number"
+                    class="sld-input"
+                    id="rename-pattern-step"
+                    value="1"
+                    min="1"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="sld-form-label"
+                    style="font-weight: 600; font-size: 12px"
+                    >자릿수 (Padding)</label
+                  >
+                  <select
+                    class="sld-select"
+                    id="rename-pattern-digits"
+                    style="width: 100%"
+                  >
+                    <option value="1">1, 2, 3</option>
+                    <option value="2">01, 02, 03</option>
+                    <option value="3">001, 002</option>
+                  </select>
+                </div>
+              </div>
+              <p style="font-size: 11px; color: #64748b; margin-bottom: 14px">
+                사용 가능한 치환자: <code>{n}</code> (번호),
+                <code>{0n}</code> (2자리 번호), <code>{name}</code> (기존 이름),
+                <code>{type}</code> (설비 종류)
+              </p>
+            </div>
+
+            <!-- Real-time Preview Table Section -->
+            <div style="margin-top: 10px">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 8px;
+                "
+              >
+                <label
+                  style="
+                    font-weight: 700;
+                    font-size: 12px;
+                    color: #1e293b;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                  "
+                >
+                  <span>👁️ 실시간 변경 미리보기 (Live Preview)</span>
+                </label>
+                <span
+                  id="rename-changed-count-badge"
+                  style="
+                    font-size: 11px;
+                    font-weight: 700;
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                    background: #f1f5f9;
+                    color: #64748b;
+                  "
+                >
+                  0개 대상
+                </span>
+              </div>
+
+              <div
+                style="
+                  border: 1px solid #e2e8f0;
+                  border-radius: 6px;
+                  overflow: hidden;
+                  max-height: 230px;
+                  overflow-y: auto;
+                "
+              >
+                <table
+                  style="
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 12px;
+                    text-align: left;
+                  "
+                >
+                  <thead
+                    style="
+                      position: sticky;
+                      top: 0;
+                      background: #f8fafc;
+                      border-bottom: 1px solid #e2e8f0;
+                      z-index: 1;
+                    "
+                  >
+                    <tr>
+                      <th
+                        style="
+                          padding: 8px 10px;
+                          width: 36px;
+                          text-align: center;
+                        "
+                      >
+                        <input
+                          type="checkbox"
+                          id="rename-select-all-cb"
+                          checked
+                          style="cursor: pointer"
+                          title="전체 선택/해제"
+                        />
+                      </th>
+                      <th
+                        style="
+                          padding: 8px 10px;
+                          font-weight: 600;
+                          color: #475569;
+                          width: 140px;
+                        "
+                      >
+                        설비 종류
+                      </th>
+                      <th
+                        style="
+                          padding: 8px 10px;
+                          font-weight: 600;
+                          color: #475569;
+                        "
+                      >
+                        현재 이름
+                      </th>
+                      <th
+                        style="
+                          padding: 8px 6px;
+                          width: 24px;
+                          text-align: center;
+                          color: #94a3b8;
+                        "
+                      ></th>
+                      <th
+                        style="
+                          padding: 8px 10px;
+                          font-weight: 600;
+                          color: #15803d;
+                        "
+                      >
+                        변경될 새 이름 (수정 가능)
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="rename-preview-tbody">
+                    <!-- Rendered dynamically by BatchRenameManager -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="sld-modal-footer"
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              background: #f8fafc;
+              padding: 12px 20px;
+            "
+          >
+            <span style="font-size: 11px; color: #94a3b8"
+              >* 변경 적용 후 Ctrl+Z로 실행 취소할 수 있습니다.</span
+            >
+            <div style="display: flex; gap: 8px">
+              <button
+                class="sld-btn"
+                id="btn-cancel-rename"
+                style="
+                  background: #ffffff;
+                  border: 1px solid #cbd5e1;
+                  color: #475569;
+                "
+              >
+                취소
+              </button>
+              <button
+                class="sld-btn sld-btn-primary"
+                id="btn-apply-rename"
+                style="font-weight: 600"
+              >
+                변경 적용
+                  <script src="./static/js/vendor/jquery.min.js?v=20260903_03"></script>
+    <script src="./static/js/vendor/lodash.min.js?v=20260903_03"></script>
+    <script src="./static/js/vendor/backbone-min.js?v=20260903_03"></script>
+    <script src="./static/js/vendor/joint.min.js?v=20260903_03"></script>
+    <script src="./static/js/vendor/htmx.min.js?v=20260903_03"></script>
+
+    <!-- SLD Core Modules & Symbols -->
+    <script src="./static/js/equipmentRegistry.js?v=20260904_02"></script>
+    <script src="./static/js/topologyTracker.js?v=20260904_02"></script>
+    <script src="./static/js/symbols/stampRegistry.js?v=20260904_02"></script>
+    <script src="./static/js/sldSymbols.js?v=20260904_02"></script>
+    <script src="./static/js/symbols/substation.js?v=20260904_02"></script>
+    <script src="./static/js/symbols/breakers.js?v=20260903_05"></script>
+    <script src="./static/js/symbols/powerSources.js?v=20260903_05"></script>
+    <script src="./static/js/symbols/distribution.js?v=20260903_05"></script>
+    <script src="./static/js/symbols/router.js?v=20260903_05"></script>
+    <script src="./static/js/sldExport.js?v=20260903_05"></script>
+
+    <!-- Sub-Managers -->
+    <script src="./static/js/core/SLDSerializer.js?v=20260903_06"></script>
+    <script src="./static/js/core/HistoryManager.js?v=20260903_06"></script>
+    <script src="./static/js/core/ClipboardManager.js?v=20260903_04"></script>
+    <script src="./static/js/core/SelectionManager.js?v=20260903_04"></script>
+    <script src="./static/js/wiring/TJunctionManager.js?v=20260903_04"></script>
+    <script src="./static/js/wiring/BusbarManager.js?v=20260903_04"></script>
+    <script src="./static/js/ui/PropertiesPanel.js?v=20260903_04"></script>
+    <script src="./static/js/ui/PaletteManager.js?v=20260903_04"></script>
+    <script src="./static/js/ui/ToolbarManager.js?v=20260903_04"></script>
+    <script src="./static/js/ui/KeyboardManager.js?v=20260903_04"></script>
+    <script src="./static/js/ui/BatchRenameManager.js?v=20260904_01"></script>
+
+    <!-- Main Orchestrator -->
+    <script src="./static/js/sldEditor.js?v=20260904_01"></script>
 
     <script>
       // Load default schema (if available) then initialize editor.

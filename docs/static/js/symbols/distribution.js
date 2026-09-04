@@ -1,6 +1,6 @@
 /**
  * symbols/distribution.js
- * 배전 설비 및 다이어그램 구조/주석 심볼 정의:
+ * 배전 설비 및 다이어그램 구조/주석 심볼 정의 (Hybrid SVG Stamp Engine):
  * - Busbar (모선)
  * - Switchgear (수배전반)
  * - Panelboard (분전반)
@@ -18,7 +18,7 @@
       ? window.formatSymbolLabel(str, 5)
       : str;
 
-  // 1. Busbar (모선)
+  // 1. Busbar (모선: Dynamic Sizing & Reactive Coloring)
   joint.shapes.sld.Busbar = joint.dia.Element.define(
     "sld.Busbar",
     {
@@ -115,36 +115,27 @@
     },
   );
 
-  // 2. Switchgear (수배전반)
+  // 2. Switchgear (수배전반: Stamp + Dynamic Label)
   joint.shapes.sld.Switchgear = joint.dia.Element.define(
     "sld.Switchgear",
     {
       size: { width: 44, height: 60 },
       markup: [
-        { tagName: "rect", selector: "box" },
-        { tagName: "path", selector: "divider1" },
-        { tagName: "path", selector: "dots" },
+        {
+          tagName: "use",
+          selector: "stamp",
+          attributes: {
+            href: "#sld-sym-switchgear",
+            "xlink:href": "#sld-sym-switchgear",
+          },
+        },
         { tagName: "text", selector: "label" },
       ],
       attrs: {
-        box: {
-          refWidth: "100%",
-          refHeight: "100%",
-          rx: 2,
-          fill: "#ffffff",
-          stroke: "#377DFF",
-          strokeWidth: 2,
-        },
-        divider1: {
-          d: "M 6 18 L 38 18 M 6 30 L 38 30 M 6 42 L 38 42",
-          stroke: "#94a3b8",
-          strokeWidth: 1.2,
-        },
-        dots: {
-          d: "M 10 10 h 2 M 10 24 h 2 M 10 36 h 2 M 10 48 h 2",
-          stroke: "#377DFF",
-          strokeWidth: 3,
-          strokeLinecap: "round",
+        stamp: {
+          href: "#sld-sym-switchgear",
+          xlinkHref: "#sld-sym-switchgear",
+          color: "#377DFF",
         },
         label: {
           text: "배전반",
@@ -186,38 +177,36 @@
       },
       updateVisual: function () {
         const data = this.get("sldData") || {};
-        this.attr("label/text", fmtName(data.name || "배전반"));
+        const strokeColor = data.color || "#377DFF";
+        this.attr({
+          stamp: { color: strokeColor },
+          label: { text: fmtName(data.name || "배전반") },
+        });
       },
     },
   );
 
-  // 3. Panelboard (분전반)
+  // 3. Panelboard (분전반: Stamp + Dynamic Label)
   joint.shapes.sld.Panelboard = joint.dia.Element.define(
     "sld.Panelboard",
     {
       size: { width: 40, height: 50 },
       markup: [
-        { tagName: "rect", selector: "box" },
-        { tagName: "rect", selector: "inner" },
+        {
+          tagName: "use",
+          selector: "stamp",
+          attributes: {
+            href: "#sld-sym-panelboard",
+            "xlink:href": "#sld-sym-panelboard",
+          },
+        },
         { tagName: "text", selector: "label" },
       ],
       attrs: {
-        box: {
-          refWidth: "100%",
-          refHeight: "100%",
-          rx: 2,
-          fill: "#ffffff",
-          stroke: "#2B6CB0",
-          strokeWidth: 2,
-        },
-        inner: {
-          x: 6,
-          y: 6,
-          width: 28,
-          height: 38,
-          fill: "#f8fafc",
-          stroke: "#2B6CB0",
-          strokeWidth: 1,
+        stamp: {
+          href: "#sld-sym-panelboard",
+          xlinkHref: "#sld-sym-panelboard",
+          color: "#2B6CB0",
         },
         label: {
           text: "분전반",
@@ -259,7 +248,11 @@
       },
       updateVisual: function () {
         const data = this.get("sldData") || {};
-        this.attr("label/text", fmtName(data.name || "분전반"));
+        const strokeColor = data.color || "#2B6CB0";
+        this.attr({
+          stamp: { color: strokeColor },
+          label: { text: fmtName(data.name || "분전반") },
+        });
       },
     },
   );

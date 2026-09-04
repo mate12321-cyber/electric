@@ -8,6 +8,13 @@ const SLDExport = {
    * Export Diagram to SVG file
    */
   toSVG: function (paper, filename = "power_diagram.svg") {
+    if (!paper) return;
+    if (
+      typeof SymbolStampRegistry !== "undefined" &&
+      typeof SymbolStampRegistry.injectDefs === "function"
+    ) {
+      SymbolStampRegistry.injectDefs(paper);
+    }
     const svgElem = paper.svg;
     if (!svgElem) return;
 
@@ -38,6 +45,13 @@ const SLDExport = {
    * Export Diagram to High-Res PNG
    */
   toPNG: function (paper, filename = "power_diagram.png", scale = 2) {
+    if (!paper) return;
+    if (
+      typeof SymbolStampRegistry !== "undefined" &&
+      typeof SymbolStampRegistry.injectDefs === "function"
+    ) {
+      SymbolStampRegistry.injectDefs(paper);
+    }
     const svgElem = paper.svg;
     if (!svgElem) return;
 
