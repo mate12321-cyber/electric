@@ -25,10 +25,6 @@
       <!-- Top Header -->
       <header class="sld-header">
         <div class="sld-header-left">
-          <div class="sld-logo">
-            <div class="sld-logo-icon">⚡</div>
-            <span>전력 계통도 편집기</span>
-          </div>
           <div class="sld-project-selector" id="project-dropdown-btn">
             <span>프로젝트 01 - 154kV 수전 단선도</span>
             <span style="font-size: 10px">▾</span>
@@ -46,20 +42,24 @@
             title="전압 레벨별 색상 설정"
           >
             <span>🎨</span>
-            <span>전압 색상</span>
           </button>
-          <button class="sld-btn sld-btn-dark" id="btn-save-project">
+          <button
+            class="sld-btn sld-btn-dark"
+            id="btn-save-project"
+            title="프로젝트 저장 (Ctrl+S)"
+          >
             <span>💾</span>
-            <span>저장</span>
           </button>
           <div
             class="sld-dropdown-wrapper"
             style="position: relative; display: inline-block"
           >
-            <button class="sld-btn sld-btn-dark" id="btn-export-dropdown">
+            <button
+              class="sld-btn sld-btn-dark"
+              id="btn-export-dropdown"
+              title="내보내기 (PNG / SVG / JSON)"
+            >
               <span>📤</span>
-              <span>내보내기</span>
-              <span style="font-size: 9px">▾</span>
             </button>
             <div
               class="sld-dropdown-menu"
@@ -117,18 +117,20 @@
               >
             </div>
           </div>
-          <button class="sld-btn sld-btn-dark" id="btn-share-modal">
+          <button
+            class="sld-btn sld-btn-dark"
+            id="btn-share-modal"
+            title="계통도 공유"
+          >
             <span>🔗</span>
-            <span>공유</span>
           </button>
           <button
             class="sld-btn sld-btn-dark"
             id="btn-help-modal"
-            title="단축키 및 도움말"
+            title="단축키 및 도움말 (F1 / ?)"
           >
             <span>❓</span>
           </button>
-          <div class="sld-avatar" title="사용자 관리자">AD</div>
         </div>
       </header>
 

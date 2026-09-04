@@ -104,28 +104,7 @@ a,
 .sld-header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
-}
-
-.sld-logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-}
-
-.sld-logo-icon {
-  width: 26px;
-  height: 26px;
-  background: linear-gradient(135deg, #377dff, #60a5fa);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  font-size: 14px;
+  gap: 12px;
 }
 
 .sld-project-selector {
@@ -133,9 +112,10 @@ a,
   align-items: center;
   gap: 6px;
   background: rgba(255, 255, 255, 0.1);
-  padding: 4px 10px;
-  border-radius: 4px;
+  padding: 5px 12px;
+  border-radius: 6px;
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   transition: background 0.2s;
 }
@@ -155,7 +135,28 @@ a,
 .sld-header-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+}
+
+.sld-header-right .sld-btn {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  max-width: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.sld-header-right .sld-btn span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .sld-btn {
@@ -180,6 +181,7 @@ a,
 
 .sld-btn-dark:hover {
   background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .sld-btn-primary {
@@ -189,19 +191,6 @@ a,
 
 .sld-btn-primary:hover {
   background: var(--primary-hover);
-}
-
-.sld-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #3b82f6;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
 }
 
 /* Floating Compact Toolbar (Popup Mode - Toggled via 'T' Key) */
