@@ -109,6 +109,51 @@ class ToolbarManager {
         snapToggle.classList.toggle("active", this.editor.options.snapToGrid);
       });
     }
+
+    // Close popup toolbar button
+    const btnCloseToolbar = document.getElementById("btn-close-toolbar-popup");
+    if (btnCloseToolbar) {
+      btnCloseToolbar.addEventListener("click", () => this.closeToolbarPopup());
+    }
+
+    // Close toolbar popup when clicking outside
+    window.addEventListener("pointerdown", (e) => {
+      const toolbar = document.querySelector(".sld-toolbar");
+      if (!toolbar || !toolbar.classList.contains("show")) return;
+      if (
+        !toolbar.contains(e.target) &&
+        !e.target.closest(".sld-toolbar") &&
+        !e.target.closest(".sld-modal") &&
+        !e.target.closest(".sld-header")
+      ) {
+        this.closeToolbarPopup();
+      }
+    });
+  }
+
+  toggleToolbarPopup() {
+    const toolbar = document.querySelector(".sld-toolbar");
+    if (!toolbar) return;
+    if (toolbar.classList.contains("show")) {
+      this.closeToolbarPopup();
+    } else {
+      this.openToolbarPopup();
+    }
+  }
+
+  openToolbarPopup() {
+    const toolbar = document.querySelector(".sld-toolbar");
+    if (!toolbar) return;
+    toolbar.classList.add("show");
+    if (this.editor && typeof this.editor.showToast === "function") {
+      this.editor.showToast("🛠️ 도구 툴바 ('T'로 닫기)");
+    }
+  }
+
+  closeToolbarPopup() {
+    const toolbar = document.querySelector(".sld-toolbar");
+    if (!toolbar) return;
+    toolbar.classList.remove("show");
   }
 
   setActiveTool(toolName) {
@@ -202,10 +247,16 @@ class ToolbarManager {
   updateZoomDisplay() {
     const zoomLevelEl = document.getElementById("status-zoom-level");
     const zoomTextEl = document.getElementById("status-zoom-text");
+    const zoomPctEl = document.getElementById("zoom-percentage");
     const pct = Math.round(this.editor.scale * 100) + "%";
 
     if (zoomLevelEl) zoomLevelEl.innerText = pct;
     if (zoomTextEl) zoomTextEl.innerText = pct;
+    if (zoomPctEl) zoomPctEl.innerText = pct;
+
+    if (this.editor && typeof this.editor.showToast === "function") {
+      this.editor.showToast("🔍 배율: " + pct);
+    }
   }
 }
 

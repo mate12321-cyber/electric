@@ -33,7 +33,22 @@ class KeyboardManager {
 
       // 1. Tool shortcut keys & Ground state shortcut (without modifier keys)
       if (!isCtrlOrMeta && !e.altKey) {
-        if (isKey("KeyV", "v", ["ㅍ"])) {
+        if (isKey("KeyT", "t", ["ㅅ", "ㅆ"])) {
+          e.preventDefault();
+          if (this.editor.toolbarManager) {
+            this.editor.toolbarManager.toggleToolbarPopup();
+          }
+          return;
+        } else if (code === "Escape" || e.key === "Escape") {
+          const toolbar = document.querySelector(".sld-toolbar");
+          if (toolbar && toolbar.classList.contains("show")) {
+            e.preventDefault();
+            if (this.editor.toolbarManager) {
+              this.editor.toolbarManager.closeToolbarPopup();
+            }
+            return;
+          }
+        } else if (isKey("KeyV", "v", ["ㅍ"])) {
           this.editor.setActiveTool("select");
           this.editor.showToast("선택 도구 (V)");
           return;
