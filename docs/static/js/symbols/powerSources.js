@@ -96,7 +96,10 @@
       updateVisual: function (effectiveState) {
         const data = this.get("sldData") || {};
         const baseState = (data.state || "DEAD").toUpperCase();
-        const state = (effectiveState || baseState).toUpperCase();
+        const state = (
+          (typeof effectiveState === "string" ? effectiveState : baseState) ||
+          "DEAD"
+        ).toUpperCase();
         const isLive = state === "LIVE" || state === "CLOSED";
         const isGrounded =
           state === "GROUNDED" || state === "GROUND" || state === "EARTH";
@@ -191,7 +194,10 @@
       },
       updateVisual: function (effectiveState, voltageColor) {
         const data = this.get("sldData") || {};
-        const state = (effectiveState || data.state || "LIVE").toUpperCase();
+        const state = (
+          (typeof effectiveState === "string" ? effectiveState : data.state) ||
+          "LIVE"
+        ).toUpperCase();
         const isLive = state === "LIVE" || state === "CLOSED";
         const isGrounded =
           state === "GROUNDED" || state === "GROUND" || state === "EARTH";
@@ -280,7 +286,10 @@
       },
       updateVisual: function (effectiveState, voltageColor) {
         const data = this.get("sldData") || {};
-        const state = (effectiveState || data.state || "LIVE").toUpperCase();
+        const state = (
+          (typeof effectiveState === "string" ? effectiveState : data.state) ||
+          "LIVE"
+        ).toUpperCase();
         const isLive = state === "LIVE" || state === "CLOSED";
         const isGrounded =
           state === "GROUNDED" || state === "GROUND" || state === "EARTH";
@@ -422,7 +431,10 @@
       updateVisual: function (effectiveState) {
         const data = this.get("sldData") || {};
         const baseState = (data.state || "LIVE").toUpperCase();
-        const state = (effectiveState || baseState).toUpperCase();
+        const state = (
+          (typeof effectiveState === "string" ? effectiveState : baseState) ||
+          "LIVE"
+        ).toUpperCase();
         const isLive = state === "LIVE" || state === "CLOSED" || state === "ON";
         const isGrounded =
           state === "GROUNDED" || state === "GROUND" || state === "EARTH";

@@ -776,7 +776,8 @@ class SLDEditor {
         catalog.isTieBreaker;
 
       const targetSel = evt.target
-        ? evt.target.getAttribute("data-selector") ||
+        ? evt.target.getAttribute("joint-selector") ||
+          evt.target.getAttribute("data-selector") ||
           evt.target.getAttribute("class") ||
           ""
         : "";
@@ -785,7 +786,9 @@ class SLDEditor {
         targetSel === "contactPath" ||
         targetSel === "stateBadge" ||
         targetSel === "crescent" ||
-        targetSel === "box";
+        targetSel === "box" ||
+        targetSel === "stamp" ||
+        (evt.target && evt.target.tagName === "use");
 
       if (
         isBreakerOrSwitch &&
@@ -797,6 +800,9 @@ class SLDEditor {
         el.set("sldData", Object.assign({}, sldData, { state: newState }));
         this.topologyTracker.applyStyles(this.paper);
         this.populateProperties(el);
+        this.updateMinimap();
+        this.pushHistory();
+        this.scheduleAutoSave();
       }
     });
 
@@ -1043,7 +1049,13 @@ class SLDEditor {
       if (link && link.isLink && link.isLink()) {
         const src = link.get("source");
         const tgt = link.get("target");
-        if (src && src.id && tgt && tgt.id && link !== this._activeDrawingLink) {
+        if (
+          src &&
+          src.id &&
+          tgt &&
+          tgt.id &&
+          link !== this._activeDrawingLink
+        ) {
           this.busbarManager.autoCreateBusbarPort(link);
           this.busbarManager.cleanupUnusedBusbarPorts();
         }

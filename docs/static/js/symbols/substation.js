@@ -197,8 +197,7 @@
       ) {
         const data = this.get("sldData") || {};
         const contactState = (
-          effectiveState ||
-          data.state ||
+          (typeof effectiveState === "string" ? effectiveState : data.state) ||
           "CLOSED"
         ).toUpperCase();
         const topState = (
@@ -362,8 +361,7 @@
       ) {
         const data = this.get("sldData") || {};
         const contactState = (
-          effectiveState ||
-          data.state ||
+          (typeof effectiveState === "string" ? effectiveState : data.state) ||
           "CLOSED"
         ).toUpperCase();
 
@@ -590,7 +588,10 @@
             : (v) => data.color || "#2E7D32";
 
         const baseState = (data.state || "LIVE").toUpperCase();
-        const state = (effectiveState || baseState).toUpperCase();
+        const state = (
+          (typeof effectiveState === "string" ? effectiveState : baseState) ||
+          "LIVE"
+        ).toUpperCase();
         const isDead = state === "DEAD" || state === "OPEN";
         const isGrounded =
           state === "GROUNDED" || state === "GROUND" || state === "EARTH";

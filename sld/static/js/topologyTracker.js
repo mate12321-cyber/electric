@@ -82,7 +82,7 @@ class PowerSystemTopologyTracker {
 
     if (this.graph && typeof this.graph.on === "function") {
       this.graph.on(
-        "add remove change:source change:target change:sldData",
+        "add remove change:source change:target change:sldData change",
         () => {
           this._isDirty = true;
         },
@@ -621,6 +621,7 @@ class PowerSystemTopologyTracker {
    * Apply the evaluated styles and classes directly to JointJS views
    */
   applyStyles(paper) {
+    this.invalidateCache();
     const { nodeStatus, linkStatus, conflicts, nodeVoltages } = this.evaluate();
 
     // Update Links

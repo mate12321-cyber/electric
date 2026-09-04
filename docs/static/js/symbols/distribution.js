@@ -83,7 +83,10 @@
             : (v) => data.color || "#9C27B0";
 
         const baseState = (data.state || "LIVE").toUpperCase();
-        const state = (effectiveState || baseState).toUpperCase();
+        const state = (
+          (typeof effectiveState === "string" ? effectiveState : baseState) ||
+          "LIVE"
+        ).toUpperCase();
         const isDead = state === "DEAD" || state === "OPEN";
         const isGrounded =
           state === "GROUNDED" || state === "GROUND" || state === "EARTH";

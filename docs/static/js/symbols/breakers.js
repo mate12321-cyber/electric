@@ -113,8 +113,7 @@
       ) {
         const data = this.get("sldData") || {};
         const contactState = (
-          effectiveState ||
-          data.state ||
+          (typeof effectiveState === "string" ? effectiveState : data.state) ||
           "CLOSED"
         ).toUpperCase();
         const topState = (
@@ -258,8 +257,7 @@
       ) {
         const data = this.get("sldData") || {};
         const contactState = (
-          effectiveState ||
-          data.state ||
+          (typeof effectiveState === "string" ? effectiveState : data.state) ||
           "CLOSED"
         ).toUpperCase();
         const topState = (
@@ -400,8 +398,7 @@
       ) {
         const data = this.get("sldData") || {};
         const contactState = (
-          effectiveState ||
-          data.state ||
+          (typeof effectiveState === "string" ? effectiveState : data.state) ||
           "CLOSED"
         ).toUpperCase();
         const topState = (
