@@ -239,14 +239,30 @@ class SLDEditor {
   setupResponsiveCanvas() {
     const updateSize = (w, h) => {
       if (!this.container || !this.paper) return;
-      const width = Math.round(w || this.container.clientWidth || 2000);
-      const height = Math.round(h || this.container.clientHeight || 1200);
+      const rect = this.container.getBoundingClientRect();
+      const parentRect = this.container.parentElement
+        ? this.container.parentElement.getBoundingClientRect()
+        : null;
+      const width = Math.round(
+        w ||
+          rect.width ||
+          parentRect?.width ||
+          this.container.clientWidth ||
+          window.innerWidth,
+      );
+      const height = Math.round(
+        h ||
+          rect.height ||
+          parentRect?.height ||
+          this.container.clientHeight ||
+          window.innerHeight,
+      );
       if (width > 0 && height > 0) {
         const curW = this.paper.options.width;
         const curH = this.paper.options.height;
         if (curW !== width || curH !== height) {
           this.paper.setDimensions(width, height);
-          if (this.updateMinimapViewport) {
+          if (typeof this.updateMinimapViewport === "function") {
             this.updateMinimapViewport();
           }
         }
@@ -266,18 +282,35 @@ class SLDEditor {
       this.resizeObserver = new ResizeObserver((entries) => {
         for (const entry of entries) {
           if (entry && entry.contentRect) {
-            scheduleResize(entry.contentRect.width, entry.contentRect.height);
+            const cr = entry.contentRect;
+            if (cr.width > 0 && cr.height > 0) {
+              scheduleResize(cr.width, cr.height);
+            } else {
+              scheduleResize();
+            }
           }
         }
       });
       this.resizeObserver.observe(this.container);
+      if (this.container.parentElement) {
+        this.resizeObserver.observe(this.container.parentElement);
+      }
     }
 
     window.addEventListener("resize", () => {
-      if (this.container) {
-        scheduleResize(this.container.clientWidth, this.container.clientHeight);
-      }
+      scheduleResize();
     });
+
+    if (typeof window.visualViewport !== "undefined" && window.visualViewport) {
+      window.visualViewport.addEventListener("resize", () => {
+        scheduleResize();
+      });
+    }
+
+    // Initial sizing passes for DOM stabilization
+    updateSize();
+    setTimeout(() => updateSize(), 50);
+    setTimeout(() => updateSize(), 200);
   }
 
   setupPanelResizeAndCollapse() {
