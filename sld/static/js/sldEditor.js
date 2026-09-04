@@ -219,6 +219,7 @@ class SLDEditor {
 
     // 3. Setup Events and Sub-Managers
     this.setupCanvasEvents();
+    this.setupResponsiveCanvas();
     this.paletteManager.setupDragDrop();
     this.setupCellInteractions();
     this.propertiesPanel.setup();
@@ -232,6 +233,50 @@ class SLDEditor {
 
     // 4. Setup Minimap
     this.initMinimap();
+  }
+
+  setupResponsiveCanvas() {
+    const updateSize = (w, h) => {
+      if (!this.container || !this.paper) return;
+      const width = Math.round(w || this.container.clientWidth || 2000);
+      const height = Math.round(h || this.container.clientHeight || 1200);
+      if (width > 0 && height > 0) {
+        const curW = this.paper.options.width;
+        const curH = this.paper.options.height;
+        if (curW !== width || curH !== height) {
+          this.paper.setDimensions(width, height);
+          if (this.updateMinimapViewport) {
+            this.updateMinimapViewport();
+          }
+        }
+      }
+    };
+
+    let resizeRafId = null;
+    const scheduleResize = (w, h) => {
+      if (resizeRafId) cancelAnimationFrame(resizeRafId);
+      resizeRafId = requestAnimationFrame(() => {
+        resizeRafId = null;
+        updateSize(w, h);
+      });
+    };
+
+    if (typeof ResizeObserver !== "undefined" && this.container) {
+      this.resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          if (entry && entry.contentRect) {
+            scheduleResize(entry.contentRect.width, entry.contentRect.height);
+          }
+        }
+      });
+      this.resizeObserver.observe(this.container);
+    }
+
+    window.addEventListener("resize", () => {
+      if (this.container) {
+        scheduleResize(this.container.clientWidth, this.container.clientHeight);
+      }
+    });
   }
 
   isTextInputFocused() {

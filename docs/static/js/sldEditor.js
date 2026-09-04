@@ -8,7 +8,7 @@
   if (typeof joint !== "undefined" && joint.dia && joint.dia.ElementView) {
     joint.dia.ElementView.prototype.drag = function (evt, x, y) {
       const paper = this.paper;
-      const gridSize = (paper && paper.options.gridSize) || 10;
+      const gridSize = (paper && paper.options.gridSize) || 5;
       const model = this.model;
       const eventData = this.eventData(evt);
       const pointerOffset = eventData.pointerOffset || { x: 0, y: 0 };
@@ -78,7 +78,7 @@ class SLDEditor {
     this.options = Object.assign(
       {
         diagramId: "default-154kv-substation",
-        gridSize: 10,
+        gridSize: 5,
         snapToGrid: true,
         readOnly: false,
       },
@@ -161,12 +161,13 @@ class SLDEditor {
       model: this.graph,
       width: paperWidth,
       height: paperHeight,
-      async: false,
+      async: true,
+      sorting: joint.dia.Paper.sorting.APPROX,
       gridSize: this.options.gridSize,
       drawGrid: { name: "dot", args: { color: "#cbd5e1", thickness: 1 } },
       snapLinks: { radius: 20 },
       linkPinning: false,
-      markAvailable: true,
+      markAvailable: false,
       defaultLink: (cellView) => {
         let strokeColor = "#377DFF";
         if (cellView && cellView.model && this.topologyTracker) {
@@ -218,6 +219,7 @@ class SLDEditor {
 
     // 3. Setup Events and Sub-Managers
     this.setupCanvasEvents();
+    this.setupResponsiveCanvas();
     this.paletteManager.setupDragDrop();
     this.setupCellInteractions();
     this.propertiesPanel.setup();
@@ -231,6 +233,50 @@ class SLDEditor {
 
     // 4. Setup Minimap
     this.initMinimap();
+  }
+
+  setupResponsiveCanvas() {
+    const updateSize = (w, h) => {
+      if (!this.container || !this.paper) return;
+      const width = Math.round(w || this.container.clientWidth || 2000);
+      const height = Math.round(h || this.container.clientHeight || 1200);
+      if (width > 0 && height > 0) {
+        const curW = this.paper.options.width;
+        const curH = this.paper.options.height;
+        if (curW !== width || curH !== height) {
+          this.paper.setDimensions(width, height);
+          if (this.updateMinimapViewport) {
+            this.updateMinimapViewport();
+          }
+        }
+      }
+    };
+
+    let resizeRafId = null;
+    const scheduleResize = (w, h) => {
+      if (resizeRafId) cancelAnimationFrame(resizeRafId);
+      resizeRafId = requestAnimationFrame(() => {
+        resizeRafId = null;
+        updateSize(w, h);
+      });
+    };
+
+    if (typeof ResizeObserver !== "undefined" && this.container) {
+      this.resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          if (entry && entry.contentRect) {
+            scheduleResize(entry.contentRect.width, entry.contentRect.height);
+          }
+        }
+      });
+      this.resizeObserver.observe(this.container);
+    }
+
+    window.addEventListener("resize", () => {
+      if (this.container) {
+        scheduleResize(this.container.clientWidth, this.container.clientHeight);
+      }
+    });
   }
 
   isTextInputFocused() {
@@ -1212,7 +1258,7 @@ class SLDEditor {
 
   getPaperPoint(clientX, clientY) {
     const p = this.paper.clientToLocalPoint({ x: clientX, y: clientY });
-    const gridSize = this.options.gridSize || 10;
+    const gridSize = this.options.gridSize || 5;
     return {
       x: Math.round(p.x / gridSize) * gridSize,
       y: Math.round(p.y / gridSize) * gridSize,
