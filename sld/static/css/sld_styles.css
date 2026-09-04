@@ -650,31 +650,131 @@ body.sld-resizing-col * {
   height: 32px;
   padding: 0 10px;
   border: 1px solid var(--border-dark);
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 12px;
   outline: none;
   color: var(--text-primary);
   background: #ffffff;
+  transition: all 0.15s ease;
 }
 
 .sld-input:focus {
   border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(55, 125, 255, 0.15);
 }
 
 .sld-input-row {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  align-items: center;
 }
 
+/* Custom Styled Select */
 .sld-select {
   height: 32px;
-  padding: 0 8px;
+  padding: 0 24px 0 10px;
   border: 1px solid var(--border-dark);
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 12px;
-  background: #ffffff;
+  background: #ffffff
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")
+    no-repeat right 8px center;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   color: var(--text-primary);
   outline: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sld-select:hover {
+  border-color: #94a3b8;
+}
+
+.sld-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(55, 125, 255, 0.15);
+}
+
+.sld-select option,
+.sld-select optgroup,
+.sld-combo-select option,
+.sld-combo-select optgroup {
+  color: #0f172a;
+  background: #ffffff;
+  font-size: 12px;
+  padding: 5px 8px;
+}
+
+.sld-select optgroup,
+.sld-combo-select optgroup {
+  font-weight: 700;
+  color: #2563eb;
+  background: #f1f5f9;
+}
+
+/* Custom Combo Dropdown Controls (Input + Dropdown) */
+.sld-combo-wrapper {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--border-dark);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.15s ease-in-out;
+  overflow: hidden;
+}
+
+.sld-combo-wrapper:hover {
+  border-color: #94a3b8;
+}
+
+.sld-combo-wrapper:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(55, 125, 255, 0.15);
+}
+
+.sld-combo-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 30px !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 4px 10px !important;
+  font-size: 12px;
+  color: var(--text-primary);
+  background: transparent !important;
+}
+
+.sld-combo-select {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 30px;
+  border: none !important;
+  border-left: 1px solid #e2e8f0 !important;
+  outline: none !important;
+  background: #f8fafc
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")
+    no-repeat center center;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  color: transparent !important;
+  border-radius: 0;
+  transition: background-color 0.15s ease;
+}
+
+.sld-combo-select:hover {
+  background-color: #e2e8f0;
+}
+
+.sld-combo-select:focus {
+  background-color: #dbeafe;
 }
 
 .sld-textarea {
@@ -682,10 +782,16 @@ body.sld-resizing-col * {
   height: 60px;
   padding: 8px 10px;
   border: 1px solid var(--border-dark);
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 12px;
   outline: none;
   resize: none;
+  transition: all 0.15s ease;
+}
+
+.sld-textarea:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(55, 125, 255, 0.15);
 }
 
 .sld-btn-danger {

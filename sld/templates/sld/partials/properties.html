@@ -120,12 +120,64 @@
             일괄 치환 ➜
           </a>
         </div>
-        <input
-          type="text"
-          class="sld-input"
-          id="prop-name"
-          placeholder="설비명 입력 (예: ACB)"
-        />
+        <div class="sld-combo-wrapper">
+          <input
+            type="text"
+            class="sld-input sld-combo-input"
+            id="prop-name"
+            placeholder="설비명 입력 또는 선택"
+          />
+          <select class="sld-combo-select" data-combo-for="prop-name" title="자주 사용하는 설비명 선택">
+            <option value="__custom__">✏️ 직접 입력...</option>
+            <optgroup label="[변압기 / 전원]">
+              <option value="MTr-1">MTr-1 (154kV 주 변압기 1)</option>
+              <option value="MTr-2">MTr-2 (154kV 주 변압기 2)</option>
+              <option value="TR-1">TR-1 (배전 변압기 1)</option>
+              <option value="TR-2">TR-2 (배전 변압기 2)</option>
+              <option value="TR-3">TR-3 (배전 변압기 3)</option>
+              <option value="GEN">GEN (비상 디젤 발전기)</option>
+              <option value="UPS">UPS (무정전 전원장치)</option>
+              <option value="RECTIFIER">RECTIFIER (정류기/충전기)</option>
+              <option value="BATTERY">BATTERY (축전지 뱅크)</option>
+            </optgroup>
+            <optgroup label="[차단기 / 개폐기]">
+              <option value="154kV GIS">154kV GIS (가스절연개폐장치)</option>
+              <option value="Main ACB">Main ACB (주 수전 기중차단기)</option>
+              <option value="Bus Tie ACB">Bus Tie ACB (모선 연락 차단기)</option>
+              <option value="ACB-1">ACB-1</option>
+              <option value="ACB-2">ACB-2</option>
+              <option value="VCB-1">VCB-1 (22.9kV 진공차단기 1)</option>
+              <option value="VCB-2">VCB-2 (22.9kV 진공차단기 2)</option>
+              <option value="GCB">GCB (가스차단기)</option>
+              <option value="DS-1">DS-1 (단로기 1)</option>
+              <option value="DS-2">DS-2 (단로기 2)</option>
+              <option value="3-DS">3-DS (3위치 단로기)</option>
+              <option value="MCCB-1">MCCB-1 (배선용차단기)</option>
+              <option value="MCCB-2">MCCB-2</option>
+            </optgroup>
+            <optgroup label="[보호 / 계측]">
+              <option value="LA">LA (피뢰기)</option>
+              <option value="PF">PF (파워퓨즈)</option>
+              <option value="OCR">OCR (과전류 계전기 51)</option>
+              <option value="OCGR">OCGR (지락과전류 계전기 51G)</option>
+              <option value="UVR">UVR (부족전압 계전기 27)</option>
+              <option value="OVR">OVR (과전압 계전기 59)</option>
+              <option value="CT">CT (변류기)</option>
+              <option value="PT">PT (계기용변압기)</option>
+              <option value="MOF">MOF (전력수급용 변성기)</option>
+            </optgroup>
+            <optgroup label="[모선 / 부하 / 기타]">
+              <option value="MAIN BUS">MAIN BUS (주 모선)</option>
+              <option value="SUB BUS">SUB BUS (보조 모선)</option>
+              <option value="MOTOR-1">MOTOR-1 (주 동력 모터)</option>
+              <option value="MOTOR-2">MOTOR-2 (보조 모터)</option>
+              <option value="LOAD-1">LOAD-1 (일반 동력 부하)</option>
+              <option value="LOAD-2">LOAD-2 (전등/전열 부하)</option>
+              <option value="PANELBOARD">PANELBOARD (분전반)</option>
+              <option value="SWITCHGEAR">SWITCHGEAR (수배전반)</option>
+            </optgroup>
+          </select>
+        </div>
       </div>
 
       <!-- 3로 단로기 접지 스위치 명칭 (3-Position DS 선택 시 노출) -->
@@ -135,22 +187,69 @@
         style="display: none"
       >
         <label class="sld-form-label">접지 스위치 명칭 (Earth Name)</label>
-        <input
-          type="text"
-          class="sld-input"
-          id="prop-earth-name"
-          placeholder="접지 스위치명 입력 (예: 154kV ES)"
-        />
+        <div class="sld-combo-wrapper">
+          <input
+            type="text"
+            class="sld-input sld-combo-input"
+            id="prop-earth-name"
+            placeholder="접지 스위치명 입력 (예: 154kV ES)"
+          />
+          <select class="sld-combo-select" data-combo-for="prop-earth-name" title="접지 스위치명 선택">
+            <option value="__custom__">✏️ 직접 입력...</option>
+            <option value="154kV ES">154kV ES (154kV Earth Switch)</option>
+            <option value="154kV ES-1">154kV ES-1</option>
+            <option value="154kV ES-2">154kV ES-2</option>
+            <option value="22.9kV ES">22.9kV ES (22.9kV 접지개폐기)</option>
+            <option value="GIS ES">GIS ES (GIS 접지스위치)</option>
+            <option value="BUS ES">BUS ES (모선 접지스위치)</option>
+            <option value="TR ES">TR ES (변압기 접지스위치)</option>
+            <option value="M-ES">M-ES (메인 접지스위치)</option>
+          </select>
+        </div>
       </div>
 
       <div class="sld-form-group" id="group-prop-desc">
         <label class="sld-form-label">설명</label>
-        <input
-          type="text"
-          class="sld-input"
-          id="prop-desc"
-          placeholder="설비 설명 (예: 주 배전 차단기)"
-        />
+        <div class="sld-combo-wrapper">
+          <input
+            type="text"
+            class="sld-input sld-combo-input"
+            id="prop-desc"
+            placeholder="설비 설명 입력 또는 선택"
+          />
+          <select class="sld-combo-select" data-combo-for="prop-desc" title="자주 사용하는 설명 선택">
+            <option value="__custom__">✏️ 직접 입력...</option>
+            <optgroup label="[전원 및 변압기]">
+              <option value="154kV 한전 송전 인입선로">154kV 한전 송전 인입선로</option>
+              <option value="154kV/22.9kV 80/100MVA 주 변압기">154kV/22.9kV 80/100MVA 주 변압기</option>
+              <option value="22.9kV/380V-220V 1000kVA 배전 변압기">22.9kV/380V-220V 1000kVA 배전 변압기</option>
+              <option value="22.9kV/6.6kV 3000kVA 고압 변압기">22.9kV/6.6kV 3000kVA 고압 변압기</option>
+              <option value="비상 상용 디젤 발전기">비상 상용 디젤 발전기</option>
+              <option value="전산실 정전대비 무정전 전원장치">전산실 정전대비 무정전 전원장치</option>
+              <option value="DC 제어전원 충전 정류기">DC 제어전원 충전 정류기</option>
+              <option value="비상 제어전원 축전지 뱅크">비상 제어전원 축전지 뱅크</option>
+            </optgroup>
+            <optgroup label="[차단기 및 개폐기]">
+              <option value="154kV GIS 수전 주 차단기">154kV GIS 수전 주 차단기</option>
+              <option value="22.9kV 수전단 진공차단기 (VCB)">22.9kV 수전단 진공차단기 (VCB)</option>
+              <option value="저압 주 배전 기중차단기 (Main ACB)">저압 주 배전 기중차단기 (Main ACB)</option>
+              <option value="모선간 부하 절체 연락 차단기 (Bus Tie)">모선간 부하 절체 연락 차단기 (Bus Tie)</option>
+              <option value="동력 분전반 배선용차단기 (MCCB)">동력 분전반 배선용차단기 (MCCB)</option>
+              <option value="154kV 선로 점검용 단로기 (DS)">154kV 선로 점검용 단로기 (DS)</option>
+              <option value="3위치 단로 및 접지 개폐기 (3-DS)">3위치 단로 및 접지 개폐기 (3-DS)</option>
+            </optgroup>
+            <optgroup label="[보호, 계측 및 부하]">
+              <option value="이상전압 대지방전 피뢰기 (LA)">이상전압 대지방전 피뢰기 (LA)</option>
+              <option value="변압기 보호용 고압 파워퓨즈 (PF)">변압기 보호용 고압 파워퓨즈 (PF)</option>
+              <option value="과전류 보호 계전기 (OCR 51)">과전류 보호 계전기 (OCR 51)</option>
+              <option value="지락사고 보호 계전기 (OCGR 51G)">지락사고 보호 계전기 (OCGR 51G)</option>
+              <option value="냉각수 펌프 구동 모터">냉각수 펌프 구동 모터</option>
+              <option value="공조기 송풍팬 유도전동기">공조기 송풍팬 유도전동기</option>
+              <option value="사무동 조명 및 전열 부하">사무동 조명 및 전열 부하</option>
+              <option value="공장 생산라인 동력 부하">공장 생산라인 동력 부하</option>
+            </optgroup>
+          </select>
+        </div>
       </div>
 
       <!-- 모선 길이 조절 필드 (모선 선택 시 노출) -->
@@ -171,15 +270,32 @@
           <span style="font-size: 10px; color: #64748b">(px)</span>
         </label>
         <div class="sld-input-row">
-          <input
-            type="number"
-            step="10"
-            min="40"
-            max="3000"
-            class="sld-input"
-            id="prop-bus-length"
-            placeholder="200"
-          />
+          <div class="sld-combo-wrapper" style="flex: 1">
+            <input
+              type="number"
+              step="10"
+              min="40"
+              max="3000"
+              class="sld-input sld-combo-input"
+              id="prop-bus-length"
+              placeholder="200"
+            />
+            <select class="sld-combo-select" data-combo-for="prop-bus-length" title="모선 길이 프리셋 선택">
+              <option value="__custom__">✏️ 직접 입력...</option>
+              <option value="100">100 px (소형 모선)</option>
+              <option value="150">150 px</option>
+              <option value="200">200 px (표준 길이)</option>
+              <option value="250">250 px</option>
+              <option value="300">300 px (중형 모선)</option>
+              <option value="350">350 px</option>
+              <option value="400">400 px (다회선 모선)</option>
+              <option value="500">500 px (대형 수배전반 모선)</option>
+              <option value="600">600 px</option>
+              <option value="800">800 px</option>
+              <option value="1000">1000 px (장거리 모선)</option>
+              <option value="1200">1200 px (초대형 플랜트 모선)</option>
+            </select>
+          </div>
           <span
             style="
               display: flex;
@@ -190,7 +306,8 @@
               color: #64748b;
               background: #f8fafc;
               border: 1px solid var(--border-color);
-              border-radius: 4px;
+              border-radius: 6px;
+              height: 32px;
             "
             >px</span
           >
@@ -235,13 +352,48 @@
       <div class="sld-form-group" id="group-prop-voltage">
         <label class="sld-form-label">정격 전압</label>
         <div class="sld-input-row">
-          <input
-            type="number"
-            step="any"
-            class="sld-input"
-            id="prop-voltage"
-            placeholder="0.4"
-          />
+          <div class="sld-combo-wrapper" style="flex: 1">
+            <input
+              type="number"
+              step="any"
+              class="sld-input sld-combo-input"
+              id="prop-voltage"
+              placeholder="0.4"
+            />
+            <select class="sld-combo-select" data-combo-for="prop-voltage" title="정격 전압 프리셋 선택">
+              <option value="__custom__">✏️ 직접 입력...</option>
+              <optgroup label="[초고압 / 송전]">
+                <option value="765">765 kV (765kV 송전)</option>
+                <option value="345">345 kV (345kV 송전)</option>
+                <option value="154">154 kV (154kV 수전 표준)</option>
+                <option value="66">66 kV (66kV 송전)</option>
+              </optgroup>
+              <optgroup label="[특고압 / 배전]">
+                <option value="22.9">22.9 kV (22.9kV-Y 배전 표준)</option>
+                <option value="22">22 kV</option>
+                <option value="11.4">11.4 kV</option>
+                <option value="6.6">6.6 kV (6.6kV 고압)</option>
+                <option value="3.3">3.3 kV (3.3kV 고압)</option>
+              </optgroup>
+              <optgroup label="[저압 / 동력]">
+                <option value="0.48">0.48 kV (480V)</option>
+                <option value="0.44">0.44 kV (440V)</option>
+                <option value="0.4">0.4 kV (400V)</option>
+                <option value="0.38">0.38 kV (380V 3상)</option>
+                <option value="0.22">0.22 kV (220V 단상)</option>
+                <option value="0.11">0.11 kV (110V 제어)</option>
+              </optgroup>
+              <optgroup label="[V 단위]">
+                <option value="480">480 V</option>
+                <option value="440">440 V</option>
+                <option value="380">380 V</option>
+                <option value="220">220 V</option>
+                <option value="110">110 V</option>
+                <option value="24">24 V (DC)</option>
+                <option value="12">12 V (DC)</option>
+              </optgroup>
+            </select>
+          </div>
           <select class="sld-select" style="width: 70px" id="prop-voltage-unit">
             <option value="kV">kV</option>
             <option value="V">V</option>
@@ -279,13 +431,28 @@
               1차 전압 (Primary)
             </div>
             <div class="sld-input-row">
-              <input
-                type="number"
-                step="any"
-                class="sld-input"
-                id="prop-pri-voltage"
-                placeholder="154"
-              />
+              <div class="sld-combo-wrapper" style="flex: 1">
+                <input
+                  type="number"
+                  step="any"
+                  class="sld-input sld-combo-input"
+                  id="prop-pri-voltage"
+                  placeholder="154"
+                />
+                <select class="sld-combo-select" data-combo-for="prop-pri-voltage" title="1차 전압 프리셋 선택">
+                  <option value="__custom__">✏️ 직접 입력...</option>
+                  <option value="765">765 kV</option>
+                  <option value="345">345 kV</option>
+                  <option value="154">154 kV (표준 154kV 수전)</option>
+                  <option value="66">66 kV</option>
+                  <option value="22.9">22.9 kV (배전 22.9kV)</option>
+                  <option value="6.6">6.6 kV</option>
+                  <option value="3.3">3.3 kV</option>
+                  <option value="0.44">0.44 kV (440V)</option>
+                  <option value="0.38">0.38 kV (380V)</option>
+                  <option value="0.22">0.22 kV (220V)</option>
+                </select>
+              </div>
               <select class="sld-select" style="width: 60px">
                 <option>kV</option>
                 <option>V</option>
@@ -304,13 +471,25 @@
               2차 전압 (Secondary)
             </div>
             <div class="sld-input-row">
-              <input
-                type="number"
-                step="any"
-                class="sld-input"
-                id="prop-sec-voltage"
-                placeholder="22.9"
-              />
+              <div class="sld-combo-wrapper" style="flex: 1">
+                <input
+                  type="number"
+                  step="any"
+                  class="sld-input sld-combo-input"
+                  id="prop-sec-voltage"
+                  placeholder="22.9"
+                />
+                <select class="sld-combo-select" data-combo-for="prop-sec-voltage" title="2차 전압 프리셋 선택">
+                  <option value="__custom__">✏️ 직접 입력...</option>
+                  <option value="22.9">22.9 kV (표준 배전)</option>
+                  <option value="6.6">6.6 kV (고압 동력)</option>
+                  <option value="3.3">3.3 kV (고압 동력)</option>
+                  <option value="0.44">0.44 kV (440V)</option>
+                  <option value="0.38">0.38 kV (380V 3상)</option>
+                  <option value="0.22">0.22 kV (220V 단상)</option>
+                  <option value="0.11">0.11 kV (110V 제어)</option>
+                </select>
+              </div>
               <select class="sld-select" style="width: 60px">
                 <option>kV</option>
                 <option>V</option>
@@ -329,13 +508,24 @@
               3차 전압 (Tertiary)
             </div>
             <div class="sld-input-row">
-              <input
-                type="number"
-                step="any"
-                class="sld-input"
-                id="prop-tert-voltage"
-                placeholder="6.6"
-              />
+              <div class="sld-combo-wrapper" style="flex: 1">
+                <input
+                  type="number"
+                  step="any"
+                  class="sld-input sld-combo-input"
+                  id="prop-tert-voltage"
+                  placeholder="6.6"
+                />
+                <select class="sld-combo-select" data-combo-for="prop-tert-voltage" title="3차 전압 프리셋 선택">
+                  <option value="__custom__">✏️ 직접 입력...</option>
+                  <option value="6.6">6.6 kV (소내용 고압)</option>
+                  <option value="3.3">3.3 kV (소내용 고압)</option>
+                  <option value="0.44">0.44 kV (440V)</option>
+                  <option value="0.38">0.38 kV (380V)</option>
+                  <option value="0.22">0.22 kV (220V)</option>
+                  <option value="0.11">0.11 kV (110V 제어)</option>
+                </select>
+              </div>
               <select class="sld-select" style="width: 60px">
                 <option>kV</option>
                 <option>V</option>
@@ -369,12 +559,81 @@
         style="display: none"
       >
         <label class="sld-form-label">정격 용량 (Capacity)</label>
-        <input
-          type="text"
-          class="sld-input"
-          id="prop-capacity"
-          placeholder="초고압: 80/100MVA | 고압: 3MVA | 저압: 1000kVA"
-        />
+        <div class="sld-combo-wrapper">
+          <input
+            type="text"
+            class="sld-input sld-combo-input"
+            id="prop-capacity"
+            placeholder="용량 입력 또는 프리셋 선택"
+          />
+          <select class="sld-combo-select" data-combo-for="prop-capacity" title="정격 용량 프리셋 선택">
+            <option value="__custom__">✏️ 직접 입력...</option>
+            <optgroup label="[초고압 / 대용량 MVA (TR/발전)]">
+              <option value="80/100MVA">80/100 MVA (154kV OA/FA)</option>
+              <option value="60/80MVA">60/80 MVA (154kV OA/FA)</option>
+              <option value="45/60MVA">45/60 MVA</option>
+              <option value="40/50MVA">40/50 MVA</option>
+              <option value="30/40MVA">30/40 MVA</option>
+              <option value="20/25MVA">20/25 MVA</option>
+              <option value="15/20MVA">15/20 MVA</option>
+              <option value="10/12.5MVA">10/12.5 MVA</option>
+              <option value="10MVA">10 MVA</option>
+              <option value="7.5MVA">7.5 MVA</option>
+              <option value="5MVA">5 MVA</option>
+              <option value="3MVA">3 MVA</option>
+              <option value="2.5MVA">2.5 MVA</option>
+              <option value="2MVA">2 MVA</option>
+              <option value="1.5MVA">1.5 MVA</option>
+              <option value="1MVA">1 MVA</option>
+            </optgroup>
+            <optgroup label="[배전 / 중저압 kVA (TR/UPS/비상전원)]">
+              <option value="3000kVA">3000 kVA (3.0 MVA)</option>
+              <option value="2500kVA">2500 kVA (2.5 MVA)</option>
+              <option value="2000kVA">2000 kVA (2.0 MVA)</option>
+              <option value="1500kVA">1500 kVA (1.5 MVA)</option>
+              <option value="1250kVA">1250 kVA</option>
+              <option value="1000kVA">1000 kVA (1.0 MVA 표준)</option>
+              <option value="750kVA">750 kVA</option>
+              <option value="500kVA">500 kVA (0.5 MVA 표준)</option>
+              <option value="400kVA">400 kVA</option>
+              <option value="300kVA">300 kVA</option>
+              <option value="250kVA">250 kVA</option>
+              <option value="200kVA">200 kVA</option>
+              <option value="150kVA">150 kVA</option>
+              <option value="100kVA">100 kVA</option>
+              <option value="75kVA">75 kVA</option>
+              <option value="50kVA">50 kVA</option>
+              <option value="30kVA">30 kVA</option>
+              <option value="20kVA">20 kVA</option>
+              <option value="10kVA">10 kVA</option>
+            </optgroup>
+            <optgroup label="[동력 / 부하 kW (모터/히터)]">
+              <option value="500kW">500 kW</option>
+              <option value="350kW">350 kW</option>
+              <option value="250kW">250 kW</option>
+              <option value="200kW">200 kW</option>
+              <option value="160kW">160 kW</option>
+              <option value="132kW">132 kW</option>
+              <option value="110kW">110 kW</option>
+              <option value="90kW">90 kW</option>
+              <option value="75kW">75 kW</option>
+              <option value="55kW">55 kW</option>
+              <option value="45kW">45 kW</option>
+              <option value="37kW">37 kW</option>
+              <option value="30kW">30 kW</option>
+              <option value="22kW">22 kW</option>
+              <option value="18.5kW">18.5 kW</option>
+              <option value="15kW">15 kW</option>
+              <option value="11kW">11 kW</option>
+              <option value="7.5kW">7.5 kW</option>
+              <option value="5.5kW">5.5 kW</option>
+              <option value="3.7kW">3.7 kW</option>
+              <option value="2.2kW">2.2 kW</option>
+              <option value="1.5kW">1.5 kW</option>
+              <option value="0.75kW">0.75 kW</option>
+            </optgroup>
+          </select>
+        </div>
         <div style="font-size: 11px; color: #64748b; margin-top: 3px">
           * 초고압(≥100kV)은 자냉/풍랭(80/100MVA) 형식 지원
         </div>
@@ -383,16 +642,59 @@
       <div class="sld-form-group">
         <label class="sld-form-label">정격 전류</label>
         <div class="sld-input-row">
-          <input
-            type="number"
-            step="any"
-            class="sld-input"
-            id="prop-current"
-            placeholder="3200"
-          />
-          <select class="sld-select" style="width: 70px">
-            <option>A</option>
-            <option>kA</option>
+          <div class="sld-combo-wrapper" style="flex: 1">
+            <input
+              type="number"
+              step="any"
+              class="sld-input sld-combo-input"
+              id="prop-current"
+              placeholder="3200"
+            />
+            <select class="sld-combo-select" data-combo-for="prop-current" title="정격 전류 프리셋 선택">
+              <option value="__custom__">✏️ 직접 입력...</option>
+              <optgroup label="[초고압 / 대용량 (Main)]">
+                <option value="5000">5000 A</option>
+                <option value="4000">4000 A (154kV GIS / ACB)</option>
+                <option value="3200">3200 A (주 수전 ACB 3200A)</option>
+                <option value="2500">2500 A (ACB 2500A)</option>
+                <option value="2000">2000 A (ACB / VCB 2000A)</option>
+                <option value="1600">1600 A (ACB / VCB 1600A)</option>
+                <option value="1250">1250 A (VCB 1250A)</option>
+                <option value="1000">1000 A (ACB 1000A)</option>
+              </optgroup>
+              <optgroup label="[배전 / 중용량 (Sub-main)]">
+                <option value="800">800 A (MCCB / ACB 800A)</option>
+                <option value="630">630 A (VCB / MCCB 630A)</option>
+                <option value="600">600 A (MCCB 600A)</option>
+                <option value="500">500 A (MCCB 500A)</option>
+                <option value="400">400 A (MCCB 400A)</option>
+                <option value="350">350 A (MCCB 350A)</option>
+                <option value="300">300 A (MCCB 300A)</option>
+                <option value="250">250 A (MCCB 250A)</option>
+                <option value="225">225 A (MCCB 225A)</option>
+                <option value="200">200 A (MCCB 200A)</option>
+                <option value="175">175 A (MCCB 175A)</option>
+                <option value="150">150 A (MCCB 150A)</option>
+                <option value="125">125 A (MCCB 125A)</option>
+              </optgroup>
+              <optgroup label="[분기 / 모터 (Branch)]">
+                <option value="100">100 A (MCCB 100A)</option>
+                <option value="80">80 A</option>
+                <option value="75">75 A</option>
+                <option value="60">60 A</option>
+                <option value="50">50 A (MCCB 50A)</option>
+                <option value="40">40 A</option>
+                <option value="30">30 A (MCCB 30A)</option>
+                <option value="20">20 A</option>
+                <option value="15">15 A</option>
+                <option value="10">10 A</option>
+                <option value="5">5 A</option>
+              </optgroup>
+            </select>
+          </div>
+          <select class="sld-select" style="width: 70px" id="prop-current-unit">
+            <option value="A">A</option>
+            <option value="kA">kA</option>
           </select>
         </div>
       </div>
@@ -750,14 +1052,27 @@
 
       <div class="sld-form-group">
         <label class="sld-form-label">선 두께 (px)</label>
-        <input
-          type="number"
-          class="sld-input"
-          id="prop-line-width"
-          value="2"
-          min="1"
-          max="10"
-        />
+        <div class="sld-combo-wrapper">
+          <input
+            type="number"
+            class="sld-input sld-combo-input"
+            id="prop-line-width"
+            value="2"
+            min="1"
+            max="10"
+          />
+          <select class="sld-combo-select" data-combo-for="prop-line-width" title="선 두께 선택">
+            <option value="__custom__">✏️ 직접 입력...</option>
+            <option value="1">1 px (가는선 / 제어선)</option>
+            <option value="2">2 px (표준 배선)</option>
+            <option value="2.5">2.5 px (계통 기본 연결선)</option>
+            <option value="3">3 px (주 간선 / 모선 인입)</option>
+            <option value="4">4 px (고압 주 모선)</option>
+            <option value="5">5 px (특고압 송전선)</option>
+            <option value="6">6 px (초고압 간선)</option>
+            <option value="8">8 px (대용량 주 모선 바)</option>
+          </select>
+        </div>
       </div>
 
       <div class="sld-form-group">

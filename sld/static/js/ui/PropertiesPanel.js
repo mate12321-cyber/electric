@@ -77,11 +77,12 @@ class PropertiesPanel {
     bindInput("prop-connection", "connection");
     bindInput("prop-capacity", "capacity");
     bindInput("prop-current", "current", true);
-    bindInput("prop-poles", "poles");
-    bindInput("prop-location", "location");
-    bindInput("prop-memo", "memo");
     bindInput("prop-symbol-color", "color");
     bindInput("prop-line-color", "lineColor");
+    bindInput("prop-line-width", "lineWidth", true);
+
+    // Setup all combo dropdowns (Direct input vs presets)
+    this.setupComboDropdowns();
 
     // Busbar Length Binding
     const busLengthInput = document.getElementById("prop-bus-length");
@@ -266,6 +267,37 @@ class PropertiesPanel {
     }
   }
 
+  setupComboDropdowns() {
+    const comboSelects = document.querySelectorAll("select[data-combo-for]");
+    comboSelects.forEach((sel) => {
+      const targetId = sel.getAttribute("data-combo-for");
+      const targetInput = document.getElementById(targetId);
+      if (!targetInput) return;
+
+      sel.addEventListener("change", () => {
+        if (sel.value === "__custom__") {
+          targetInput.focus();
+          targetInput.select();
+        } else {
+          targetInput.value = sel.value;
+          targetInput.dispatchEvent(new Event("input", { bubbles: true }));
+          targetInput.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      });
+
+      const syncSelectToInput = () => {
+        const val = targetInput.value;
+        const matchOpt = Array.from(sel.options).find(
+          (opt) => opt.value !== "__custom__" && opt.value === String(val),
+        );
+        sel.value = matchOpt ? String(val) : "__custom__";
+      };
+
+      targetInput.addEventListener("input", syncSelectToInput);
+      targetInput.addEventListener("change", syncSelectToInput);
+    });
+  }
+
   updateRotationUI(angle) {
     const normAngle = ((Math.round(angle || 0) % 360) + 360) % 360;
     const disp = document.getElementById("prop-rotation-display");
@@ -310,7 +342,19 @@ class PropertiesPanel {
 
     const setValue = (id, val) => {
       const el = document.getElementById(id);
-      if (el) el.value = val !== undefined && val !== null ? val : "";
+      if (el) {
+        el.value = val !== undefined && val !== null ? val : "";
+        const comboSelect = document.querySelector(
+          `select[data-combo-for="${id}"]`,
+        );
+        if (comboSelect) {
+          const strVal = String(el.value);
+          const matchOpt = Array.from(comboSelect.options).find(
+            (opt) => opt.value !== "__custom__" && opt.value === strVal,
+          );
+          comboSelect.value = matchOpt ? strVal : "__custom__";
+        }
+      }
     };
 
     const isMulti =
@@ -526,6 +570,7 @@ class PropertiesPanel {
       "prop-line-color",
       sldData.lineColor || sldData.color || "#377DFF",
     );
+    setValue("prop-line-width", sldData.lineWidth || 2);
     setValue("prop-memo", sldData.memo || "");
 
     const curAngle =
