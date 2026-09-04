@@ -102,17 +102,39 @@ class TJunctionManager {
       }
     }
 
+    const searchMinX = paperPoint.x - maxDist;
+    const searchMaxX = paperPoint.x + maxDist;
+    const searchMinY = paperPoint.y - maxDist;
+    const searchMaxY = paperPoint.y + maxDist;
+
     const links = this.editor.graph.getLinks();
     let bestMatch = null;
     let bestDist = maxDist;
 
     links.forEach((link) => {
       if (
-        sourceInfo &&
-        (link.get("source")?.id === sourceInfo.id ||
-          link.get("target")?.id === sourceInfo.id)
+        link === this.editor._activeDrawingLink ||
+        (sourceInfo &&
+          (link.get("source")?.id === sourceInfo.id ||
+            link.get("target")?.id === sourceInfo.id))
       ) {
         return;
+      }
+
+      // Fast AABB pre-filtering: skip link if outside search radius
+      const linkView = this.editor.paper
+        ? this.editor.paper.findViewByModel(link)
+        : null;
+      if (linkView && typeof linkView.getBBox === "function") {
+        const bbox = linkView.getBBox();
+        if (
+          bbox.x + bbox.width < searchMinX ||
+          bbox.x > searchMaxX ||
+          bbox.y + bbox.height < searchMinY ||
+          bbox.y > searchMaxY
+        ) {
+          return;
+        }
       }
 
       const pts = this.getLinkPoints(link);
@@ -230,6 +252,11 @@ class TJunctionManager {
   ) {
     if (!paperPoint || !this.editor.graph) return null;
 
+    const searchMinX = paperPoint.x - maxDist;
+    const searchMaxX = paperPoint.x + maxDist;
+    const searchMinY = paperPoint.y - maxDist;
+    const searchMaxY = paperPoint.y + maxDist;
+
     const links = this.editor.graph.getLinks();
     let bestLink = null;
     let bestDist = maxDist;
@@ -237,6 +264,7 @@ class TJunctionManager {
     let bestSegment = null;
 
     links.forEach((link) => {
+      if (link === this.editor._activeDrawingLink) return;
       if (excludeLinkId && link.id === excludeLinkId) return;
       if (
         excludeElementId &&
@@ -244,6 +272,22 @@ class TJunctionManager {
           link.get("target")?.id === excludeElementId)
       ) {
         return;
+      }
+
+      // Fast AABB pre-filtering
+      const linkView = this.editor.paper
+        ? this.editor.paper.findViewByModel(link)
+        : null;
+      if (linkView && typeof linkView.getBBox === "function") {
+        const bbox = linkView.getBBox();
+        if (
+          bbox.x + bbox.width < searchMinX ||
+          bbox.x > searchMaxX ||
+          bbox.y + bbox.height < searchMinY ||
+          bbox.y > searchMaxY
+        ) {
+          return;
+        }
       }
 
       const pts = this.getLinkPoints(link);

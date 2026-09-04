@@ -520,9 +520,16 @@ class SLDEditor {
       this.scheduleAutoSave();
     });
 
-    this.graph.on("change:vertices change:source change:target", () => {
+    this.graph.on("change:vertices change:source change:target", (cell) => {
       if (this._isBatchOperation || !this.historyManager?.isHistoryTracking)
         return;
+      // Guard: If it's a link currently being drawn/dragged, skip full graph refresh
+      if (cell && cell.isLink && cell.isLink()) {
+        const tgt = cell.get("target");
+        if (!tgt || !tgt.id || cell === this._activeDrawingLink) {
+          return;
+        }
+      }
       this.refreshAllLinks();
     });
 
@@ -1006,8 +1013,9 @@ class SLDEditor {
         if (src && src.id && (!tgt || !tgt.id)) {
           this._activeDrawingLink = cell;
           this._lastDrawingSource = Object.assign({}, src);
+        } else if (src && src.id && tgt && tgt.id) {
+          this.busbarManager.autoCreateBusbarPort(cell);
         }
-        this.busbarManager.autoCreateBusbarPort(cell);
       }
     });
 
@@ -1032,9 +1040,13 @@ class SLDEditor {
     this.graph.on("change:source change:target", (link) => {
       if (this._isBatchOperation || !this.historyManager?.isHistoryTracking)
         return;
-      if (link.isLink && link.isLink()) {
-        this.busbarManager.autoCreateBusbarPort(link);
-        this.busbarManager.cleanupUnusedBusbarPorts();
+      if (link && link.isLink && link.isLink()) {
+        const src = link.get("source");
+        const tgt = link.get("target");
+        if (src && src.id && tgt && tgt.id && link !== this._activeDrawingLink) {
+          this.busbarManager.autoCreateBusbarPort(link);
+          this.busbarManager.cleanupUnusedBusbarPorts();
+        }
       }
     });
 

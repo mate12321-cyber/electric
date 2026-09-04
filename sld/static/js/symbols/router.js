@@ -141,6 +141,30 @@
         return c && typeof c.isElement === "function" && c.isElement();
       }
 
+      // Fast-path: When dragging/drawing a link toward a free cursor point (target cell not yet resolved)
+      if (!tgtCell) {
+        if (!srcCell) {
+          return Math.abs(sx - tx) <= 5 || Math.abs(sy - ty) <= 5
+            ? []
+            : [{ x: sx, y: ty }];
+        }
+        const srcBBox = getBox(srcCell);
+        const srcDir = getPortDirection(srcCell, srcPortId, src, srcBBox);
+        if (srcDir === "BOTTOM") {
+          return sy <= ty && Math.abs(sx - tx) <= 5 ? [] : [{ x: sx, y: ty }];
+        }
+        if (srcDir === "TOP") {
+          return sy >= ty && Math.abs(sx - tx) <= 5 ? [] : [{ x: sx, y: ty }];
+        }
+        if (srcDir === "LEFT") {
+          return sx >= tx && Math.abs(sy - ty) <= 5 ? [] : [{ x: tx, y: sy }];
+        }
+        if (srcDir === "RIGHT") {
+          return sx <= tx && Math.abs(sy - ty) <= 5 ? [] : [{ x: tx, y: sy }];
+        }
+        return [{ x: sx, y: ty }];
+      }
+
       const srcBBox = getBox(srcCell);
       const tgtBBox = getBox(tgtCell);
 
