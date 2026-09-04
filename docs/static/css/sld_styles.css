@@ -1077,3 +1077,21 @@ g[data-type*="sld"].node-voltage-conflict {
   border-color: #93c5fd;
   color: #1d4ed8;
 }
+
+/* Panning Performance Optimization */
+.sld-paper-container.sld-panning,
+#sld-paper-container.sld-panning {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+.sld-panning .joint-paper * {
+  pointer-events: none !important;
+}
+
+.sld-panning .sld-selected-overlay,
+.sld-panning .sld-selected-shadow,
+.sld-panning .joint-highlight {
+  filter: none !important;
+  box-shadow: none !important;
+}

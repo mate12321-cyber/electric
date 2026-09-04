@@ -262,7 +262,7 @@ class SLDEditor {
     let mouseMovePendingEvent = null;
     let mouseMoveRafId = null;
 
-    paperEl.addEventListener("mousemove", (e) => {
+    window.addEventListener("mousemove", (e) => {
       mouseMovePendingEvent = {
         clientX: e.clientX,
         clientY: e.clientY,
@@ -281,7 +281,7 @@ class SLDEditor {
           this.origin.y += dy;
           this.panStart = { x: clientX, y: clientY };
           this.paper.setOrigin(this.origin.x, this.origin.y);
-          this.requestMinimapUpdate();
+          this.updateMinimapViewport();
           return;
         }
 
@@ -357,6 +357,7 @@ class SLDEditor {
         this.panStart = { x: e.clientX, y: e.clientY };
         this._panOriginStart = { x: e.clientX, y: e.clientY };
         paperEl.style.cursor = "grabbing";
+        this.container?.classList.add("sld-panning");
         return;
       }
 
@@ -379,6 +380,7 @@ class SLDEditor {
             this.panStart = { x: e.clientX, y: e.clientY };
             this._panOriginStart = { x: e.clientX, y: e.clientY };
             paperEl.style.cursor = "grabbing";
+            this.container?.classList.add("sld-panning");
           }
         }
       }
@@ -390,6 +392,8 @@ class SLDEditor {
       if (this.isPanning) {
         this.isPanning = false;
         paperEl.style.cursor = this.isSpacePressed ? "grab" : "default";
+        this.container?.classList.remove("sld-panning");
+        this.updateMinimapViewport();
 
         if (this._panOriginStart) {
           const dist = Math.hypot(
@@ -1477,7 +1481,7 @@ class SLDEditor {
       this.origin.x = -(targetPaperX - viewportWidth / 2) * this.scale;
       this.origin.y = -(targetPaperY - viewportHeight / 2) * this.scale;
       this.paper.setOrigin(this.origin.x, this.origin.y);
-      this.updateMinimap();
+      this.updateMinimapViewport();
     };
 
     boxContainer.addEventListener("mousedown", (e) => {
@@ -1504,6 +1508,38 @@ class SLDEditor {
       this._minimapRafId = null;
       this.updateMinimap();
     });
+  }
+
+  updateMinimapViewport() {
+    const viewportBox = document.getElementById("minimap-viewport");
+    if (
+      !viewportBox ||
+      !this._minimapBounds ||
+      !this._minimapScale ||
+      !this.container
+    )
+      return;
+
+    const bounds = this._minimapBounds;
+    const mmScale = this._minimapScale;
+    const mmW = 200;
+    const mmH = 90;
+
+    const vpW = (this.container.clientWidth / this.scale) * mmScale;
+    const vpH = (this.container.clientHeight / this.scale) * mmScale;
+    const vpX = (-this.origin.x / this.scale - bounds.x) * mmScale;
+    const vpY = (-this.origin.y / this.scale - bounds.y) * mmScale;
+
+    viewportBox.setAttribute("x", Math.max(0, vpX).toFixed(1));
+    viewportBox.setAttribute("y", Math.max(0, vpY).toFixed(1));
+    viewportBox.setAttribute(
+      "width",
+      Math.max(6, Math.min(mmW, vpW)).toFixed(1),
+    );
+    viewportBox.setAttribute(
+      "height",
+      Math.max(6, Math.min(mmH, vpH)).toFixed(1),
+    );
   }
 
   updateMinimap() {
@@ -1612,22 +1648,7 @@ class SLDEditor {
     });
 
     minimapContent.innerHTML = svgHtml;
-
-    const vpW = (this.container.clientWidth / this.scale) * mmScale;
-    const vpH = (this.container.clientHeight / this.scale) * mmScale;
-    const vpX = (-this.origin.x / this.scale - bounds.x) * mmScale;
-    const vpY = (-this.origin.y / this.scale - bounds.y) * mmScale;
-
-    viewportBox.setAttribute("x", Math.max(0, vpX).toFixed(1));
-    viewportBox.setAttribute("y", Math.max(0, vpY).toFixed(1));
-    viewportBox.setAttribute(
-      "width",
-      Math.max(6, Math.min(mmW, vpW)).toFixed(1),
-    );
-    viewportBox.setAttribute(
-      "height",
-      Math.max(6, Math.min(mmH, vpH)).toFixed(1),
-    );
+    this.updateMinimapViewport();
   }
 
   setupVoltageColorsModal() {
