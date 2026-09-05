@@ -172,29 +172,56 @@
     },
   );
 
-  // 2. Air Circuit Breaker (ACB - 기중차단기: Stamp + Dynamic Ground/Labels)
+  // 2. Air Circuit Breaker (ACB - 기중차단기: Dynamic SVG + Contact/Ground/Labels)
   joint.shapes.sld.ACB = joint.dia.Element.define(
     "sld.ACB",
     {
       size: { width: 28, height: 40 },
       markup: [
-        {
-          tagName: "use",
-          selector: "stamp",
-          attributes: {
-            href: "#sld-sym-acb-crescent",
-            "xlink:href": "#sld-sym-acb-crescent",
-          },
-        },
+        { tagName: "path", selector: "terminalIn" },
+        { tagName: "path", selector: "terminalOut" },
+        { tagName: "circle", selector: "topContact" },
+        { tagName: "circle", selector: "bottomContact" },
+        { tagName: "path", selector: "crescent" },
         { tagName: "text", selector: "groundSymbol" },
         { tagName: "text", selector: "nameLabel" },
         { tagName: "text", selector: "specLabel" },
       ],
       attrs: {
-        stamp: {
-          href: "#sld-sym-acb-crescent",
-          xlinkHref: "#sld-sym-acb-crescent",
-          color: "#377DFF",
+        terminalIn: {
+          d: "M 14 0 L 14 6",
+          stroke: "#377DFF",
+          strokeWidth: 2,
+          strokeLinecap: "round",
+        },
+        terminalOut: {
+          d: "M 14 34 L 14 40",
+          stroke: "#377DFF",
+          strokeWidth: 2,
+          strokeLinecap: "round",
+        },
+        topContact: {
+          cx: 14,
+          cy: 6,
+          r: 3.5,
+          fill: "#000000",
+          stroke: "#377DFF",
+          strokeWidth: 1.5,
+        },
+        bottomContact: {
+          cx: 14,
+          cy: 34,
+          r: 3.5,
+          fill: "#000000",
+          stroke: "#377DFF",
+          strokeWidth: 1.5,
+        },
+        crescent: {
+          d: "M 17 6 C 22 12, 22 28, 17 34 C 33 30, 33 10, 17 6 Z",
+          fill: "#000000",
+          stroke: "#377DFF",
+          strokeWidth: 1.5,
+          strokeLinejoin: "round",
         },
         groundSymbol: {
           text: "⏚",
@@ -280,12 +307,17 @@
         const isDead = topState === "DEAD" || !isContactClosed;
 
         const baseColor = activeVoltageColor || data.color || "#377DFF";
-        let strokeColor = isGrounded
+        const fillColor = isGrounded
+          ? "#84CC16"
+          : isDead
+            ? "#94a3b8"
+            : "#000000";
+        const strokeColor = isGrounded
           ? "#84CC16"
           : isDead
             ? "#94a3b8"
             : baseColor;
-        let showGround = isGrounded ? "block" : "none";
+        const showGround = isGrounded ? "block" : "none";
 
         const formattedName = fmtName(data.name || "ACB");
         const specText = data.current ? data.current + "A" : "";
@@ -299,7 +331,11 @@
         });
 
         this.attr({
-          stamp: { color: strokeColor },
+          terminalIn: { stroke: strokeColor },
+          terminalOut: { stroke: strokeColor },
+          topContact: { fill: fillColor, stroke: strokeColor },
+          bottomContact: { fill: fillColor, stroke: strokeColor },
+          crescent: { fill: fillColor, stroke: strokeColor },
           groundSymbol: {
             display: showGround,
             fill: "#ffffff",
@@ -317,29 +353,38 @@
     },
   );
 
-  // 3. Molded Case Circuit Breaker (MCCB - 배선용차단기: Stamp + Dynamic Ground/Labels)
+  // 3. Molded Case Circuit Breaker (MCCB - 배선용차단기: Dynamic SVG + Contact/Ground/Labels)
   joint.shapes.sld.MCCB = joint.dia.Element.define(
     "sld.MCCB",
     {
       size: { width: 28, height: 40 },
       markup: [
-        {
-          tagName: "use",
-          selector: "stamp",
-          attributes: {
-            href: "#sld-sym-mccb-crescent",
-            "xlink:href": "#sld-sym-mccb-crescent",
-          },
-        },
+        { tagName: "path", selector: "terminalIn" },
+        { tagName: "path", selector: "terminalOut" },
+        { tagName: "path", selector: "crescent" },
         { tagName: "text", selector: "groundSymbol" },
         { tagName: "text", selector: "nameLabel" },
         { tagName: "text", selector: "specLabel" },
       ],
       attrs: {
-        stamp: {
-          href: "#sld-sym-mccb-crescent",
-          xlinkHref: "#sld-sym-mccb-crescent",
-          color: "#377DFF",
+        terminalIn: {
+          d: "M 14 0 L 14 6",
+          stroke: "#377DFF",
+          strokeWidth: 2,
+          strokeLinecap: "round",
+        },
+        terminalOut: {
+          d: "M 14 34 L 14 40",
+          stroke: "#377DFF",
+          strokeWidth: 2,
+          strokeLinecap: "round",
+        },
+        crescent: {
+          d: "M 14 6 C 21 12, 21 28, 14 34 C 31 30, 31 10, 14 6 Z",
+          fill: "#000000",
+          stroke: "#377DFF",
+          strokeWidth: 1.5,
+          strokeLinejoin: "round",
         },
         groundSymbol: {
           text: "⏚",
@@ -426,12 +471,17 @@
 
         const baseColor = activeVoltageColor || data.color || "#377DFF";
         const sz = this.get("size") || { width: 28, height: 40 };
-        let strokeColor = isGrounded
+        const fillColor = isGrounded
+          ? "#84CC16"
+          : isDead
+            ? "#94a3b8"
+            : "#000000";
+        const strokeColor = isGrounded
           ? "#84CC16"
           : isDead
             ? "#94a3b8"
             : baseColor;
-        let showGround = isGrounded ? "block" : "none";
+        const showGround = isGrounded ? "block" : "none";
 
         const formattedName = fmtName(data.name || "MCCB");
         const specText = data.current ? data.current + "A" : "";
@@ -444,11 +494,13 @@
         });
 
         this.attr({
-          stamp: { color: strokeColor },
+          terminalIn: { stroke: strokeColor },
+          terminalOut: { stroke: strokeColor },
+          crescent: { fill: fillColor, stroke: strokeColor },
           groundSymbol: {
             display: showGround,
             fill: "#ffffff",
-            transform: data.angle ? `rotate(${-data.angle}, 23, 20)` : "",
+            transform: data.angle ? `rotate(${-data.angle}, 22, 20)` : "",
           },
           nameLabel: lbls.nameAttrs,
           specLabel: lbls.specAttrs,
