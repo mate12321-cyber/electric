@@ -58,12 +58,9 @@ select,
   -ms-user-select: text !important;
 }
 
-/* Prevent native ghost dragging on images, SVGs, buttons, links, and palette items */
+/* Prevent native link/image ghost dragging on non-draggable buttons and static assets */
 img,
-svg,
 button,
-a,
-.palette-item,
 .tool-btn,
 .sld-btn,
 .prop-tab-btn,
@@ -403,6 +400,15 @@ a,
   cursor: grab;
   transition: all 0.15s;
   user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-drag: element !important;
+  user-drag: element !important;
+}
+
+.palette-item:active {
+  cursor: grabbing;
 }
 
 .palette-item:hover {
@@ -412,11 +418,18 @@ a,
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+.palette-item * {
+  pointer-events: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
 .palette-item svg {
   width: 24px;
   height: 24px;
   margin-bottom: 4px;
-  pointer-events: none;
 }
 
 .palette-item span {
@@ -427,7 +440,6 @@ a,
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
-  pointer-events: none;
 }
 
 /* Minimap Box */

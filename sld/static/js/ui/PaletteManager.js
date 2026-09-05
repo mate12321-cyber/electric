@@ -18,9 +18,12 @@ class PaletteManager {
       item.addEventListener("dragstart", (e) => {
         isItemDragging = true;
         const type = item.getAttribute("data-symbol-type");
-        e.dataTransfer.setData("text/plain", type);
-        e.dataTransfer.setData("text", type);
-        e.dataTransfer.effectAllowed = "copy";
+        if (e.dataTransfer) {
+          e.dataTransfer.setData("text/plain", type);
+          e.dataTransfer.setData("text", type);
+          e.dataTransfer.setData("text/sld-type", type);
+          e.dataTransfer.effectAllowed = "copy";
+        }
         window.__draggedSymbolType = type;
       });
 
@@ -45,30 +48,35 @@ class PaletteManager {
       });
     });
 
-    const dropArea =
-      document.querySelector(".sld-canvas-wrapper") || this.editor.container;
+    const dropTargets = Array.from(
+      new Set(
+        [
+          document.querySelector(".sld-canvas-wrapper"),
+          this.editor.container,
+          document.getElementById("sld-paper-container"),
+        ].filter(Boolean),
+      ),
+    );
 
-    dropArea.addEventListener("dragover", (e) => {
+    const handleDragOver = (e) => {
       e.preventDefault();
       if (e.dataTransfer) {
         e.dataTransfer.dropEffect = "copy";
       }
-    });
+    };
 
-    dropArea.addEventListener("dragenter", (e) => {
-      e.preventDefault();
-    });
-
-    dropArea.addEventListener("drop", (e) => {
+    const handleDrop = (e) => {
       e.preventDefault();
       e.stopPropagation();
 
       let type = null;
       if (e.dataTransfer) {
-        type =
-          e.dataTransfer.getData("text/plain") ||
-          e.dataTransfer.getData("text") ||
-          e.dataTransfer.getData("text/sld-type");
+        try {
+          type =
+            e.dataTransfer.getData("text/plain") ||
+            e.dataTransfer.getData("text") ||
+            e.dataTransfer.getData("text/sld-type");
+        } catch (err) {}
       }
       if (!type) {
         type = window.__draggedSymbolType;
@@ -78,6 +86,13 @@ class PaletteManager {
       const p = this.editor.getPaperPoint(e.clientX, e.clientY);
       this.createElement(type, p.x, p.y);
       window.__draggedSymbolType = null;
+      isItemDragging = false;
+    };
+
+    dropTargets.forEach((target) => {
+      target.addEventListener("dragover", handleDragOver);
+      target.addEventListener("dragenter", (e) => e.preventDefault());
+      target.addEventListener("drop", handleDrop);
     });
   }
 
